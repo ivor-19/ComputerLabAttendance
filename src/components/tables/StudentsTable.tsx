@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown, ChevronDown, MoreHorizontal, Pencil, PencilIcon, Plus, QrCode } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -35,48 +35,56 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { AddStudent } from "../AddStudent"
+import DeleteModal from "../DeleteModal"
 
-const data: Payment[] = [
+const data: Student[] = [
   {
     id: "m5gr84i9",
-    amount: 316,
-    status: "success",
-    email: "ken99@example.com",
+    lastName: "Cruz",
+    firstName: "Deniel",
+    course: "BSIS",
+    section: "4D",
   },
   {
-    id: "3u1reuv4",
-    amount: 242,
-    status: "success",
-    email: "Abe45@example.com",
+    id: "m5gr84i9",
+    lastName: "Cruz",
+    firstName: "Deniel",
+    course: "BSIS",
+    section: "4D",
   },
   {
-    id: "derv1ws0",
-    amount: 837,
-    status: "processing",
-    email: "Monserrat44@example.com",
+    id: "m5gr84i9",
+    lastName: "Cruz",
+    firstName: "Deniel",
+    course: "BSIS",
+    section: "4D",
   },
   {
-    id: "5kma53ae",
-    amount: 874,
-    status: "success",
-    email: "Silas22@example.com",
+    id: "m5gr84i9",
+    lastName: "Cruz",
+    firstName: "Deniel",
+    course: "BSIS",
+    section: "4D",
   },
   {
-    id: "bhqecj4p",
-    amount: 721,
-    status: "failed",
-    email: "carmella@example.com",
+    id: "m5gr84i9",
+    lastName: "Cruz",
+    firstName: "Deniel",
+    course: "BSIS",
+    section: "4D",
   },
 ]
 
-export type Payment = {
-  id: string
-  amount: number
-  status: "pending" | "processing" | "success" | "failed"
-  email: string
+export type Student = {
+  id: string,
+  lastName: string,
+  firstName: string,
+  course: string,
+  section: string,
 }
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<Student>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -100,47 +108,90 @@ export const columns: ColumnDef<Payment>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "status",
-    header: "Status",
+    accessorKey: "id",
+    header: "ID",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("status")}</div>
+      <div className="capitalize">{row.getValue("id")}</div>
     ),
   },
   {
-    accessorKey: "email",
+    accessorKey: "lastName",
     header: ({ column }) => {
       return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Email
-          <ArrowUpDown />
-        </Button>
+        <div className="text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="text-xs pl-0 bg-transparent"
+          >
+            Last Name
+            <ArrowUpDown />
+          </Button>
+        </div>
       )
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+    cell: ({ row }) => <div className="lowercase">{row.getValue("lastName")}</div>,
   },
   {
-    accessorKey: "amount",
-    header: () => <div className="text-right">Amount</div>,
-    cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"))
-
-      // Format the amount as a dollar amount
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(amount)
-
-      return <div className="text-right font-medium">{formatted}</div>
+    accessorKey: "firstName",
+    header: ({ column }) => {
+      return (
+        <div className="text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="text-xs pl-0 bg-transparent"
+          >
+            First Name
+            <ArrowUpDown />
+          </Button>
+        </div>
+      )
     },
+    cell: ({ row }) => <div className="lowercase">{row.getValue("firstName")}</div>,
   },
+  {
+    accessorKey: "course",
+    header: ({ column }) => {
+      return (
+        <div className="text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="text-xs pl-0 bg-transparent"
+          >
+            Course
+            <ArrowUpDown />
+          </Button>
+        </div>
+      )
+    },
+    cell: ({ row }) => <div className="lowercase">{row.getValue("course")}</div>,
+  },
+  {
+    accessorKey: "section",
+    header: ({ column }) => {
+      return (
+        <div className="text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="text-xs pl-0 bg-transparent"
+          >
+            Section
+            <ArrowUpDown />
+          </Button>
+        </div>
+      )
+    },
+    cell: ({ row }) => <div className="lowercase">{row.getValue("section")}</div>,
+  },
+  
   {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const payment = row.original
+      const student = row.original
 
       return (
         <DropdownMenu>
@@ -153,13 +204,19 @@ export const columns: ColumnDef<Payment>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
+              onClick={() => navigator.clipboard.writeText(student.id)}
             >
-              Copy payment ID
+              Copy ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
+            <DropdownMenuItem>
+              <QrCode />
+              View QR Code
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <PencilIcon />
+              Edit student details
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )
@@ -168,6 +225,9 @@ export const columns: ColumnDef<Payment>[] = [
 ]
 
 export function StudentsTable() {
+  const [open, setOpen] = React.useState(false);
+  const [openDelete, setOpenDelete] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -195,43 +255,41 @@ export function StudentsTable() {
     },
   })
 
+  const deleteUser = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setOpenDelete(false);
+      setLoading(false);
+    }, 2000)
+  }
+
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
+      <div className="flex items-center justify-between py-4">
+        <div>
+          <Input
+            placeholder="Filter emails..."
+            value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("email")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
+          />
+        </div>
+        <div className="flex gap-2"> 
+        {Object.keys(rowSelection).length !== 0 && 
+            <DeleteModal 
+              title={`Delete (${Object.keys(rowSelection).length})`}
+              description={`Are you sure you want to delete ${Object.keys(rowSelection).length} user(s)? This action will archive their data, which can be retrieved later.`}
+              open={openDelete}
+              setOpen={setOpenDelete} // This function updates the modal's state
+              onClick={deleteUser}
+              loading={loading}
+            />
+           
           }
-          className="max-w-sm"
-        />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDown />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                )
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          <AddStudent open={open} setOpen={setOpen}/>
+        </div>
       </div>
       <div className="rounded-md border">
         <Table>
