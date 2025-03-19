@@ -38,6 +38,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import {QRCodeSVG} from 'qrcode.react';
 
 export type Student = {
   student_id: string;
@@ -47,7 +48,7 @@ export type Student = {
   section: string;
 };
 
-export const columns = (setOpenQRModal: (open: boolean) => void, setRowId: (id: string) => void): ColumnDef<Student>[] => [
+export const columns = (setRow: (row: string) => void, setOpenQRModal: (open: boolean) => void): ColumnDef<Student>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -166,10 +167,7 @@ export const columns = (setOpenQRModal: (open: boolean) => void, setRowId: (id: 
               Copy student ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => {
-             
-              setOpenQRModal(true);
-            }}>
+            <DropdownMenuItem onClick={() => {setRow(student.student_id), setOpenQRModal(true),  console.log("Setting row to:", student.student_id);}}>
               <QrCode className="mr-2 h-4 w-4" />
               View QR Code
             </DropdownMenuItem>
@@ -195,9 +193,12 @@ export function CoursesAndSectionTable() {
   const [openQRModal, setOpenQRModal] = React.useState(false);
   const [students, setStudents] = React.useState<Student[]>([]);
 
+  const [row, setRow] = React.useState("");
+  
+
   const fetchStudents = async () => {
     try {
-      const response = await axios.get("https://comlab-backend.vercel.app/api/student/getStudents");
+      const response = await axios.get(`https://comlab-backend.vercel.app/api/student/getStudents`);
       setStudents(response.data);
       console.log(response.data);
     } catch (error) {
@@ -213,19 +214,20 @@ export function CoursesAndSectionTable() {
         const studentId = row.original.student_id; // Access the user's _id
         await axios.delete(`https://comlab-backend.vercel.app/api/student/deleteStudent/${studentId}`);
         console.log(`Deleted user with ID: ${studentId}`);
+
       }
-      toast.info(`${selectedRows.length} User/s has been deleted.`);
+      toast.info(`(${selectedRows.length}) User/s has been deleted.`)
 
       fetchStudents();
       setRowSelection({});
       setLoading(false);
       setOpenDelete(false);
     } catch (error) {
-      console.error("Error deleting a user", error);
+      console.error("Error deleting a user", error)
       setOpenDelete(false);
-      toast.error("Unknown error has occured");
+      toast.error("Unknown error has occured")
     }
-  };
+  }
 
   React.useEffect(() => {
     fetchStudents();
@@ -233,7 +235,7 @@ export function CoursesAndSectionTable() {
 
   const table = useReactTable({
     data: students,
-    columns: columns(setOpenQRModal),
+    columns: columns(setRow, setOpenQRModal),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -376,15 +378,21 @@ export function CoursesAndSectionTable() {
           </Button>
         </div>
       </div>
-      <Dialog open={openQRModal} onOpenChange={setOpenQRModal}>
+      <Dialog 
+        open={openQRModal} 
+        onOpenChange={(open) => {
+          setOpenQRModal(open);
+        
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>QR Code</DialogTitle>
             <DialogDescription>
               This is the QR code for the selected student.
             </DialogDescription>
-            <div className="w-full flex items-center justify-center">
-             {/* show qr here */}
+            <div className="w-full flex justify-center">
+              <QRCodeSVG size={300} key={row} value={String(row)} />
             </div>
           </DialogHeader>
           {/* Add QR Code rendering logic here */}
