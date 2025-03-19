@@ -40,7 +40,7 @@ const data = {
         },
         {
           title: "Subject",
-          url: "/subject",
+          url: "/admin/subjectsLists",
           isActive: false,
         },
         {
@@ -62,7 +62,7 @@ const data = {
         },
         {
           title: "Logout",
-          url: "/logout",
+          url: "/",
         },
       ],
     },

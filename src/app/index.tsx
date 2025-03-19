@@ -4,6 +4,7 @@ import { QrAttendance } from './QrAttendance'
 import Students from './admin/Students'
 import Courses from './admin/Courses'
 import Sections from './admin/Sections'
+import Subjects from './admin/Subjects'
 import Faculty from './admin/Faculty'
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <Route path={'/admin/studentsLists'} element={<Students />}/>
         <Route path={'/admin/coursesLists'} element={<Courses />}/>
         <Route path={'/admin/sectionsLists'} element={<Sections />}/>
+        <Route path={'/admin/subjectsLists'} element={<Subjects />}/>
         <Route path={'/admin/faculty'} element={<Faculty />}/>
         {/* <Route path={'/admin/accounts'} element={<Users />}/> */}
       </Routes>
