@@ -15,7 +15,7 @@ export const QrAttendance = () => {
           <Scanner onScan={(result) => console.log(result.map((v) => v.rawValue))} />
           <span>push</span>
         </div>
-        <div className='w-full h-[90%] p-4'>
+        <div className='w-full h-[50%] p-4'>
           <QRAttendanceTable />
         </div>
       </div>
