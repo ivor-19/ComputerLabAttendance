@@ -43,36 +43,31 @@ const data: Student[] = [
     id: "m5gr84i9",
     lastName: "Cruz",
     firstName: "Deniel",
-    course: "BSIS",
-    section: "4D",
+    course_section: "BSIS-4D",
   },
   {
     id: "m5gr84i9",
     lastName: "Cruz",
     firstName: "Deniel",
-    course: "BSIS",
-    section: "4D",
+    course_section: "BSIS-4D",
   },
   {
     id: "m5gr84i9",
     lastName: "Cruz",
     firstName: "Deniel",
-    course: "BSIS",
-    section: "4D",
+    course_section: "BSIS-4D",
   },
   {
     id: "m5gr84i9",
     lastName: "Cruz",
     firstName: "Deniel",
-    course: "BSIS",
-    section: "4D",
+    course_section: "BSIS-4D",
   },
   {
     id: "m5gr84i9",
     lastName: "Cruz",
     firstName: "Deniel",
-    course: "BSIS",
-    section: "4D",
+    course_section: "BSIS-4D",
   },
 ]
 
@@ -80,8 +75,7 @@ export type Student = {
   id: string,
   lastName: string,
   firstName: string,
-  course: string,
-  section: string,
+  course_section: string,
 }
 
 export const columns: ColumnDef<Student>[] = [
@@ -151,7 +145,7 @@ export const columns: ColumnDef<Student>[] = [
     cell: ({ row }) => <div className="lowercase">{row.getValue("firstName")}</div>,
   },
   {
-    accessorKey: "course",
+    accessorKey: "course_section",
     header: ({ column }) => {
       return (
         <div className="text-left">
@@ -160,31 +154,13 @@ export const columns: ColumnDef<Student>[] = [
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             className="text-xs pl-0 bg-transparent"
           >
-            Course
+            Course & Section
             <ArrowUpDown />
           </Button>
         </div>
       )
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("course")}</div>,
-  },
-  {
-    accessorKey: "section",
-    header: ({ column }) => {
-      return (
-        <div className="text-left">
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="text-xs pl-0 bg-transparent"
-          >
-            Section
-            <ArrowUpDown />
-          </Button>
-        </div>
-      )
-    },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("section")}</div>,
+    cell: ({ row }) => <div className="lowercase">{row.getValue("course_section")}</div>,
   },
   
   {
