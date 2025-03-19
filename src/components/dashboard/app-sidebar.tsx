@@ -50,11 +50,6 @@ const data = {
       icon: Bot,
       items: [
         {
-          title: "Students",
-          url: "/admin/studentsLists",
-          isActive: false,
-        },
-        {
           title: "Course & Section",
           url: "/admin/course&section",
           isActive: false,

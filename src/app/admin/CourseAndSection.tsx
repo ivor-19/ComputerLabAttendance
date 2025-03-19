@@ -1,5 +1,5 @@
 import { AppSidebar } from "@/components/dashboard/app-sidebar"
-import { CoursesTable } from "@/components/tables/CoursesTable"
+import { CoursesAndSectionTable } from "@/components/tables/CoursesAndSectionTable"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -38,7 +38,7 @@ export default function CourseAndSection() {
           </Breadcrumb>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <CoursesTable />
+          <CoursesAndSectionTable />
         </div>
       </SidebarInset>
     </SidebarProvider>

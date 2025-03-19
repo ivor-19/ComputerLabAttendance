@@ -1,5 +1,4 @@
 import { AppSidebar } from "@/components/dashboard/app-sidebar"
-import { StudentsTable } from "@/components/tables/StudentsTable"
 import {
   Breadcrumb,
   BreadcrumbItem,
