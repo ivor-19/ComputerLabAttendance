@@ -20,31 +20,48 @@ import { Input } from './ui/input'
 import { Button } from './ui/button'
 
 interface AddStudentProps {
+  fetch: () => void;
   open: boolean;
   setOpen: (open: boolean) => void; // Corrected type for setOpen
 }
 
 const FormSchema = z.object({
-  id: z.string().min(10, {message: "ID must have atleast 10 characters"}),
-  lastName: z.string().min(1, {message: "Last Name is required"}),
-  firstName: z.string().min(1, {message: "First Name is required"}),
-  course: z.enum([""], {message: "Invalid status"}),
-  section: z.enum([""], {message: "Invalid status"})
+  student_id: z.string().min(10, {message: "ID must have atleast 10 characters"}),
+  lastname: z.string().min(1, {message: "Last Name is required"}),
+  firstname: z.string().min(1, {message: "First Name is required"}),
+  course: z.string().optional(),
+  yearlevel: z.string().optional(),
+  section: z.string().optional()
 })
 
 type FormData = z.infer<typeof FormSchema>;
 
-export const AddStudent = ({open, setOpen} : AddStudentProps) => {
-  const { register, handleSubmit, formState: {errors}, reset, setError } = useForm<FormData>({
+export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
+  const { register, handleSubmit, formState: {errors}, reset, setError, watch } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
   })
-  const [openAddDialog, setOpenAddDialog] = React.useState(false);
   const [userExists, setUserExists] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const addUser = async (data: FormData) => {
+  const yearLevel = watch("yearlevel");
+  const section = watch("section");
+  const combinedSection = yearLevel && section ? `${yearLevel}${section}` : "1A";
+
+  const addNewStudent = async (data: FormData) => {
     setLoading(true);
-    setUserExists(false);
+    const newStudent = {student_id: data.student_id, lastname: data.lastname, firstname: data.firstname, course: data.course, section: combinedSection}
+    try {
+      const response = await axios.post("https://comlab-backend.vercel.app/api/student/addStudent", newStudent);
+      console.log(response.data)
+      setOpen(false);
+      toast.success("User has been created.")
+      setLoading(false);
+      fetch();
+    } catch (error) {
+      console.error("Error adding student", error)
+      setOpen(false);
+    }
+    
   }
   
   return (
@@ -69,40 +86,40 @@ export const AddStudent = ({open, setOpen} : AddStudentProps) => {
                 id="id" 
                 className="col-span-3" 
                 type="text"
-                {...register("id")}
+                {...register("student_id")}
                 placeholder="MA-########"
               />
-              {errors.id && <span className="text-red-500 text-xs font-geist">{errors.id.message}</span>}
+              {errors.student_id && <span className="text-red-500 text-xs font-geist">{errors.student_id.message}</span>}
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="lastName" className="text-right">
+            <Label htmlFor="lastname" className="text-right">
               Last Name
             </Label>
             <div className="col-span-3 relative">
               <Input 
-                id="lastName" 
+                id="lastname" 
                 className="col-span-3" 
                 type="text"
-                {...register("lastName")}
+                {...register("lastname")}
                 placeholder="Last Name"
               />
-              {errors.lastName && <span className="text-red-500 text-xs font-geist">{errors.lastName.message}</span>}
+              {errors.lastname && <span className="text-red-500 text-xs font-geist">{errors.lastname.message}</span>}
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="firstName" className="text-right">
+            <Label htmlFor="firstname" className="text-right">
               First Name
             </Label>
             <div className="col-span-3 relative">
               <Input 
-                id="firstName" 
+                id="firstname" 
                 className="col-span-3" 
                 type="text"
-                {...register("firstName")}
+                {...register("firstname")}
                 placeholder="First Name"
               />
-              {errors.firstName && <span className="text-red-500 text-xs font-geist">{errors.firstName.message}</span>}
+              {errors.firstname && <span className="text-red-500 text-xs font-geist">{errors.firstname.message}</span>}
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -116,8 +133,9 @@ export const AddStudent = ({open, setOpen} : AddStudentProps) => {
                 className="w-[180px] p-2 border rounded-md font-geist"
               >
                 <option value="" disabled>Select course</option>
-                <option value="">Course 1</option>
-                <option value="">Course 2</option>
+                <option value="BSIS">BSIS</option>
+                <option value="BSAIS">BSAIS</option>
+                <option value="BSOM">BSOM</option>
               </select>
               {errors.course && <p className="text-red-500 text-xs">{errors.course.message}</p>}
             </div>
@@ -126,23 +144,47 @@ export const AddStudent = ({open, setOpen} : AddStudentProps) => {
             <Label htmlFor="section" className="text-right">
               Section
             </Label>
-            <div className="col-span-3 font-geist text-[14px]">
-              <select 
-                id="section"
-                {...register("section")}
-                className="w-[180px] p-2 border rounded-md font-geist"
-              >
-                <option value="" disabled>Select section</option>
-                <option value="">Section 1</option>
-                <option value="">Section 2</option>
-              </select>
-              {errors.section && <p className="text-red-500 text-xs">{errors.section.message}</p>}
+            <div className='flex gap-4'>
+              <div className="font-geist text-[14px]">
+                <select 
+                  id="yearlevel"
+                  {...register("yearlevel")}
+                  className="w-[130px] p-2 border rounded-md font-geist"
+                >
+                  <option value="" disabled>Year Level</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+                {errors.yearlevel && <p className="text-red-500 text-xs">{errors.yearlevel.message}</p>}
+              </div>
+              <div className="w-full font-geist text-[14px]">
+                <select 
+                  id="section"
+                  {...register("section")}
+                  className="p-2 border rounded-md font-geist"
+                >
+                  <option value="" disabled>Select section</option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="D">D</option>
+                  <option value="E">E</option>
+                  <option value="F">F</option>
+                  <option value="G">G</option>
+                  <option value="H">H</option>
+                  <option value="I">I</option>
+                  <option value="J">J</option>
+                </select>
+                {errors.section && <p className="text-red-500 text-xs">{errors.section.message}</p>}
+              </div>
             </div>
           </div>
         </div>
         <DialogFooter className="flex items-center">
           {userExists && <span className="text-red-500 text-xs font-geist">Student already exists. Please choose a different account ID.</span>}
-          <Button onClick={handleSubmit(addUser)}> 
+          <Button onClick={handleSubmit(addNewStudent)}> 
             {loading ? ( 
               <>
                 Submitting

@@ -1,50 +1,53 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { ColumnDef, ColumnFiltersState, SortingState, VisibilityState, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table"
-import { ArrowUpDown, FilterX, MoreHorizontal, PencilIcon, PlusCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { DropdownMenu, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "../ui/badge"
-import { AddStudent } from "../AddStudent"
-import DeleteModal from "../DeleteModal"
-
-const data: Student[] = [
-  { id: "m5gr84i9", lastName: "Cruz", firstName: "Deniel", course: "BSOM", section: "4D" },
-  { id: "m6gr84i1", lastName: "Reyes", firstName: "Juan", course: "BSIS", section: "4D" },
-  { id: "m7gr84i2", lastName: "Alvarez", firstName: "Maria", course: "BSAIS", section: "3D" },
-  { id: "m8gr84i3", lastName: "Gutierrez", firstName: "Carlos", course: "BSBA", section: "1A" },
-  { id: "m9gr84i4", lastName: "Torres", firstName: "Lucia", course: "BSIS", section: "1A" },
-  { id: "m10gr84i5", lastName: "Mendoza", firstName: "Elena", course: "BSOM", section: "2C" },
-  { id: "m11gr84i6", lastName: "Fernandez", firstName: "Raul", course: "BSAIS", section: "4A" },
-  { id: "m12gr84i7", lastName: "Diaz", firstName: "Andres", course: "BSBA", section: "3B" },
-  { id: "m13gr84i8", lastName: "Garcia", firstName: "Isabella", course: "BSIS", section: "2C" },
-  { id: "m14gr84i9", lastName: "Martinez", firstName: "Pedro", course: "BSAIS", section: "1B" },
-  { id: "m15gr85i0", lastName: "Sanchez", firstName: "Beatriz", course: "BSOM", section: "4D" },
-  { id: "m16gr85i1", lastName: "Lopez", firstName: "Luis", course: "BSBA", section: "3C" },
-  { id: "m17gr85i2", lastName: "Ramirez", firstName: "Ana", course: "BSAIS", section: "2B" },
-  { id: "m18gr85i3", lastName: "Perez", firstName: "Francisco", course: "BSIS", section: "1A" },
-  { id: "m19gr85i4", lastName: "Santos", firstName: "Gabriel", course: "BSBA", section: "4A" },
-  { id: "m20gr85i5", lastName: "Gonzalez", firstName: "Julia", course: "BSOM", section: "1A" },
-  { id: "m21gr85i6", lastName: "Hernandez", firstName: "Julian", course: "BSIS", section: "2A" },
-  { id: "m22gr85i7", lastName: "Castro", firstName: "Raquel", course: "BSAIS", section: "3A" },
-  { id: "m23gr85i8", lastName: "Vasquez", firstName: "Victor", course: "BSOM", section: "2B" },
-  { id: "m24gr85i9", lastName: "Jimenez", firstName: "Nina", course: "BSBA", section: "4D" },
-];
-
+import * as React from "react";
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { ArrowUpDown, FilterX, MoreHorizontal, PlusCircle, QrCode, SquarePen } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "../ui/badge";
+import { AddStudent } from "../AddStudent";
+import DeleteModal from "../DeleteModal";
+import axios from "axios";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 export type Student = {
-  id: string,
-  lastName: string,
-  firstName: string,
-  course: string,
-  section: string,
-}
+  student_id: string;
+  lastname: string;
+  firstname: string;
+  course: string;
+  section: string;
+};
 
-export const columns: ColumnDef<Student>[] = [
+export const columns = (setOpenQRModal: (open: boolean) => void, setRowId: (id: string) => void): ColumnDef<Student>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -55,50 +58,182 @@ export const columns: ColumnDef<Student>[] = [
       />
     ),
     cell: ({ row }) => (
-      <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
     ),
     enableSorting: false,
     enableHiding: false,
   },
   {
-    accessorKey: "id",
+    accessorKey: "student_id",
     header: "ID",
-    cell: ({ row }) => <div className="capitalize">{row.getValue("id")}</div>,
+    cell: ({ row }) => <div className="capitalize">{row.getValue("student_id")}</div>,
   },
   {
-    accessorKey: "lastName",
-    header: "Last Name",
-    cell: ({ row }) => <div>{row.getValue("lastName")}</div>,
+    accessorKey: "lastname",
+    header: ({ column }) => {
+      return (
+        <div className="text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="text-xs pl-0 bg-transparent"
+          >
+            Last Name
+            <ArrowUpDown />
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }) => <div>{row.getValue("lastname")}</div>,
   },
   {
-    accessorKey: "firstName",
-    header: "First Name",
-    cell: ({ row }) => <div>{row.getValue("firstName")}</div>,
+    accessorKey: "firstname",
+    header: ({ column }) => {
+      return (
+        <div className="text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="text-xs pl-0 bg-transparent"
+          >
+            First Name
+            <ArrowUpDown />
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }) => <div>{row.getValue("firstname")}</div>,
   },
   {
     accessorKey: "course",
-    header: "Course",
+    header: ({ column }) => {
+      return (
+        <div className="text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="text-xs pl-0 bg-transparent"
+          >
+            Course
+            <ArrowUpDown />
+          </Button>
+        </div>
+      );
+    },
     cell: ({ row }) => <div>{row.getValue("course")}</div>,
   },
   {
     accessorKey: "section",
-    header: "Section",
+    header: ({ column }) => {
+      return (
+        <div className="text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="text-xs pl-0 bg-transparent"
+          >
+            Section
+            <ArrowUpDown />
+          </Button>
+        </div>
+      );
+    },
     cell: ({ row }) => <div>{row.getValue("section")}</div>,
   },
-]
+  {
+    id: "actions",
+    enableHiding: false,
+    cell: ({ row }) => {
+      const student = row.original;
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={() => navigator.clipboard.writeText(student.student_id)}
+            >
+              Copy student ID
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => {
+             
+              setOpenQRModal(true);
+            }}>
+              <QrCode className="mr-2 h-4 w-4" />
+              View QR Code
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <SquarePen className="mr-2 h-4 w-4" />
+              Edit User Details
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+  },
+];
 
 export function CoursesAndSectionTable() {
-  const [open, setOpen] = React.useState(false)
-  const [openDelete, setOpenDelete] = React.useState(false)
-  const [loading, setLoading] = React.useState(false)
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
+  const [open, setOpen] = React.useState(false);
+  const [openDelete, setOpenDelete] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = React.useState({});
+  const [openQRModal, setOpenQRModal] = React.useState(false);
+  const [students, setStudents] = React.useState<Student[]>([]);
+
+  const fetchStudents = async () => {
+    try {
+      const response = await axios.get("https://comlab-backend.vercel.app/api/student/getStudents");
+      setStudents(response.data);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error fetching users", error);
+    }
+  };
+
+  const deleteUser = async () => {
+    setLoading(true);
+    try {
+      const selectedRows = table.getSelectedRowModel().rows;
+      for (const row of selectedRows) {
+        const studentId = row.original.student_id; // Access the user's _id
+        await axios.delete(`https://comlab-backend.vercel.app/api/student/deleteStudent/${studentId}`);
+        console.log(`Deleted user with ID: ${studentId}`);
+      }
+      toast.info(`${selectedRows.length} User/s has been deleted.`);
+
+      fetchStudents();
+      setRowSelection({});
+      setLoading(false);
+      setOpenDelete(false);
+    } catch (error) {
+      console.error("Error deleting a user", error);
+      setOpenDelete(false);
+      toast.error("Unknown error has occured");
+    }
+  };
+
+  React.useEffect(() => {
+    fetchStudents();
+  }, []);
 
   const table = useReactTable({
-    data,
-    columns,
+    data: students,
+    columns: columns(setOpenQRModal),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -113,19 +248,11 @@ export function CoursesAndSectionTable() {
       columnVisibility,
       rowSelection,
     },
-  })
+  });
 
   // Generate unique values for course and section
-  const uniqueCourses = Array.from(new Set(data.map(student => student.course)))
-  const uniqueSections = Array.from(new Set(data.map(student => student.section)))
-
-  const deleteUser = () => {
-    setLoading(true)
-    setTimeout(() => {
-      setOpenDelete(false)
-      setLoading(false)
-    }, 2000)
-  }
+  const uniqueCourses = Array.from(new Set(students.map((student) => student.course)));
+  const uniqueSections = Array.from(new Set(students.map((student) => student.section)));
 
   return (
     <div className="w-full">
@@ -133,8 +260,8 @@ export function CoursesAndSectionTable() {
         <div className="flex justify-between">
           <Input
             placeholder="Filter by name..."
-            value={(table.getColumn("lastName")?.getFilterValue() as string) ?? ""}
-            onChange={(event) => table.getColumn("lastName")?.setFilterValue(event.target.value)}
+            value={(table.getColumn("lastname")?.getFilterValue() as string) ?? ""}
+            onChange={(event) => table.getColumn("lastname")?.setFilterValue(event.target.value)}
             className="max-w-sm"
           />
           <DropdownMenu>
@@ -201,7 +328,7 @@ export function CoursesAndSectionTable() {
               loading={loading}
             />
           )}
-          <AddStudent open={open} setOpen={setOpen} />
+          <AddStudent open={open} setOpen={setOpen} fetch={fetchStudents} />
         </div>
       </div>
       <div className="rounded-md border">
@@ -228,7 +355,9 @@ export function CoursesAndSectionTable() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">No results.</TableCell>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results.
+                </TableCell>
               </TableRow>
             )}
           </TableBody>
@@ -247,6 +376,20 @@ export function CoursesAndSectionTable() {
           </Button>
         </div>
       </div>
+      <Dialog open={openQRModal} onOpenChange={setOpenQRModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>QR Code</DialogTitle>
+            <DialogDescription>
+              This is the QR code for the selected student.
+            </DialogDescription>
+            <div className="w-full flex items-center justify-center">
+             {/* show qr here */}
+            </div>
+          </DialogHeader>
+          {/* Add QR Code rendering logic here */}
+        </DialogContent>
+      </Dialog>
     </div>
-  )
+  );
 }
