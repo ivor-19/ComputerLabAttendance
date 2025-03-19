@@ -67,6 +67,30 @@ const data = {
       ],
     },
   ],
+  navFaculty: [
+    {
+      title: "Faculty",
+      url: "/admin/faculty",
+      isActive: false,
+
+    },
+  ],
+  navSettings: [
+    {
+      title: "Settings",
+      url: "#",
+      items: [
+        {
+          title: "Profile",
+          url: "/profile",
+        },
+        {
+          title: "Logout",
+          url: "/",
+        },
+      ],
+    },
+  ],
 };
 
 
@@ -125,7 +149,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       {item.items.map((item) => (
                         <SidebarMenuItem key={item.title}>
                           <SidebarMenuButton asChild isActive={item.isActive}>
-                            <a href={item.url} className="text-gray-200">{item.title}</a>
+                            <a href={item.url} className="text-[#d1fae5]">{item.title}</a>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       ))}
@@ -135,9 +159,45 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarGroup>
             </Collapsible>
           ))}
+          {data.navFaculty.map((item) => (
+            <SidebarGroup key={item.title}>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild isActive={item.isActive}>
+                        <a href={item.url} className="text-[#d1fae5]">{item.title}</a>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ))}
         </SidebarContent>
-      <SidebarFooter>
-       
+        <SidebarFooter>
+         <SidebarGroup>
+           <SidebarMenu className="gap-2">
+             {data.navSettings.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton asChild>
+                  <span className="font-medium text-white">
+                    {item.title}
+                  </span>
+                </SidebarMenuButton>
+                {item.items?.length ? (
+                  <SidebarMenuSub className="ml-0 border-l-0 px-1.5">
+                    {item.items.map((item) => (
+                      <SidebarMenuSubItem key={item.title}>
+                        <SidebarMenuSubButton asChild>
+                          <a href={item.url}>{item.title}</a>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                ) : null}
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
