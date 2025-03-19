@@ -124,7 +124,7 @@ export const columns: ColumnDef<Student>[] = [
         </div>
       )
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("lastName")}</div>,
+    cell: ({ row }) => <div>{row.getValue("lastName")}</div>,
   },
   {
     accessorKey: "firstName",
@@ -142,7 +142,7 @@ export const columns: ColumnDef<Student>[] = [
         </div>
       )
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("firstName")}</div>,
+    cell: ({ row }) => <div>{row.getValue("firstName")}</div>,
   },
   {
     accessorKey: "course_section",
@@ -160,7 +160,7 @@ export const columns: ColumnDef<Student>[] = [
         </div>
       )
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("course_section")}</div>,
+    cell: ({ row }) => <div>{row.getValue("course_section")}</div>,
   },
   
   {

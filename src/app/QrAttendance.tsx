@@ -23,10 +23,10 @@ export const QrAttendance = () => {
       <div className='h-screen'>
         <div className='h-full flex flex-1 justify-center'>
           <Button className='absolute left-5 top-5' onClick={() => navigate("/login")}>Login</Button>
-          <div className='w-full flex justify-center items-center bg-gray-200'>
-            <div className='w-1/2'>
-              <Scanner onScan={(result) => console.log(result.map((v) => v.rawValue))} paused={true} />
-            </div>
+          <div className='w-[60%] h-full flex justify-center items-center bg-gray-200'>
+           <div className='w-[500px] absolute top-28'>
+            <Scanner onScan={(result) => console.log(result.map((v) => v.rawValue))} paused={true} />
+           </div>
           </div>
           <div className='w-full h-[90%] p-4'>
             <QRAttendanceTable />

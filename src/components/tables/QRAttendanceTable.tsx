@@ -35,22 +35,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Badge } from "../ui/badge"
 
 const data: Student[] = [
   {
     id: "m5gr84i9",
     name: "Deniel Ivor",
-    course: "BSIS",
-    section: "4D",
+    course_section: "BSIS-4D",
     subject: "ICT11",
     timeIn: "12:03 PM",
-    status: "Present",
+    status: "Late",
   },
   {
     id: "3u1reuv4",
     name: "Deniel Ivor",
-    course: "BSIS",
-    section: "4D",
+    course_section: "BSIS-4D",
     subject: "ICT11",
     timeIn: "12:03 PM",
     status: "Present",
@@ -58,26 +57,23 @@ const data: Student[] = [
   {
     id: "derv1ws0",
     name: "Deniel Ivor",
-    course: "BSIS",
-    section: "4D",
+    course_section: "BSIS-4D",
     subject: "ICT11",
     timeIn: "12:03 PM",
-    status: "Present",
+    status: "Absent",
   },
   {
     id: "5kma53ae",
     name: "Deniel Ivor",
-    course: "BSIS",
-    section: "4D",
+    course_section: "BSIS-4D",
     subject: "ICT11",
     timeIn: "12:03 PM",
-    status: "Present",
+    status: "Excused",
   },
   {
     id: "bhqecj4p",
     name: "Deniel Ivor",
-    course: "BSIS",
-    section: "4D",
+    course_section: "BSIS-4D",
     subject: "ICT11",
     timeIn: "12:03 PM",
     status: "Present",
@@ -87,8 +83,7 @@ const data: Student[] = [
 export type Student = {
   id: string,
   name: string,
-  course: string,
-  section: string,
+  course_section: string,
   subject: string,
   timeIn: string,
   status: "Present" | "Absent" | "Late" | "Excused"
@@ -140,10 +135,10 @@ export const columns: ColumnDef<Student>[] = [
         </div>
       )
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("name")}</div>,
+    cell: ({ row }) => <div>{row.getValue("name")}</div>,
   },
   {
-    accessorKey: "course",
+    accessorKey: "course_section",
     header: ({ column }) => {
       return (
         <div className="text-left">
@@ -152,31 +147,13 @@ export const columns: ColumnDef<Student>[] = [
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             className="text-xs pl-0 bg-transparent"
           >
-            Course
+            Course & Section
             <ArrowUpDown />
           </Button>
         </div>
       )
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("course")}</div>,
-  },
-  {
-    accessorKey: "section",
-    header: ({ column }) => {
-      return (
-        <div className="text-left">
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="text-xs pl-0 bg-transparent"
-          >
-            Section
-            <ArrowUpDown />
-          </Button>
-        </div>
-      )
-    },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("section")}</div>,
+    cell: ({ row }) => <div>{row.getValue("course_section")}</div>,
   },
   {
     accessorKey: "subject",
@@ -194,7 +171,7 @@ export const columns: ColumnDef<Student>[] = [
         </div>
       )
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("subject")}</div>,
+    cell: ({ row }) => <div>{row.getValue("subject")}</div>,
   },
   {
     accessorKey: "timeIn",
@@ -212,7 +189,7 @@ export const columns: ColumnDef<Student>[] = [
         </div>
       )
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("timeIn")}</div>,
+    cell: ({ row }) => <div>{row.getValue("timeIn")}</div>,
   },
   {
     accessorKey: "status",
@@ -230,7 +207,24 @@ export const columns: ColumnDef<Student>[] = [
         </div>
       )
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("status")}</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">
+       <Badge
+          className={`
+            ${
+              row.getValue("status") === 'Absent' ? 'bg-red-200 text-red-900 hover:bg-red-200' :
+              row.getValue("status") === 'Late' ? 'bg-yellow-200 text-yellow-800 hover:bg-yellow-200' :
+              row.getValue("status") === 'Excused' ? 'bg-blue-200 text-blue-800 hover:bg-blue-200' :
+              'bg-green-200 text-green-800 hover:bg-green-200'
+            }
+            cursor-default
+          `}
+        >
+          {row.getValue("status")}
+        </Badge>
+      </div>
+    )
+    
   },
   
   {
