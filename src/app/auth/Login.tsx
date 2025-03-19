@@ -41,7 +41,7 @@ const Login = () => {
                 </div>
                 <Input id="password" type="password" required />
               </div>
-              <Button type="submit" className="w-full" onClick={() => navigate('/admin/studentsLists')}>Login</Button>
+              <Button type="submit" className="w-full" onClick={() => navigate('/admin/course&section')}>Login</Button>
             </div>
           </form>
         </CardContent>
