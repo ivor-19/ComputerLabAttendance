@@ -67,6 +67,11 @@ const data = {
       title: "Faculty",
       url: "/admin/faculty",
       isActive: false,
+    },
+    {
+      title: "Computer Management",
+      url: "/admin/computermanagement",
+      isActive: false,
 
     },
   ],
