@@ -43,7 +43,9 @@ const data: Student[] = [
     name: "Deniel Ivor",
     course_section: "BSIS-4D",
     subject: "ICT11",
+    date: "03-24-2025",
     timeIn: "12:03 PM",
+    timeOut: "12:03 PM",
     status: "Late",
   },
   {
@@ -51,7 +53,9 @@ const data: Student[] = [
     name: "Deniel Ivor",
     course_section: "BSIS-4D",
     subject: "ICT11",
+    date: "03-24-2025",
     timeIn: "12:03 PM",
+    timeOut: "12:03 PM",
     status: "Present",
   },
   {
@@ -59,7 +63,9 @@ const data: Student[] = [
     name: "Deniel Ivor",
     course_section: "BSIS-4D",
     subject: "ICT11",
+    date: "03-24-2025",
     timeIn: "12:03 PM",
+    timeOut: "12:03 PM",
     status: "Absent",
   },
   {
@@ -67,7 +73,9 @@ const data: Student[] = [
     name: "Deniel Ivor",
     course_section: "BSIS-4D",
     subject: "ICT11",
+    date: "03-24-2025",
     timeIn: "12:03 PM",
+    timeOut: "12:03 PM",
     status: "Excused",
   },
   {
@@ -75,7 +83,9 @@ const data: Student[] = [
     name: "Deniel Ivor",
     course_section: "BSIS-4D",
     subject: "ICT11",
+    date: "03-24-2025",
     timeIn: "12:03 PM",
+    timeOut: "12:03 PM",
     status: "Present",
   },
 ]
@@ -85,7 +95,9 @@ export type Student = {
   name: string,
   course_section: string,
   subject: string,
+  date: string,
   timeIn: string,
+  timeOut: string,
   status: "Present" | "Absent" | "Late" | "Excused"
 }
 
@@ -174,6 +186,24 @@ export const columns: ColumnDef<Student>[] = [
     cell: ({ row }) => <div>{row.getValue("subject")}</div>,
   },
   {
+    accessorKey: "date",
+    header: ({ column }) => {
+      return (
+        <div className="text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="text-xs pl-0 bg-transparent"
+          >
+            Date
+            <ArrowUpDown />
+          </Button>
+        </div>
+      )
+    },
+    cell: ({ row }) => <div>{row.getValue("date")}</div>,
+  },
+  {
     accessorKey: "timeIn",
     header: ({ column }) => {
       return (
@@ -190,6 +220,24 @@ export const columns: ColumnDef<Student>[] = [
       )
     },
     cell: ({ row }) => <div>{row.getValue("timeIn")}</div>,
+  },
+  {
+    accessorKey: "timeOut",
+    header: ({ column }) => {
+      return (
+        <div className="text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="text-xs pl-0 bg-transparent"
+          >
+            Time Out
+            <ArrowUpDown />
+          </Button>
+        </div>
+      )
+    },
+    cell: ({ row }) => <div>{row.getValue("timeOut")}</div>,
   },
   {
     accessorKey: "status",
