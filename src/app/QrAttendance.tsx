@@ -9,13 +9,14 @@ export const QrAttendance = () => {
 
   return (
     <div className='h-screen'>
-      <Button onClick={() => navigate("/login")}>Login</Button>
-      <div className='h-full w-full grid grid-cols-2 gap-10 p-10 items-center justify-center'>
-        <div className='w-full h-[90%] bg-gray-200'>
-          <Scanner onScan={(result) => console.log(result.map((v) => v.rawValue))} />
-          <span>push</span>
+      <div className='h-full flex flex-1 justify-center'>
+      <Button className='absolute left-5 top-5' onClick={() => navigate("/login")}>Login</Button>
+        <div className='w-full flex justify-center items-center bg-gray-200'>
+          <div className='w-1/2'>
+            <Scanner onScan={(result) => console.log(result.map((v) => v.rawValue))} />
+          </div>
         </div>
-        <div className='w-full h-[50%] p-4'>
+        <div className='w-full h-[90%] p-4'>
           <QRAttendanceTable />
         </div>
       </div>
