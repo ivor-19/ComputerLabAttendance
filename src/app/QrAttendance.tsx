@@ -1,4 +1,6 @@
 import { QRAttendanceTable } from '@/components/tables/QRAttendanceTable';
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
 import { Scanner } from '@yudiel/react-qr-scanner';
@@ -6,8 +8,6 @@ import { useState } from 'react';
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -16,6 +16,7 @@ export const QrAttendance = () => {
   const navigate = useNavigate();
   const [isPaused, setIsPaused] = useState<boolean>(true)
   const [isStartClick, setIsStartClick] = useState<boolean>(false)
+  const [isScanned, setIsScanned] = useState<boolean>(false)
   const [scannedData, setScannedData] = useState('')
 
   return (
@@ -38,15 +39,34 @@ export const QrAttendance = () => {
       <div className='w-full h-full z-2 absolute bg-transparent backdrop-blur-sm inset-0 flex justify-center items-center flex-1' style={{ display: isStartClick ? 'flex' : 'none' }}>
         <Card className='w-1/4'>
           <CardHeader>
-            <CardTitle className='text-2xl text-center'>Scan Your QR here!</CardTitle>
+            <CardTitle className='text-2xl text-center'>Scan Your QR Code</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className='w-full bg-red-200'>
-              <Scanner onScan={(result) => { setScannedData(result.map((v) => v.rawValue).toString()) }} paused={isPaused} />
+            <div className='w-full bg-red-200' style={{ display: isScanned ? 'none' : 'flex' }}>
+              <Scanner onScan={(result) => { setScannedData(result.map((v) => v.rawValue).toString()); setIsScanned(true) }} paused={isPaused} />
             </div>
-            {scannedData &&
-              <p>{scannedData}</p>
-            }
+            <div style={{ display: isScanned ? 'flex' : 'none' }}>
+              <form action="" className='flex flex-col gap-5 w-full'>
+                <div className='flex flex-col gap-3'>
+                  <div>
+                    <Label htmlFor='name'>Name</Label>
+                    <Input id='name' placeholder='fetch to database' />
+                  </div>
+                  <div>
+                    <Label htmlFor='subj'>Subject</Label>
+                    <Input id='subj' placeholder='fetch to database' />
+                  </div>
+                  <div>
+                    <Label htmlFor='time'>Time</Label>
+                    <Input id='time' value={new Date().toLocaleTimeString()} readOnly />
+                  </div>
+                </div>
+                <div className='w-full flex justify-between'>
+                  <Button type='button' onClick={() => { setIsStartClick(false); setIsScanned(false) }}>Cancel</Button>
+                  <Button>Confirm</Button>
+                </div>
+              </form>
+            </div>
           </CardContent>
         </Card>
       </div>
