@@ -5,21 +5,15 @@ import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { useState } from 'react';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import axios from 'axios';
+
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export const QrAttendance = () => {
   const navigate = useNavigate();
@@ -50,9 +44,25 @@ export const QrAttendance = () => {
         <div className='h-full flex flex-1 justify-center'>
           <Button className='absolute left-5 top-5' onClick={() => navigate("/login")}>Login</Button>
           <div className='w-[60%] h-full flex justify-center items-center bg-gray-200'>
-           <div className='w-[500px] absolute top-28'>
-            <Scanner onScan={(result) => console.log(result.map((v) => v.rawValue))} paused={true} />
-           </div>
+            <div className='w-[500px] absolute top-28'>
+              <Scanner onScan={async (result) => {
+                const res = result.map((v) => v.rawValue.toString());
+                console.log(res.toString())
+                try {
+                  const data = {
+                    student_id: res.toString(),
+                    teacher_id: res.toString(), //teacher
+                    subject: "Math", // teacher
+                    course: "BSIS", //teacher
+                    section: "4D" //teacher
+                  }
+                  const response = await axios.post('https://comlab-backend.vercel.app/api/student/addAttendance', data)
+                  console.log(response)
+                } catch (error) {
+                  console.log(error)
+                }
+              }} paused={false} />
+            </div>
           </div>
           <div className='w-full h-[90%] p-4'>
             <QRAttendanceTable />
