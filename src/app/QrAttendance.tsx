@@ -18,12 +18,15 @@ import { Loader2 } from 'lucide-react';
 
 export const QrAttendance = () => {
   const navigate = useNavigate();
-  
+
   // State variables
   const [isPaused, setIsPaused] = useState<boolean>(true);
   const [isStartClick, setIsStartClick] = useState<boolean>(false);
   const [isScanned, setIsScanned] = useState<boolean>(false);
   const [scannedData, setScannedData] = useState<string>('');
+  const [course, setCourse] = useState<string>('')
+  const [section, setSection] = useState<string>('')
+  const [subject, setSubject] = useState<string>('')
 
 
   const [teacher, setTeacher] = useState<any>(null);
@@ -73,10 +76,9 @@ export const QrAttendance = () => {
     try {
       const data = {
         student_id: res.toString(),
-        teacher_id: res.toString(), //teacher
-        subject: "Math", // teacher
-        course: "BSIS", //teacher
-        section: "1F" //teacher
+        teacher_id: teacherId, //teacher
+        course: course, //teacher
+        section: section //teacher
       };
       const response = await axios.post('https://comlab-backend.vercel.app/api/student/addAttendance', data);
       console.log(response);
@@ -85,6 +87,12 @@ export const QrAttendance = () => {
     }
   };
 
+  const handleConfirm = () => {
+    console.log(section)
+    console.log(course)
+    console.log(teacherId)
+  }
+
   return (
     <>
       <div className="h-screen">
@@ -92,30 +100,28 @@ export const QrAttendance = () => {
           <Button className="absolute left-5 top-5" onClick={() => navigate("/login")}>Login</Button>
           <div className="w-[60%] h-full flex justify-center items-center bg-gray-200">
             <div className="w-[500px] absolute top-28">
-              <Scanner onScan={handleScan} paused={true} />
+              <Scanner onScan={handleScan} paused={isPaused} />
             </div>
           </div>
 
           <div className="w-full h-[90%] p-4">
             <QRAttendanceTable />
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button onClick={() => { setIsStartClick(true); setIsPaused(false); }}>Start Class</Button>
-              </DialogTrigger>
+            <Button onClick={() => { setIsStartClick(true); }}>Start Class</Button>
+            <Dialog open={isStartClick}>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle className='text-center'>Set up class attendance</DialogTitle>
 
                   <div className={`w-full bg-red-200 ${isScanned ? 'hidden' : 'flex'}`}>
-                    <Scanner onScan={(teacherResult) => {setIsScanned(true);fetchTeacher(teacherResult.map((v: any) => v.rawValue).toString());}}paused={isPaused}/>
+                    <Scanner onScan={(teacherResult) => { setIsScanned(true); fetchTeacher(teacherResult.map((v: any) => v.rawValue).toString()); }} paused={false} />
                   </div>
                   <div className={`w-full ${isScanned ? 'flex' : 'hidden'}`}>
                     {loading ? (
                       <div className="flex justify-center items-center">
-                        <Loader2 className='animate-spin text-center'/>
+                        <Loader2 className='animate-spin text-center' />
                       </div>
-                    ):(
-                      <form className="flex flex-col gap-5 w-full">
+                    ) : (
+                      <div className="flex flex-col gap-5 w-full">
                         <div className="flex flex-col gap-3">
                           <div>
                             <Label htmlFor="teacher_id">ID</Label>
@@ -127,7 +133,7 @@ export const QrAttendance = () => {
                           </div>
                           <div className='flex flex-col gap-2'>
                             <Label htmlFor="course">Course</Label>
-                            <select id="course" className="w-[180px] p-2 border rounded-md">
+                            <select id="course" className="w-[180px] p-2 border rounded-md" onChange={(e) => setCourse(e.target.value)}>
                               <option value="" disabled>Select a course</option>
                               {teacher?.courses?.map((course: string, index: number) => (
                                 <option key={index} value={course}>{course}</option>
@@ -136,7 +142,7 @@ export const QrAttendance = () => {
                           </div>
                           <div className='flex flex-col gap-2'>
                             <Label htmlFor="section">Section</Label>
-                            <select id="section" className="w-[180px] p-2 border rounded-md">
+                            <select id="section" className="w-[180px] p-2 border rounded-md" onChange={(e) => setSection(e.target.value)}>
                               <option value="" disabled>Select a section</option>
                               {teacher?.sections?.map((section: string, index: number) => (
                                 <option key={index} value={section}>{section}</option>
@@ -167,11 +173,11 @@ export const QrAttendance = () => {
 
                         <div className="w-full flex justify-between">
                           <Button type="button" onClick={() => { setIsStartClick(false); setIsScanned(false); }}>Cancel</Button>
-                          <Button>Confirm</Button>
+                          <Button onClick={() => { setIsStartClick(false); setIsPaused(false) }}>Confirm</Button>
                         </div>
-                      </form>
+                      </div>
                     )}
-                  
+
                   </div>
                 </DialogHeader>
               </DialogContent>
