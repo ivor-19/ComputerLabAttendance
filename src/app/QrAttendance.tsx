@@ -110,7 +110,7 @@ export const QrAttendance = () => {
           <div className="w-full h-[90%] p-4">
             <QRAttendanceTable />
             <Button onClick={() => { setIsStartClick(true); }}>Start Class</Button>
-            <Dialog open={isStartClick}>
+            <Dialog open={isStartClick} onOpenChange={() => setIsStartClick(false)}>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle className='text-center'>Set up class attendance</DialogTitle>
