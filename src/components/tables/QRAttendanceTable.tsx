@@ -38,37 +38,13 @@ import {
 import { Badge } from "../ui/badge"
 import axios from "axios"
 
-// const data: Student[] = [
-//   {
-//     student_id: "m5gr84i9",
-//     teacher_id: "Deniel Ivor",
-//     course_section: "BSIS-4D",
-//     subject: "ICT11",
-//     date: "03-24-2025",
-//     timeIn: "12:03 PM",
-//     timeOut: "12:03 PM",
-//     status: "Late",
-//   },
-//   {
-//     student_id: "3u1reuv4",
-//     teacher_id: "Deniel Ivor",
-//     course_section: "BSIS-4D",
-//     subject: "ICT11",
-//     date: "03-24-2025",
-//     timeIn: "12:03 PM",
-//     timeOut: "12:03 PM",
-//     status: "Present",
-//   },
-// ]
-
 export type Student = {
   student_id: string,
   teacher_id: string,
   course_section: string,
-  subject: string,
   date: string,
-  timeIn: string,
-  timeOut: string,
+  time_in: string,
+  time_out: string,
   status: "Present" | "Absent" | "Late" | "Excused"
 }
 
@@ -150,24 +126,6 @@ export const columns: ColumnDef<Student>[] = [
     cell: ({ row }) => <div>{row.getValue("course_section")}</div>,
   },
   {
-    accessorKey: "subject",
-    header: ({ column }) => {
-      return (
-        <div className="text-left">
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="text-xs pl-0 bg-transparent"
-          >
-            Subject
-            <ArrowUpDown />
-          </Button>
-        </div>
-      )
-    },
-    cell: ({ row }) => <div>{row.getValue("subject")}</div>,
-  },
-  {
     accessorKey: "date",
     header: ({ column }) => {
       return (
@@ -186,7 +144,7 @@ export const columns: ColumnDef<Student>[] = [
     cell: ({ row }) => <div>{row.getValue("date")}</div>,
   },
   {
-    accessorKey: "timeIn",
+    accessorKey: "time_in",
     header: ({ column }) => {
       return (
         <div className="text-left">
@@ -201,10 +159,10 @@ export const columns: ColumnDef<Student>[] = [
         </div>
       )
     },
-    cell: ({ row }) => <div>{row.getValue("timeIn")}</div>,
+    cell: ({ row }) => <div>{row.getValue("time_in")}</div>,
   },
   {
-    accessorKey: "timeOut",
+    accessorKey: "time_out",
     header: ({ column }) => {
       return (
         <div className="text-left">
@@ -219,7 +177,7 @@ export const columns: ColumnDef<Student>[] = [
         </div>
       )
     },
-    cell: ({ row }) => <div>{row.getValue("timeOut")}</div>,
+    cell: ({ row }) => <div>{row.getValue("time_out")}</div>,
   },
   {
     accessorKey: "status",
@@ -274,7 +232,7 @@ export const columns: ColumnDef<Student>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(student.id)}
+              onClick={() => navigator.clipboard.writeText(student.student_id)}
             >
               Copy student ID
             </DropdownMenuItem>
@@ -300,18 +258,18 @@ export function QRAttendanceTable() {
   const [rowSelection, setRowSelection] = React.useState({})
 
   const [attendanceList, setAttendanceList] = React.useState<Student[]>([])
-  // const fetchAttendance = async () => {
-  //   try {
-  //     const response = await axios.get("")
-  //     setAttendanceList(response.data);
-  //   } catch (error) {
+  const fetchAttendance = async () => {
+    try {
+      const response = await axios.get("https://comlab-backend.vercel.app/api/student/getAttendance")
+      setAttendanceList(response.data);
+    } catch (error) {
       
-  //   }
-  // }
+    }
+  }
 
-  // React.useEffect(() => {
-  //   fetchAttendance();
-  // },[])
+  React.useEffect(() => {
+    fetchAttendance();
+  },[])
 
   const table = useReactTable({
     data: attendanceList,
@@ -336,10 +294,10 @@ export function QRAttendanceTable() {
     <div className="w-full">
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter name..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          placeholder="Filter student..."
+          value={(table.getColumn("student_id")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
+            table.getColumn("student_id")?.setFilterValue(event.target.value)
           }
           className="max-w-sm text-xs"
         />
