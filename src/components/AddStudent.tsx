@@ -27,6 +27,7 @@ interface AddStudentProps {
 
 const FormSchema = z.object({
   student_id: z.string().min(10, {message: "ID must have atleast 10 characters"}),
+  email: z.string().email({ message: "Invalid email address" }).min(1, { message: "Email is required" }),
   lastname: z.string().min(1, {message: "Last Name is required"}),
   firstname: z.string().min(1, {message: "First Name is required"}),
   course: z.string().optional(),
@@ -49,10 +50,15 @@ export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
 
   const addNewStudent = async (data: FormData) => {
     setLoading(true);
-    const newStudent = {student_id: data.student_id, lastname: data.lastname, firstname: data.firstname, course: data.course, section: combinedSection}
+    const newStudent = {student_id: data.student_id, email: data.email, lastname: data.lastname, firstname: data.firstname, course: data.course, section: combinedSection}
+    const studentEmail = {student_id: data.student_id, student_email: data.email}
     try {
       const response = await axios.post("https://comlab-backend.vercel.app/api/student/addStudent", newStudent);
       console.log(response.data)
+
+      const sendQr = await axios.post("https://comlab-backend.vercel.app/api/student/generateQR", studentEmail)
+      console.log("Sent successfully", sendQr.data);
+
       setOpen(false);
       toast.success("User has been created.")
       setLoading(false);
@@ -90,6 +96,21 @@ export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
                 placeholder="MA-########"
               />
               {errors.student_id && <span className="text-red-500 text-xs font-geist">{errors.student_id.message}</span>}
+            </div>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="email" className="text-right">
+              Email
+            </Label>
+            <div className="col-span-3 relative">
+              <Input 
+                id="email" 
+                className="col-span-3" 
+                type="email"
+                {...register("email")}
+                placeholder="Email"
+              />
+              {errors.email && <span className="text-red-500 text-xs font-geist">{errors.email.message}</span>}
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">

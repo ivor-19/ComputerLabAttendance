@@ -40,6 +40,7 @@ import { QRCodeSVG } from 'qrcode.react';
 
 export type Student = {
   student_id: string;
+  email: string;
   lastname: string;
   firstname: string;
   course: string;
@@ -70,6 +71,24 @@ export const columns = (setOpenQRModal: (open: boolean) => void, setId: (id: str
     accessorKey: "student_id",
     header: "ID",
     cell: ({ row }) => <div className="capitalize">{row.getValue("student_id")}</div>,
+  },
+  {
+    accessorKey: "email",
+    header: ({ column }) => {
+      return (
+        <div className="text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="text-xs pl-0 bg-transparent"
+          >
+            Email
+            <ArrowUpDown />
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }) => <div>{row.getValue("email")}</div>,
   },
   {
     accessorKey: "lastname",

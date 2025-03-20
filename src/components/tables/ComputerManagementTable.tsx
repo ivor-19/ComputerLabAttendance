@@ -44,31 +44,26 @@ const data: ComLabList[] = [
     id: "m5gr84i9",
     name: "Com Lab 1",
     room: "201",
-    computerSets: 40
   },
   {
     id: "m5gr84i9",
     name: "Com Lab 2",
     room: "201",
-    computerSets: 40
   },
   {
     id: "m5gr84i9",
     name: "Com Lab 3",
     room: "201",
-    computerSets: 40
   },
   {
     id: "m5gr84i9",
     name: "Com Lab 4",
     room: "201",
-    computerSets: 40
   },
   {
     id: "m5gr84i9",
     name: "Com Lab 5",
     room: "201",
-    computerSets: 40
   },
 ]
 
@@ -76,7 +71,6 @@ export type ComLabList = {
   id: string,
   name: string,
   room: string,
-  computerSets: number,
 }
 
 export function ComputerManagementTable() {
@@ -153,24 +147,6 @@ export function ComputerManagementTable() {
           )
         },
         cell: ({ row }) => <div>{row.getValue("room")}</div>,
-      },
-      {
-        accessorKey: "computerSets",
-        header: ({ column }) => {
-          return (
-            <div className="text-left">
-              <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                className="text-xs pl-0 bg-transparent"
-              >
-                Computer Sets
-                <ArrowUpDown />
-              </Button>
-            </div>
-          )
-        },
-        cell: ({ row }) => <div>{row.getValue("computerSets")}</div>,
       },
     {
       id: "actions",

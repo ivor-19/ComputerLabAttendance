@@ -23,6 +23,8 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 type CMDetailsParams = {
   name: string;
@@ -59,6 +61,9 @@ export default function CMDetails() {
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           {/* Display computer lab details for {name} */}
           <h2 className="text-2xl font-semibold">Details for {name}</h2>
+          <Input placeholder="Name"></Input>
+          <Input placeholder="Room"></Input>
+          <Button>Update</Button>
           <div>
             <Accordion type="multiple" className="w-full">
               <AccordionItem value="item-1">
