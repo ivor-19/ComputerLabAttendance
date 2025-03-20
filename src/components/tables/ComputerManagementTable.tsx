@@ -38,37 +38,10 @@ import {
 import DeleteModal from "../DeleteModal"
 import { AddCom } from "../AddCom"
 import { useNavigate } from "react-router-dom"
-
-const data: ComLabList[] = [
-  {
-    id: "m5gr84i9",
-    name: "Com Lab 1",
-    room: "201",
-  },
-  {
-    id: "m5gr84i9",
-    name: "Com Lab 2",
-    room: "201",
-  },
-  {
-    id: "m5gr84i9",
-    name: "Com Lab 3",
-    room: "201",
-  },
-  {
-    id: "m5gr84i9",
-    name: "Com Lab 4",
-    room: "201",
-  },
-  {
-    id: "m5gr84i9",
-    name: "Com Lab 5",
-    room: "201",
-  },
-]
+import axios from "axios"
 
 export type ComLabList = {
-  id: string,
+  _id: string,
   name: string,
   room: string,
 }
@@ -106,10 +79,10 @@ export function ComputerManagementTable() {
       enableHiding: false,
     },
     {
-      accessorKey: "id",
+      accessorKey: "_id",
       header: "ID",
       cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("id")}</div>
+        <div className="capitalize">{row.getValue("_id")}</div>
       ),
     },
     {
@@ -170,7 +143,7 @@ export function ComputerManagementTable() {
                 Copy payment ID
               </DropdownMenuItem> */}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleRowClick(row.getValue("name"))}>View & Edit Details</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleRowClick(row.original)}>View & Edit Details</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )
@@ -178,8 +151,42 @@ export function ComputerManagementTable() {
     },
   ]
 
+  const navigate = useNavigate();
+  const [open, setOpen] = React.useState(false);
+  const [openDelete, setOpenDelete] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [list, setList] = React.useState<ComLabList[]>([])
+
+  const fetchList = async () => {
+    try {
+      const response = await axios.get("https://comlab-backend.vercel.app/api/computer/getList");
+      setList(response.data.com);
+      console.log(response.data.com);
+    } catch (error) {
+      console.error("Error fetching users", error);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchList();
+  }, [])
+
+  const deleteCom = () => {
+    setOpenDelete(true);
+  }
+
+  const handleRowClick = (row: ComLabList): void => {
+    navigate(`/admin/computermanagement/${encodeURIComponent(row.name)}`, {
+      state: { 
+        name: row.name,
+        room: row.room,
+        id: row._id
+      }
+    });
+  };
+
   const table = useReactTable({
-    data,
+    data: list,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -196,24 +203,6 @@ export function ComputerManagementTable() {
       rowSelection,
     },
   })
-
-  const navigate = useNavigate();
-  const [open, setOpen] = React.useState(false);
-  const [openDelete, setOpenDelete] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
-
-  const fetchComs = () => {
-
-  }
-
-  const deleteCom = () => {
-    setOpenDelete(true);
-  }
-
-  const handleRowClick = (name: string): void => {
-    navigate(`/admin/computermanagement/${encodeURIComponent(name)}`);
-  };
-  
 
   return (
     <div className="w-full">
@@ -240,7 +229,7 @@ export function ComputerManagementTable() {
                 loading={loading}
               />
             )}
-           <AddCom open={open} setOpen={setOpen} fetch={fetchComs} />
+           <AddCom open={open} setOpen={setOpen} fetch={fetchList} />
           </div>
           
         </div>

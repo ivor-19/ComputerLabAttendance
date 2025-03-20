@@ -63,9 +63,26 @@ export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
       toast.success("User has been created.")
       setLoading(false);
       fetch();
-    } catch (error) {
+      reset({
+        student_id: "",
+        email: "",
+        lastname: "",
+        firstname: "",
+        course: "",
+        section: ""
+      })
+    } catch (error: any) {
       console.error("Error adding student", error)
-      setOpen(false);
+      if (error.response && error.response.status === 403) {
+        setUserExists(true);
+        // Keep the dialog open to show the error
+        toast.error("Student ID already exists");
+        setLoading(false);
+      } else {
+
+        toast.error("Failed to add student");
+        setOpen(false);
+      }
     }
     
   }

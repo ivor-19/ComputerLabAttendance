@@ -43,18 +43,18 @@ export const AddCom = ({open, setOpen, fetch} : AddComProps) => {
 
   const addNewCom = async (data: FormData) => {
     setLoading(true);
-    // const newStudent = {student_id: data.student_id, lastname: data.lastname, firstname: data.firstname, course: data.course, section: combinedSection}
-    // try {
-    //   const response = await axios.post("https://comlab-backend.vercel.app/api/student/addStudent", newStudent);
-    //   console.log(response.data)
-    //   setOpen(false);
-    //   toast.success("User has been created.")
-    //   setLoading(false);
-    //   fetch();
-    // } catch (error) {
-    //   console.error("Error adding student", error)
-    //   setOpen(false);
-    // }
+    const newCom = {name: data.name, room: data.room}
+    try {
+      const response = await axios.post("https://comlab-backend.vercel.app/api/computer/add", newCom);
+      console.log(response.data.com)
+      setOpen(false);
+      toast.success("New Data has been created.")
+      setLoading(false);
+      fetch();
+    } catch (error) {
+      console.error("Error adding student", error)
+      setOpen(false);
+    }
     
   }
   
@@ -99,21 +99,6 @@ export const AddCom = ({open, setOpen, fetch} : AddComProps) => {
                 placeholder="Room"
               />
               {errors.room && <span className="text-red-500 text-xs font-geist">{errors.room.message}</span>}
-            </div>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="firstname" className="text-right">
-              Computer Sets
-            </Label>
-            <div className="col-span-3 relative">
-              <Input 
-                id="computerSets" 
-                className="col-span-3" 
-                type="text"
-                {...register("computerSets")}
-                placeholder="0"
-              />
-              {errors.computerSets && <span className="text-red-500 text-xs font-geist">{errors.computerSets.message}</span>}
             </div>
           </div>
         </div>

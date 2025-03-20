@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label"
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
 import { Scanner } from '@yudiel/react-qr-scanner';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 
 import {
@@ -14,105 +14,164 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Loader2 } from 'lucide-react';
 
 export const QrAttendance = () => {
   const navigate = useNavigate();
-  const [isPaused, setIsPaused] = useState<boolean>(true)
-  const [isStartClick, setIsStartClick] = useState<boolean>(false)
-  const [isScanned, setIsScanned] = useState<boolean>(false)
-  const [scannedData, setScannedData] = useState('')
+  
+  // State variables
+  const [isPaused, setIsPaused] = useState<boolean>(true);
+  const [isStartClick, setIsStartClick] = useState<boolean>(false);
+  const [isScanned, setIsScanned] = useState<boolean>(false);
+  const [scannedData, setScannedData] = useState<string>('');
 
+
+  const [teacher, setTeacher] = useState<any>(null);
+  const [teacherName, setTeacherName] = useState<string>('');
+  const [teacherId, setTeacherId] = useState<string>('');
+
+  // Time formatting function
   const formatTime = (date: Date) => {
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     return `${hours}:${minutes}`;
-  }
+  };
 
   const [startTime, setStartTime] = useState<string>(formatTime(new Date()));
+  const [endTime, setEndTime] = useState<string>("");
+
+  // Handler for start time
   const handleStartTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setStartTime(event.target.value);
   };
 
-  const [endTime, setEndTime] = useState<string>("");
+  // Handler for end time
   const handleEndTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEndTime(event.target.value);
   };
 
+  const [loading, setLoading] = useState(false);
+  const fetchTeacher = async (result: any) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`https://comlab-backend.vercel.app/api/teacher/getSpecificTeacher/${result}`);
+      const teacherData = response.data.teacher;
+      setTeacher(teacherData);
+      setTeacherName(`${teacherData.lastname}, ${teacherData.firstname}`);
+      setTeacherId(teacherData.teacher_id);
+      setLoading(false)
+    } catch (error) {
+      console.error("Error fetching teacher data", error);
+      setLoading(false)
+    }
+  };
+
+  // Handle QR code scan
+  const handleScan = async (result: any) => {
+    const res = result.map((v: any) => v.rawValue.toString());
+    console.log(res.toString());
+    try {
+      const data = {
+        student_id: res.toString(),
+        teacher_id: res.toString(), //teacher
+        subject: "Math", // teacher
+        course: "BSIS", //teacher
+        section: "4D" //teacher
+      };
+      const response = await axios.post('https://comlab-backend.vercel.app/api/student/addAttendance', data);
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <>
-      <div className='h-screen'>
-        <div className='h-full flex flex-1 justify-center'>
-          <Button className='absolute left-5 top-5' onClick={() => navigate("/login")}>Login</Button>
-          <div className='w-[60%] h-full flex justify-center items-center bg-gray-200'>
-            <div className='w-[500px] absolute top-28'>
-              <Scanner onScan={async (result) => {
-                const res = result.map((v) => v.rawValue.toString());
-                console.log(res.toString())
-                try {
-                  const data = {
-                    student_id: res.toString(),
-                    teacher_id: res.toString(), //teacher
-                    subject: "Math", // teacher
-                    course: "BSIS", //teacher
-                    section: "4D" //teacher
-                  }
-                  const response = await axios.post('https://comlab-backend.vercel.app/api/student/addAttendance', data)
-                  console.log(response)
-                } catch (error) {
-                  console.log(error)
-                }
-              }} paused={false} />
+      <div className="h-screen">
+        <div className="h-full flex justify-center">
+          <Button className="absolute left-5 top-5" onClick={() => navigate("/login")}>Login</Button>
+          <div className="w-[60%] h-full flex justify-center items-center bg-gray-200">
+            <div className="w-[500px] absolute top-28">
+              <Scanner onScan={handleScan} paused={true} />
             </div>
           </div>
-          <div className='w-full h-[90%] p-4'>
+
+          <div className="w-full h-[90%] p-4">
             <QRAttendanceTable />
             <Dialog>
               <DialogTrigger asChild>
-                <Button onClick={() => { setIsPaused(false) }}>Start Class</Button>
+                <Button onClick={() => { setIsStartClick(true); setIsPaused(false); }}>Start Class</Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Scan QR Code</DialogTitle>
-                  <div className='w-full bg-red-200' style={{ display: isScanned ? 'none' : 'flex' }}>
-                    <Scanner onScan={(result) => { setScannedData(result.map((v) => v.rawValue).toString()); setIsScanned(true) }} paused={isPaused} />
+                  <DialogTitle className='text-center'>Set up class attendance</DialogTitle>
+
+                  <div className={`w-full bg-red-200 ${isScanned ? 'hidden' : 'flex'}`}>
+                    <Scanner onScan={(teacherResult) => {setIsScanned(true);fetchTeacher(teacherResult.map((v: any) => v.rawValue).toString());}}paused={isPaused}/>
                   </div>
-                  <div style={{ display: isScanned ? 'flex' : 'none' }}>
-                    <form action="" className='flex flex-col gap-5 w-full'>
-                      <div className='flex flex-col gap-3'>
-                        <div>
-                          <Label htmlFor='name'>Name</Label>
-                          <Input id='name' placeholder='fetch to database' />
-                        </div>
-                        <div>
-                          <Label htmlFor='subj'>Subject</Label>
-                          <Input id='subj' placeholder='fetch to database' />
-                        </div>
-                        <div className="flex flex-col">
-                          <label htmlFor="time" className="text-sm font-medium mb-2">Select Time:</label>
-                          <div className='flex items-center gap-2'>
-                            <input
-                              type="time"
-                              id="startTime"
-                              value={startTime}
-                              onChange={handleStartTimeChange}
-                              className="border p-2 rounded-md"
-                            />
-                            to
-                            <input
-                              type="time"
-                              id="endTime"
-                              value={endTime}
-                              onChange={handleEndTimeChange}
-                              className="border p-2 rounded-md"
-                            />
+                  <div className={`w-full ${isScanned ? 'flex' : 'hidden'}`}>
+                    {loading ? (
+                      <div className="flex justify-center items-center">
+                        <Loader2 className='animate-spin text-center'/>
+                      </div>
+                    ):(
+                      <form className="flex flex-col gap-5 w-full">
+                        <div className="flex flex-col gap-3">
+                          <div>
+                            <Label htmlFor="teacher_id">ID</Label>
+                            <Input id="teacher_id" placeholder="Teacher ID" value={teacherId} disabled />
+                          </div>
+                          <div>
+                            <Label htmlFor="name">Name</Label>
+                            <Input id="name" placeholder="Teacher Name" value={teacherName} disabled />
+                          </div>
+                          <div className='flex flex-col gap-2'>
+                            <Label htmlFor="course">Course</Label>
+                            <select id="course" className="w-[180px] p-2 border rounded-md">
+                              <option value="" disabled>Select a course</option>
+                              {teacher?.courses?.map((course: string, index: number) => (
+                                <option key={index} value={course}>{course}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className='flex flex-col gap-2'>
+                            <Label htmlFor="section">Section</Label>
+                            <select id="section" className="w-[180px] p-2 border rounded-md">
+                              <option value="" disabled>Select a section</option>
+                              {teacher?.sections?.map((section: string, index: number) => (
+                                <option key={index} value={section}>{section}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="flex flex-col">
+                            <label htmlFor="time" className="text-sm font-medium mb-2">Select Time:</label>
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="time"
+                                id="startTime"
+                                value={startTime}
+                                onChange={handleStartTimeChange}
+                                className="border p-2 rounded-md"
+                              />
+                              to
+                              <input
+                                type="time"
+                                id="endTime"
+                                value={endTime}
+                                onChange={handleEndTimeChange}
+                                className="border p-2 rounded-md"
+                              />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className='w-full flex justify-between'>
-                        <Button type='button' onClick={() => { setIsStartClick(false); setIsScanned(false) }}>Cancel</Button>
-                        <Button>Confirm</Button>
-                      </div>
-                    </form>
+
+                        <div className="w-full flex justify-between">
+                          <Button type="button" onClick={() => { setIsStartClick(false); setIsScanned(false); }}>Cancel</Button>
+                          <Button>Confirm</Button>
+                        </div>
+                      </form>
+                    )}
+                  
                   </div>
                 </DialogHeader>
               </DialogContent>
@@ -121,5 +180,5 @@ export const QrAttendance = () => {
         </div>
       </div>
     </>
-  )
-}
+  );
+};
