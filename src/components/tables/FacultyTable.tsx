@@ -195,10 +195,7 @@ export const columns = (setOpenQRModal: (open: boolean) => void, setId: (id: str
               <QrCode className="mr-2 h-4 w-4" />
               View QR Code
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <SquarePen className="mr-2 h-4 w-4" />
-              Edit User Details
-            </DropdownMenuItem>
+          
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -234,10 +231,10 @@ export function FacultyTable() {
       const selectedRows = table.getSelectedRowModel().rows;
       for (const row of selectedRows) {
         const teacher_id = row.original.teacher_id; // Access the user's _id
-        // await axios.delete(`https://comlab-backend.vercel.app/api/student/deleteStudent/${studentId}`);
+        await axios.delete(`https://comlab-backend.vercel.app/api/teacher/deleteTeacher/${teacher_id}`);
         console.log(`Deleted user with ID: ${teacher_id}`);
       }
-      toast.info(`${selectedRows.length} User/s has been deleted.`);
+      toast.info(`${selectedRows.length} Teacher/s has been deleted.`);
 
       fetchTeachers();
       setRowSelection({});

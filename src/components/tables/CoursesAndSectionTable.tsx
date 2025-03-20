@@ -191,10 +191,7 @@ export const columns = (setOpenQRModal: (open: boolean) => void, setId: (id: str
               <QrCode className="mr-2 h-4 w-4" />
               View QR Code
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <SquarePen className="mr-2 h-4 w-4" />
-              Edit User Details
-            </DropdownMenuItem>
+          
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -400,7 +397,7 @@ export function CoursesAndSectionTable() {
           <DialogHeader>
             <DialogTitle>QR Code</DialogTitle>
             <DialogDescription>
-              This is the QR code for the selected student.
+              This is the QR code for the selected student ({id})
             </DialogDescription>
             <div className="w-full flex items-center justify-center">
               <div className="w-fit">

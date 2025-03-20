@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import {
   Dialog,
   DialogContent,
@@ -7,95 +7,127 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { CSSProperties, useEffect, useState } from "react"
-import * as z from "zod"
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form"
-import axios from 'axios'
-import { toast } from 'sonner'
-import { CirclePlus, Loader2, Plus } from 'lucide-react'
-import { Input } from './ui/input'
-import { Button } from './ui/button'
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { useEffect, useState } from 'react';
+import * as z from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import axios from 'axios';
+import { toast } from 'sonner';
+import { Loader2, Plus } from 'lucide-react';
+import { Input } from './ui/input';
+import { Button } from './ui/button';
+import { Checkbox } from './ui/checkbox'; // Assuming you have a Checkbox component
 
 interface AddTeacherProps {
   fetch: () => void;
   open: boolean;
-  setOpen: (open: boolean) => void; // Corrected type for setOpen
+  setOpen: (open: boolean) => void;
 }
 
 const FormSchema = z.object({
-  teacher_id: z.string().min(10, {message: "ID must have atleast 10 characters"}),
-  lastname: z.string().min(1, {message: "Last Name is required"}),
-  firstname: z.string().min(1, {message: "First Name is required"}),
-  course: z.string().optional(),
-  yearlevel: z.string().optional(),
-  section: z.string().optional()
-})
+  teacher_id: z.string().min(10, { message: 'ID must have at least 10 characters' }),
+  lastname: z.string().min(1, { message: 'Last Name is required' }),
+  firstname: z.string().min(1, { message: 'First Name is required' }),
+  courses: z.array(z.string()).min(1, { message: 'At least one course is required' }), // Array of courses
+  sections: z.array(z.string()).min(1, { message: 'At least one section is required' }), // Array of sections
+});
 
 type FormData = z.infer<typeof FormSchema>;
 
-export const AddTeacher = ({open, setOpen, fetch} : AddTeacherProps) => {
-  const { register, handleSubmit, formState: {errors}, reset, setError, watch } = useForm<FormData>({
+export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    setValue,
+    watch,
+  } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
-  })
+    defaultValues: {
+      courses: [],
+      sections: [],
+    },
+  });
+
   const [userExists, setUserExists] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const yearLevel = watch("yearlevel");
-  const section = watch("section");
-  const combinedSection = yearLevel && section ? `${yearLevel}${section}` : "1A";
+  // Generate all possible sections (1A, 1B, ..., 4J)
+  const allSections = Array.from({ length: 4 }, (_, year) =>
+    Array.from({ length: 10 }, (_, section) => `${year + 1}${String.fromCharCode(65 + section)}`)
+  ).flat();
 
-  const addNewStudent = async (data: FormData) => {
+  const course = watch('courses');
+  const section = watch('sections');
+
+  // Handle course selection
+  const handleCourseChange = (value: string) => {
+    const updatedCourses = course.includes(value)
+      ? course.filter((c) => c !== value) // Remove if already selected
+      : [...course, value]; // Add if not selected
+    setValue('courses', updatedCourses);
+  };
+
+  // Handle section selection
+  const handleSectionChange = (value: string) => {
+    const updatedSections = section.includes(value)
+      ? section.filter((s) => s !== value) // Remove if already selected
+      : [...section, value]; // Add if not selected
+    setValue('sections', updatedSections);
+  };
+
+  const addNewTeacher = async (data: FormData) => {
     setLoading(true);
-    const newTeacher = {teacher_id: data.teacher_id, lastname: data.lastname, firstname: data.firstname, course: data.course, section: combinedSection}
-    // const studentEmail = {student_id: data.student_id, student_email: data.email}
-    try {
-      const response = await axios.post("https://comlab-backend.vercel.app/api/teacher/addStudent", newTeacher);
-      console.log(response.data)
+    const newTeacher = {
+      teacher_id: data.teacher_id,
+      lastname: data.lastname,
+      firstname: data.firstname,
+      courses: data.courses, // Array of courses
+      sections: data.sections, // Array of sections (e.g., ["1A", "2B"])
+    };
 
-      // const sendQr = await axios.post("https://comlab-backend.vercel.app/api/student/generateQR", studentEmail)
-      // console.log("Sent successfully", sendQr.data);
+    try {
+      const response = await axios.post('https://comlab-backend.vercel.app/api/teacher/addTeacher', newTeacher);
+      console.log(response.data);
 
       setOpen(false);
-      toast.success("User has been created.")
+      toast.success('User has been created.');
       setLoading(false);
       fetch();
       reset({
-        teacher_id: "",
-        lastname: "",
-        firstname: "",
-        course: "",
-        section: ""
-      })
+        teacher_id: '',
+        lastname: '',
+        firstname: '',
+        courses: [],
+        sections: [],
+      });
     } catch (error: any) {
-      console.error("Error adding student", error)
+      console.error('Error adding teacher', error);
       if (error.response && error.response.status === 403) {
         setUserExists(true);
-        // Keep the dialog open to show the error
-        toast.error("Teacher ID already exists");
+        toast.error('Teacher ID already exists');
         setLoading(false);
       } else {
-
-        toast.error("Failed to add student");
+        toast.error('Failed to add teacher');
         setOpen(false);
       }
     }
-    
-  }
-  
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button onClick={() => setOpen(true)}><Plus strokeWidth={3}/>Add</Button>
+        <Button onClick={() => setOpen(true)}>
+          <Plus strokeWidth={3} /> Add
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] font-geist">
         <DialogHeader>
-          <DialogTitle>Add User</DialogTitle>
-          <DialogDescription>
-          Click submit when you're done.
-          </DialogDescription>
+          <DialogTitle>Add Teacher</DialogTitle>
+          <DialogDescription>Click submit when you're done.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
@@ -103,14 +135,16 @@ export const AddTeacher = ({open, setOpen, fetch} : AddTeacherProps) => {
               ID
             </Label>
             <div className="col-span-3 relative">
-              <Input 
-                id="id" 
-                className="col-span-3" 
+              <Input
+                id="id"
+                className="col-span-3"
                 type="text"
-                {...register("teacher_id")}
-                placeholder="MA-########"
+                {...register('teacher_id')}
+                placeholder="########"
               />
-              {errors.teacher_id && <span className="text-red-500 text-xs font-geist">{errors.teacher_id.message}</span>}
+              {errors.teacher_id && (
+                <span className="text-red-500 text-xs font-geist">{errors.teacher_id.message}</span>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -118,14 +152,16 @@ export const AddTeacher = ({open, setOpen, fetch} : AddTeacherProps) => {
               Last Name
             </Label>
             <div className="col-span-3 relative">
-              <Input 
-                id="lastname" 
-                className="col-span-3" 
+              <Input
+                id="lastname"
+                className="col-span-3"
                 type="text"
-                {...register("lastname")}
+                {...register('lastname')}
                 placeholder="Last Name"
               />
-              {errors.lastname && <span className="text-red-500 text-xs font-geist">{errors.lastname.message}</span>}
+              {errors.lastname && (
+                <span className="text-red-500 text-xs font-geist">{errors.lastname.message}</span>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -133,14 +169,16 @@ export const AddTeacher = ({open, setOpen, fetch} : AddTeacherProps) => {
               First Name
             </Label>
             <div className="col-span-3 relative">
-              <Input 
-                id="firstname" 
-                className="col-span-3" 
+              <Input
+                id="firstname"
+                className="col-span-3"
                 type="text"
-                {...register("firstname")}
+                {...register('firstname')}
                 placeholder="First Name"
               />
-              {errors.firstname && <span className="text-red-500 text-xs font-geist">{errors.firstname.message}</span>}
+              {errors.firstname && (
+                <span className="text-red-500 text-xs font-geist">{errors.firstname.message}</span>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -148,77 +186,64 @@ export const AddTeacher = ({open, setOpen, fetch} : AddTeacherProps) => {
               Course
             </Label>
             <div className="col-span-3 font-geist text-[14px]">
-              <select 
-                id="course"
-                {...register("course")}
-                className="w-[180px] p-2 border rounded-md font-geist"
-              >
-                <option value="" disabled>Select course</option>
-                <option value="BSIS">BSIS</option>
-                <option value="BSAIS">BSAIS</option>
-                <option value="BSOM">BSOM</option>
-              </select>
-              {errors.course && <p className="text-red-500 text-xs">{errors.course.message}</p>}
+              <div className="flex flex-wrap gap-2">
+                {['BSIS', 'BSAIS', 'BSOM'].map((courseOption) => (
+                  <div key={courseOption} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={courseOption}
+                      checked={course.includes(courseOption)}
+                      onCheckedChange={() => handleCourseChange(courseOption)}
+                    />
+                    <Label htmlFor={courseOption}>{courseOption}</Label>
+                  </div>
+                ))}
+              </div>
+              {errors.courses && (
+                <p className="text-red-500 text-xs">{errors.courses.message}</p>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="section" className="text-right">
               Section
             </Label>
-            <div className='flex gap-4'>
-              <div className="font-geist text-[14px]">
-                <select 
-                  id="yearlevel"
-                  {...register("yearlevel")}
-                  className="w-[130px] p-2 border rounded-md font-geist"
-                >
-                  <option value="" disabled>Year Level</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                </select>
-                {errors.yearlevel && <p className="text-red-500 text-xs">{errors.yearlevel.message}</p>}
+            <div className="col-span-3 font-geist text-[14px]">
+              <div className="flex flex-wrap gap-2">
+                {allSections.map((sec) => (
+                  <div key={sec} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={sec}
+                      checked={section.includes(sec)}
+                      onCheckedChange={() => handleSectionChange(sec)}
+                    />
+                    <Label htmlFor={sec}>{sec}</Label>
+                  </div>
+                ))}
               </div>
-              <div className="w-full font-geist text-[14px]">
-                <select 
-                  id="section"
-                  {...register("section")}
-                  className="p-2 border rounded-md font-geist"
-                >
-                  <option value="" disabled>Select section</option>
-                  <option value="A">A</option>
-                  <option value="B">B</option>
-                  <option value="C">C</option>
-                  <option value="D">D</option>
-                  <option value="E">E</option>
-                  <option value="F">F</option>
-                  <option value="G">G</option>
-                  <option value="H">H</option>
-                  <option value="I">I</option>
-                  <option value="J">J</option>
-                </select>
-                {errors.section && <p className="text-red-500 text-xs">{errors.section.message}</p>}
-              </div>
+              {errors.sections && (
+                <p className="text-red-500 text-xs">{errors.sections.message}</p>
+              )}
             </div>
           </div>
         </div>
         <DialogFooter className="flex items-center">
-          {userExists && <span className="text-red-500 text-xs font-geist">Student already exists. Please choose a different account ID.</span>}
-          <Button onClick={handleSubmit(addNewStudent)}> 
-            {loading ? ( 
+          {userExists && (
+            <span className="text-red-500 text-xs font-geist">
+              Teacher already exists. Please choose a different account ID.
+            </span>
+          )}
+          <Button onClick={handleSubmit(addNewTeacher)}>
+            {loading ? (
               <>
                 Submitting
-                <Loader2 className="animate-spin"/>
+                <Loader2 className="animate-spin" />
               </>
-            ):(
-              <>
-                Submit
-              </>
-            )} 
+            ) : (
+              <>Submit</>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>
-  </Dialog>
-  )
-}
+    </Dialog>
+  );
+};
