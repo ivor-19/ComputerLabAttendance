@@ -76,7 +76,7 @@ export const QrAttendance = () => {
         teacher_id: res.toString(), //teacher
         subject: "Math", // teacher
         course: "BSIS", //teacher
-        section: "4D" //teacher
+        section: "1F" //teacher
       };
       const response = await axios.post('https://comlab-backend.vercel.app/api/student/addAttendance', data);
       console.log(response);

@@ -36,63 +36,34 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "../ui/badge"
+import axios from "axios"
 
-const data: Student[] = [
-  {
-    id: "m5gr84i9",
-    name: "Deniel Ivor",
-    course_section: "BSIS-4D",
-    subject: "ICT11",
-    date: "03-24-2025",
-    timeIn: "12:03 PM",
-    timeOut: "12:03 PM",
-    status: "Late",
-  },
-  {
-    id: "3u1reuv4",
-    name: "Deniel Ivor",
-    course_section: "BSIS-4D",
-    subject: "ICT11",
-    date: "03-24-2025",
-    timeIn: "12:03 PM",
-    timeOut: "12:03 PM",
-    status: "Present",
-  },
-  {
-    id: "derv1ws0",
-    name: "Deniel Ivor",
-    course_section: "BSIS-4D",
-    subject: "ICT11",
-    date: "03-24-2025",
-    timeIn: "12:03 PM",
-    timeOut: "12:03 PM",
-    status: "Absent",
-  },
-  {
-    id: "5kma53ae",
-    name: "Deniel Ivor",
-    course_section: "BSIS-4D",
-    subject: "ICT11",
-    date: "03-24-2025",
-    timeIn: "12:03 PM",
-    timeOut: "12:03 PM",
-    status: "Excused",
-  },
-  {
-    id: "bhqecj4p",
-    name: "Deniel Ivor",
-    course_section: "BSIS-4D",
-    subject: "ICT11",
-    date: "03-24-2025",
-    timeIn: "12:03 PM",
-    timeOut: "12:03 PM",
-    status: "Present",
-  },
-]
+// const data: Student[] = [
+//   {
+//     student_id: "m5gr84i9",
+//     teacher_id: "Deniel Ivor",
+//     course_section: "BSIS-4D",
+//     subject: "ICT11",
+//     date: "03-24-2025",
+//     timeIn: "12:03 PM",
+//     timeOut: "12:03 PM",
+//     status: "Late",
+//   },
+//   {
+//     student_id: "3u1reuv4",
+//     teacher_id: "Deniel Ivor",
+//     course_section: "BSIS-4D",
+//     subject: "ICT11",
+//     date: "03-24-2025",
+//     timeIn: "12:03 PM",
+//     timeOut: "12:03 PM",
+//     status: "Present",
+//   },
+// ]
 
 export type Student = {
-  id: string,
-  name: string,
+  student_id: string,
+  teacher_id: string,
   course_section: string,
   subject: string,
   date: string,
@@ -125,14 +96,7 @@ export const columns: ColumnDef<Student>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "id",
-    header: "ID",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("id")}</div>
-    ),
-  },
-  {
-    accessorKey: "name",
+    accessorKey: "student_id",
     header: ({ column }) => {
       return (
         <div className="text-left">
@@ -141,13 +105,31 @@ export const columns: ColumnDef<Student>[] = [
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             className="text-xs pl-0 bg-transparent"
           >
-            Name
+            Student
             <ArrowUpDown />
           </Button>
         </div>
       )
     },
-    cell: ({ row }) => <div>{row.getValue("name")}</div>,
+    cell: ({ row }) => <div>{row.getValue("student_id")}</div>,
+  },
+  {
+    accessorKey: "teacher_id",
+    header: ({ column }) => {
+      return (
+        <div className="text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="text-xs pl-0 bg-transparent"
+          >
+            Teacher
+            <ArrowUpDown />
+          </Button>
+        </div>
+      )
+    },
+    cell: ({ row }) => <div>{row.getValue("teacher_id")}</div>,
   },
   {
     accessorKey: "course_section",
@@ -317,8 +299,22 @@ export function QRAttendanceTable() {
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
 
+  const [attendanceList, setAttendanceList] = React.useState<Student[]>([])
+  // const fetchAttendance = async () => {
+  //   try {
+  //     const response = await axios.get("")
+  //     setAttendanceList(response.data);
+  //   } catch (error) {
+      
+  //   }
+  // }
+
+  // React.useEffect(() => {
+  //   fetchAttendance();
+  // },[])
+
   const table = useReactTable({
-    data,
+    data: attendanceList,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
