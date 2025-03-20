@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/table"
 import DeleteModal from "../DeleteModal"
 import { AddCom } from "../AddCom"
+import { useNavigate } from "react-router-dom"
 
 const data: ComLabList[] = [
   {
@@ -47,25 +48,25 @@ const data: ComLabList[] = [
   },
   {
     id: "m5gr84i9",
-    name: "Com Lab 1",
+    name: "Com Lab 2",
     room: "201",
     computerSets: 40
   },
   {
     id: "m5gr84i9",
-    name: "Com Lab 1",
+    name: "Com Lab 3",
     room: "201",
     computerSets: 40
   },
   {
     id: "m5gr84i9",
-    name: "Com Lab 1",
+    name: "Com Lab 4",
     room: "201",
     computerSets: 40
   },
   {
     id: "m5gr84i9",
-    name: "Com Lab 1",
+    name: "Com Lab 5",
     room: "201",
     computerSets: 40
   },
@@ -78,121 +79,6 @@ export type ComLabList = {
   computerSets: number,
 }
 
-export const columns: ColumnDef<ComLabList>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "id",
-    header: "ID",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("id")}</div>
-    ),
-  },
-  {
-     accessorKey: "name",
-     header: ({ column }) => {
-       return (
-         <div className="text-left">
-           <Button
-             variant="ghost"
-             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-             className="text-xs pl-0 bg-transparent"
-           >
-             Name
-             <ArrowUpDown />
-           </Button>
-         </div>
-       )
-     },
-     cell: ({ row }) => <div>{row.getValue("name")}</div>,
-   },
-   {
-      accessorKey: "room",
-      header: ({ column }) => {
-        return (
-          <div className="text-left">
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-              className="text-xs pl-0 bg-transparent"
-            >
-              Room
-              <ArrowUpDown />
-            </Button>
-          </div>
-        )
-      },
-      cell: ({ row }) => <div>{row.getValue("room")}</div>,
-    },
-    {
-      accessorKey: "computerSets",
-      header: ({ column }) => {
-        return (
-          <div className="text-left">
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-              className="text-xs pl-0 bg-transparent"
-            >
-              Computer Sets
-              <ArrowUpDown />
-            </Button>
-          </div>
-        )
-      },
-      cell: ({ row }) => <div>{row.getValue("computerSets")}</div>,
-    },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const payment = row.original
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
-            >
-              Copy payment ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    },
-  },
-]
-
 export function ComputerManagementTable() {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -201,6 +87,120 @@ export function ComputerManagementTable() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+
+  const columns: ColumnDef<ComLabList>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "id",
+      header: "ID",
+      cell: ({ row }) => (
+        <div className="capitalize">{row.getValue("id")}</div>
+      ),
+    },
+    {
+       accessorKey: "name",
+       header: ({ column }) => {
+         return (
+           <div className="text-left">
+             <Button
+               variant="ghost"
+               onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+               className="text-xs pl-0 bg-transparent"
+             >
+               Name
+               <ArrowUpDown />
+             </Button>
+           </div>
+         )
+       },
+       cell: ({ row }) => <div>{row.getValue("name")}</div>,
+     },
+     {
+        accessorKey: "room",
+        header: ({ column }) => {
+          return (
+            <div className="text-left">
+              <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                className="text-xs pl-0 bg-transparent"
+              >
+                Room
+                <ArrowUpDown />
+              </Button>
+            </div>
+          )
+        },
+        cell: ({ row }) => <div>{row.getValue("room")}</div>,
+      },
+      {
+        accessorKey: "computerSets",
+        header: ({ column }) => {
+          return (
+            <div className="text-left">
+              <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                className="text-xs pl-0 bg-transparent"
+              >
+                Computer Sets
+                <ArrowUpDown />
+              </Button>
+            </div>
+          )
+        },
+        cell: ({ row }) => <div>{row.getValue("computerSets")}</div>,
+      },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }) => {
+        const payment = row.original
+  
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              {/* <DropdownMenuItem
+                onClick={() => navigator.clipboard.writeText(payment.id)}
+              >
+                Copy payment ID
+              </DropdownMenuItem> */}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => handleRowClick(row.getValue("name"))}>View & Edit Details</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      },
+    },
+  ]
 
   const table = useReactTable({
     data,
@@ -221,6 +221,7 @@ export function ComputerManagementTable() {
     },
   })
 
+  const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -232,6 +233,11 @@ export function ComputerManagementTable() {
   const deleteCom = () => {
     setOpenDelete(true);
   }
+
+  const handleRowClick = (name: string): void => {
+    navigate(`/admin/computermanagement/${encodeURIComponent(name)}`);
+  };
+  
 
   return (
     <div className="w-full">
@@ -290,6 +296,7 @@ export function ComputerManagementTable() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  // onClick={() => handleRowClick(row.getValue("name"))}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

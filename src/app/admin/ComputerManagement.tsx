@@ -9,14 +9,17 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { useNavigate } from "react-router-dom"
 
 export default function ComputerManagement() {
+
   return (
     <SidebarProvider
       style={
@@ -40,6 +43,7 @@ export default function ComputerManagement() {
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <ComputerManagementTable />
+          
         </div>
       </SidebarInset>
     </SidebarProvider>

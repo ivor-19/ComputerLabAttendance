@@ -5,6 +5,7 @@ import Subjects from './admin/Subjects'
 import Faculty from './admin/Faculty'
 import CourseAndSection from './admin/CourseAndSection'
 import ComputerManagement from './admin/ComputerManagement'
+import CMDetails from './admin/CMDetails'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path={'/admin/subjectsLists'} element={<Subjects />}/>
         <Route path={'/admin/faculty'} element={<Faculty />}/>
         <Route path={'/admin/computermanagement'} element={<ComputerManagement />}/>
+        <Route path={'/admin/computermanagement/:name'} element={<CMDetails />}/>
         {/* <Route path={'/admin/accounts'} element={<Users />}/> */}
       </Routes>
     </BrowserRouter>
