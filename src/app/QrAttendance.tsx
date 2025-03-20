@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Loader2 } from 'lucide-react';
+import { ChartNoAxesColumnIcon, Loader2 } from 'lucide-react';
 
 export const QrAttendance = () => {
   const navigate = useNavigate();
@@ -73,6 +73,9 @@ export const QrAttendance = () => {
   const handleScan = async (result: any) => {
     const res = result.map((v: any) => v.rawValue.toString());
     console.log(res.toString());
+    console.log(teacherId)
+    console.log(course)
+    console.log(section)
     try {
       const data = {
         student_id: res.toString(),
@@ -133,7 +136,7 @@ export const QrAttendance = () => {
                           </div>
                           <div className='flex flex-col gap-2'>
                             <Label htmlFor="course">Course</Label>
-                            <select id="course" className="w-[180px] p-2 border rounded-md" onChange={(e) => setCourse(e.target.value)}>
+                            <select id="course" className="w-[180px] p-2 border rounded-md" value={course} onChange={(e) => setCourse(e.target.value)}>
                               <option value="" disabled>Select a course</option>
                               {teacher?.courses?.map((course: string, index: number) => (
                                 <option key={index} value={course}>{course}</option>
@@ -142,7 +145,7 @@ export const QrAttendance = () => {
                           </div>
                           <div className='flex flex-col gap-2'>
                             <Label htmlFor="section">Section</Label>
-                            <select id="section" className="w-[180px] p-2 border rounded-md" onChange={(e) => setSection(e.target.value)}>
+                            <select id="section" className="w-[180px] p-2 border rounded-md" value={section} onChange={(e) => setSection(e.target.value)}>
                               <option value="" disabled>Select a section</option>
                               {teacher?.sections?.map((section: string, index: number) => (
                                 <option key={index} value={section}>{section}</option>
@@ -173,7 +176,7 @@ export const QrAttendance = () => {
 
                         <div className="w-full flex justify-between">
                           <Button type="button" onClick={() => { setIsStartClick(false); setIsScanned(false); }}>Cancel</Button>
-                          <Button onClick={() => { setIsStartClick(false); setIsPaused(false) }}>Confirm</Button>
+                          <Button onClick={() => { handleConfirm(); setIsStartClick(false); setIsPaused(false) }}>Confirm</Button>
                         </div>
                       </div>
                     )}
