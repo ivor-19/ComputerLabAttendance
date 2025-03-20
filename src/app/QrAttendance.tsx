@@ -81,7 +81,9 @@ export const QrAttendance = () => {
         student_id: res.toString(),
         teacher_id: teacherId, //teacher
         course: course, //teacher
-        section: section //teacher
+        section: section, //teacher
+        in_time: startTime,
+        out_time: endTime
       };
       const response = await axios.post('https://comlab-backend.vercel.app/api/student/addAttendance', data);
       console.log(response);
@@ -94,6 +96,8 @@ export const QrAttendance = () => {
     console.log(section)
     console.log(course)
     console.log(teacherId)
+    console.log(startTime)
+    console.log(endTime)
   }
 
   return (
@@ -161,6 +165,7 @@ export const QrAttendance = () => {
                                 value={startTime}
                                 onChange={handleStartTimeChange}
                                 className="border p-2 rounded-md"
+                                disabled
                               />
                               to
                               <input
