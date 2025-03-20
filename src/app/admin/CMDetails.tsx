@@ -46,6 +46,7 @@ export default function CMDetails() {
   
   const [open, setOpen] = useState(false);
   const [list, setList] = useState<ComputerItem[]>([]);
+  const [disable, setDisable] = useState(false);
 
   const fetchList = async () => {
     try {
@@ -63,6 +64,9 @@ export default function CMDetails() {
 
   // Filter the list based on the `name` field
   const filteredList = list.filter(item => item.comlabid === name);
+  useEffect(() => {
+    setDisable(filteredList.length >= 40);
+  }, [filteredList]);
 
   return (
     <SidebarProvider
@@ -132,7 +136,8 @@ export default function CMDetails() {
                 </div>
               )}
             </Accordion>
-            <AddComputerStat open={open} setOpen={setOpen} id={String(name)} fetch={fetchList} />
+           
+            <AddComputerStat open={open} setOpen={setOpen} id={String(name)} fetch={fetchList} disabled={disable}/>
           </div>
         </div>
       </SidebarInset>

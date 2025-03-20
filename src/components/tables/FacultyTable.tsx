@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { QRCodeSVG } from 'qrcode.react';
+import { AddTeacher } from "../AddTeacher";
 
 export type Teacher = {
   teacher_id: string;
@@ -82,7 +83,7 @@ export const columns = (setOpenQRModal: (open: boolean) => void, setId: (id: str
             className="text-xs pl-0 bg-transparent"
           >
             Last Name
-            <ArrowUpDown />
+            <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         </div>
       );
@@ -100,7 +101,7 @@ export const columns = (setOpenQRModal: (open: boolean) => void, setId: (id: str
             className="text-xs pl-0 bg-transparent"
           >
             First Name
-            <ArrowUpDown />
+            <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         </div>
       );
@@ -108,7 +109,7 @@ export const columns = (setOpenQRModal: (open: boolean) => void, setId: (id: str
     cell: ({ row }) => <div>{row.getValue("firstname")}</div>,
   },
   {
-    accessorKey: "course",
+    accessorKey: "courses",
     header: ({ column }) => {
       return (
         <div className="text-left">
@@ -117,16 +118,27 @@ export const columns = (setOpenQRModal: (open: boolean) => void, setId: (id: str
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             className="text-xs pl-0 bg-transparent"
           >
-            Course
-            <ArrowUpDown />
+            Courses
+            <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         </div>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("course")}</div>,
+    cell: ({ row }) => {
+      const courses = row.getValue("courses") as string[]; // Explicitly type as string[]
+      return (
+        <div className="flex flex-wrap gap-1">
+          {courses.map((course, index) => (
+            <Badge key={index} variant="secondary">
+              {course}
+            </Badge>
+          ))}
+        </div>
+      );
+    },
   },
   {
-    accessorKey: "section",
+    accessorKey: "sections",
     header: ({ column }) => {
       return (
         <div className="text-left">
@@ -135,13 +147,24 @@ export const columns = (setOpenQRModal: (open: boolean) => void, setId: (id: str
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             className="text-xs pl-0 bg-transparent"
           >
-            Section
-            <ArrowUpDown />
+            Sections
+            <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         </div>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("section")}</div>,
+    cell: ({ row }) => {
+      const sections = row.getValue("sections") as string[]; // Explicitly type as string[]
+      return (
+        <div className="flex flex-wrap gap-1">
+          {sections.map((section, index) => (
+            <Badge key={index} variant="secondary">
+              {section}
+            </Badge>
+          ))}
+        </div>
+      );
+    },
   },
   {
     id: "actions",
@@ -154,7 +177,7 @@ export const columns = (setOpenQRModal: (open: boolean) => void, setId: (id: str
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
+              <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -166,7 +189,7 @@ export const columns = (setOpenQRModal: (open: boolean) => void, setId: (id: str
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => {
-              setId(row.original.teacher_id)
+              setId(row.original.teacher_id);
               setOpenQRModal(true);
             }}>
               <QrCode className="mr-2 h-4 w-4" />
@@ -328,7 +351,7 @@ export function FacultyTable() {
               loading={loading}
             />
           )}
-          <AddStudent open={open} setOpen={setOpen} fetch={fetchTeachers} />
+          <AddTeacher open={open} setOpen={setOpen} fetch={fetchTeachers} />
         </div>
       </div>
       <div className="rounded-md border">

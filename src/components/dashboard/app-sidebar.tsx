@@ -54,11 +54,7 @@ const data = {
           url: "/admin/course&section",
           isActive: false,
         },
-        {
-          title: "Subjects",
-          url: "/admin/subjects",
-          isActive: false,
-        },
+       
       ],
     },
   ],

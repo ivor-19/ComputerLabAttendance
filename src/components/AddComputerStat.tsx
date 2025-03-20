@@ -22,6 +22,7 @@ import { Button } from './ui/button'
 interface AddComputerStatProps {
   fetch: () => void;
   open: boolean;
+  disabled: boolean;
   setOpen: (open: boolean) => void; // Corrected type for setOpen
   id: string;
 }
@@ -35,7 +36,7 @@ const FormSchema = z.object({
 
 type FormData = z.infer<typeof FormSchema>;
 
-export const AddComputerStat = ({open, setOpen, fetch, id} : AddComputerStatProps) => {
+export const AddComputerStat = ({open, setOpen, fetch, id, disabled} : AddComputerStatProps) => {
   const { register, handleSubmit, formState: {errors}, reset, setError, watch } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
   })
@@ -63,7 +64,7 @@ export const AddComputerStat = ({open, setOpen, fetch, id} : AddComputerStatProp
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button onClick={() => setOpen(true)}><Plus strokeWidth={3}/>Add Computer Set</Button>
+        <Button onClick={() => setOpen(true)} disabled={disabled}><Plus strokeWidth={3}/>Add Computer Set</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] font-geist">
         <DialogHeader>

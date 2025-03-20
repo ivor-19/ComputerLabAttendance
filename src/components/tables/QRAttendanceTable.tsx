@@ -258,18 +258,23 @@ export function QRAttendanceTable() {
   const [rowSelection, setRowSelection] = React.useState({})
 
   const [attendanceList, setAttendanceList] = React.useState<Student[]>([])
-  const fetchAttendance = async () => {
-    try {
-      const response = await axios.get("https://comlab-backend.vercel.app/api/student/getAttendance")
-      setAttendanceList(response.data);
-    } catch (error) {
-      
-    }
-  }
 
   React.useEffect(() => {
+    const fetchAttendance = async () => {
+      try {
+        const response = await axios.get("https://comlab-backend.vercel.app/api/student/getAttendance")
+        setAttendanceList(response.data);
+      } catch (error) {
+        console.log(error)
+      }
+    }
     fetchAttendance();
-  },[])
+    const interval = setInterval(() => {
+      fetchAttendance();
+    }, 1000);
+
+    return () => clearInterval(interval);
+  })
 
   const table = useReactTable({
     data: attendanceList,
