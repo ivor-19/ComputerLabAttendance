@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import {
   ColumnDef,
@@ -21,9 +19,6 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
@@ -197,13 +192,12 @@ export const columns: ColumnDef<Student>[] = [
     },
     cell: ({ row }) => (
       <div className="capitalize">
-       <Badge
+        <Badge
           className={`
-            ${
-              row.getValue("status") === 'Absent' ? 'bg-red-200 text-red-900 hover:bg-red-200' :
+            ${row.getValue("status") === 'Absent' ? 'bg-red-200 text-red-900 hover:bg-red-200' :
               row.getValue("status") === 'Late' ? 'bg-yellow-200 text-yellow-800 hover:bg-yellow-200' :
-              row.getValue("status") === 'Excused' ? 'bg-blue-200 text-blue-800 hover:bg-blue-200' :
-              'bg-green-200 text-green-800 hover:bg-green-200'
+                row.getValue("status") === 'Excused' ? 'bg-blue-200 text-blue-800 hover:bg-blue-200' :
+                  'bg-green-200 text-green-800 hover:bg-green-200'
             }
             cursor-default
           `}
@@ -212,43 +206,14 @@ export const columns: ColumnDef<Student>[] = [
         </Badge>
       </div>
     )
-    
   },
-  
-  // {
-  //   id: "actions",
-  //   enableHiding: false,
-  //   cell: ({ row }) => {
-  //     const student = row.original
-
-  //     return (
-  //       <DropdownMenu>
-  //         <DropdownMenuTrigger asChild>
-  //           <Button variant="ghost" className="h-8 w-8 p-0">
-  //             <span className="sr-only">Open menu</span>
-  //             <MoreHorizontal />
-  //           </Button>
-  //         </DropdownMenuTrigger>
-  //         <DropdownMenuContent align="end">
-  //           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-  //           <DropdownMenuItem
-  //             onClick={() => navigator.clipboard.writeText(student.student_id)}
-  //           >
-  //             Copy student ID
-  //           </DropdownMenuItem>
-  //           <DropdownMenuSeparator />
-  //           <DropdownMenuItem>
-  //             <SquarePen />
-  //             Edit User Details
-  //           </DropdownMenuItem>
-  //         </DropdownMenuContent>
-  //       </DropdownMenu>
-  //     )
-  //   },
-  // },
 ]
 
-export function QRAttendanceTable() {
+interface QRAttendanceTableProps {
+  refreshKey: number;
+}
+
+export function QRAttendanceTable({ refreshKey }: QRAttendanceTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -268,13 +233,9 @@ export function QRAttendanceTable() {
         console.log(error)
       }
     }
-    fetchAttendance();
-    const interval = setInterval(() => {
-      fetchAttendance();
-    }, 1000);
 
-    return () => clearInterval(interval);
-  })
+    fetchAttendance();
+  }, [refreshKey])
 
   const table = useReactTable({
     data: attendanceList,
@@ -344,9 +305,9 @@ export function QRAttendanceTable() {
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   )
                 })}

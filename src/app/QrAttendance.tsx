@@ -12,11 +12,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
-import { ChartNoAxesColumnIcon, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
+
 
 export const QrAttendance = () => {
   const navigate = useNavigate();
@@ -25,10 +25,9 @@ export const QrAttendance = () => {
   const [isPaused, setIsPaused] = useState<boolean>(true);
   const [isStartClick, setIsStartClick] = useState<boolean>(false);
   const [isScanned, setIsScanned] = useState<boolean>(false);
-  const [scannedData, setScannedData] = useState<string>('');
   const [course, setCourse] = useState<string>('')
   const [section, setSection] = useState<string>('')
-  const [subject, setSubject] = useState<string>('')
+
 
   const [teacher, setTeacher] = useState<any>(null);
   const [teacherName, setTeacherName] = useState<string>('');
@@ -37,6 +36,8 @@ export const QrAttendance = () => {
   const [loading, setLoading] = useState(false);
   const [classStarted, setClassStarted] = useState<boolean>(false);
   const [isEndClassEnabled, setIsEndClassEnabled] = useState<boolean>(false);
+
+  const [refresh, setRefresh] = useState<number>(0);
 
   // Time formatting function
   const formatTime = (date: Date) => {
@@ -73,7 +74,7 @@ export const QrAttendance = () => {
         setLoading(false);
         setIsStartClick(false);
         setIsScanned(false);
-      } 
+      }
       else {
         toast.error("An unknown error has occurred.");
         setLoading(false);
@@ -102,15 +103,16 @@ export const QrAttendance = () => {
       const response = await axios.post('https://comlab-backend.vercel.app/api/student/addAttendance', data);
       console.log(response);
       toast.error("Added");
+      setRefresh(prev => prev += 1);
     } catch (error: any) {
       if (error.response && error.response.status === 403) {
         toast.error("Student is not enrolled in this section.");
         setLoading(false);
-      } 
+      }
       else if (error.response && error.response.status === 402) {
         toast.error("Cannot time out before the end time.");
         setLoading(false);
-      } 
+      }
       else {
         toast.error("An unknown error has occurred.");
         setLoading(false);
@@ -136,6 +138,7 @@ export const QrAttendance = () => {
     try {
       await axios.delete("https://comlab-backend.vercel.app/api/student/deleteAllStudentAttendance")
       toast.success("Ended class successfully")
+      setRefresh(prev => prev += 1);
     } catch (error) {
       console.error(error)
     }
@@ -158,16 +161,19 @@ export const QrAttendance = () => {
   };
 
   useEffect(() => {
-    if (classStarted && endTime) {
-      const interval = setInterval(() => {
-        if (isTimePastEndTime()) {
-          setIsEndClassEnabled(true); // Enable "End Class" button
-          clearInterval(interval); // Stop checking
-        }
-      }, 1000);
+    if (!classStarted || !endTime) return;
+    let timeoutId: NodeJS.Timeout;
+    const checkTime = () => {
+      if (isTimePastEndTime()) {
+        setIsEndClassEnabled(true);
+      } else {
+        timeoutId = setTimeout(checkTime, 10000);
+      }
+    };
 
-      return () => clearInterval(interval);
-    }
+    checkTime();
+
+    return () => clearTimeout(timeoutId);
   }, [classStarted, endTime]);
 
   return (
@@ -183,7 +189,7 @@ export const QrAttendance = () => {
           </div>
 
           <div className="w-full h-[90%] p-4">
-            <QRAttendanceTable />
+            <QRAttendanceTable refreshKey={refresh} />
 
             {classStarted && (
               <div className="mt-4 text-center">
@@ -193,7 +199,7 @@ export const QrAttendance = () => {
               </div>
             )}
             {!classStarted && (
-              <Button onClick={() => { setIsScanned(false); setIsStartClick(true);}}>Create New Class</Button>
+              <Button onClick={() => { setIsScanned(false); setIsStartClick(true); }}>Create New Class</Button>
             )}
             {classStarted && (
               <Button onClick={handleEndClass} disabled={!isEndClassEnabled}>End Class</Button>
