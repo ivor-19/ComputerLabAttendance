@@ -162,7 +162,6 @@ export const QrAttendance = () => {
       const interval = setInterval(() => {
         if (isTimePastEndTime()) {
           setIsEndClassEnabled(true); // Enable "End Class" button
-          setIsPaused(true); // Pause the scanner
           clearInterval(interval); // Stop checking
         }
       }, 1000);
