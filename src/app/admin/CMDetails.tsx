@@ -1,13 +1,11 @@
 import { useParams, useLocation } from "react-router-dom";
 import { AppSidebar } from "@/components/dashboard/app-sidebar";
-
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -28,6 +26,17 @@ import { Button } from "@/components/ui/button";
 import { AddComputerStat } from "@/components/AddComputerStat";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { SVGProps } from "react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Loader2 } from "lucide-react";
 
 interface ComputerItem {
   _id: string;
@@ -47,6 +56,9 @@ export default function CMDetails() {
   const [open, setOpen] = useState(false);
   const [list, setList] = useState<ComputerItem[]>([]);
   const [disable, setDisable] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const fetchList = async () => {
     try {
@@ -62,11 +74,22 @@ export default function CMDetails() {
     fetchList();
   }, []);
 
-  // Filter the list based on the `name` field
-  const filteredList = list.filter(item => item.comlabid === name);
+  // Filter the list based on the `id` field
+  const filteredList = list.filter(item => item.comlabid === id);
   useEffect(() => {
     setDisable(filteredList.length >= 40);
   }, [filteredList]);
+
+  const deleteComputerSet = async (id: string) => {
+    console.log(id);
+    try {
+      await axios.delete(`https://comlab-backend.vercel.app/api/computerStat/deleteComputerSet/${id}`);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error deleting computer set", error);
+    } finally {
+    }
+  }
 
   return (
     <SidebarProvider
@@ -116,6 +139,7 @@ export default function CMDetails() {
                     <AccordionTrigger className="px-2">{item.name}</AccordionTrigger>
                     <AccordionContent>
                       <div className="flex flex-col p-4 gap-2">
+                        <span>ID: {item._id}</span>
                         <span>ID: {item.pc_id}</span>
                         <span>Name: {item.name}</span>
                         <span>Condition: <Badge className={
@@ -127,6 +151,39 @@ export default function CMDetails() {
                         }>{item.status}</Badge></span>
                         <span>Date Added: {item.dateAdded}</span>
                       </div>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="destructive" className="font-geist">Delete</Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px] font-geist">
+                          <div className="flex flex-col items-center justify-center gap-4 py-8">
+                            <TriangleAlertIcon className="size-12 text-red-500" />
+                            <div className="space-y-2 text-center">
+                              <DialogTitle>Hold on!</DialogTitle>
+                              <DialogDescription>
+                                This action cannot be undone
+                              </DialogDescription>
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button variant="destructive" onClick={() => deleteComputerSet(item._id)}>
+                              {loading ? (
+                                <>
+                                  Deleting
+                                  <Loader2 className="animate-spin"/>
+                                </>
+                              
+                              ) : (
+                                <>
+                                  Delete
+                                </>
+                                
+                              )}
+                              
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                     </AccordionContent>
                   </AccordionItem>
                 ))
@@ -137,10 +194,31 @@ export default function CMDetails() {
               )}
             </Accordion>
            
-            <AddComputerStat open={open} setOpen={setOpen} id={String(name)} fetch={fetchList} disabled={disable}/>
+            <AddComputerStat open={open} setOpen={setOpen} id={String(id)} fetch={fetchList} disabled={disable}/>
           </div>
         </div>
       </SidebarInset>
     </SidebarProvider>
   );
+}
+
+function TriangleAlertIcon(props : SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+      <path d="M12 9v4" />
+      <path d="M12 17h.01" />
+    </svg>
+  )
 }
