@@ -1,22 +1,15 @@
-"use client"
-
 import * as React from "react"
-import {
-  AudioWaveform,
-  Bot,
-  ChevronRight,
-  Command,
-  GalleryVerticalEnd,
-  SquareTerminal,
-} from "lucide-react"
+import { Bot, ChevronDown, ChevronUp, GalleryVerticalEnd, Minus, Plus, SquareTerminal } from "lucide-react"
 
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -26,8 +19,7 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { useLocation } from "react-router-dom"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible"
+import { useLocation } from "react-router-dom";
 
 // This is sample data.
 const data = {
@@ -45,7 +37,7 @@ const data = {
       ],
     },
     {
-      title: "Student & Course Management",
+      title: "Course & Student Management",
       url: "#",
       icon: Bot,
       items: [
@@ -54,7 +46,38 @@ const data = {
           url: "/admin/course&section",
           isActive: false,
         },
-       
+      ],
+    },
+    {
+      title: "Administration",
+      url: "#",
+      icon: Bot,
+      items: [
+        {
+          title: "Faculty",
+          url: "/admin/faculty",
+          isActive: false,
+        },
+        {
+          title: "Computer Management",
+          url: "/admin/computermanagement",
+          isActive: false,
+        },
+      ],
+    },
+    {
+      title: "Account Settings",
+      url: "#",
+      icon: Bot,
+      items: [
+        {
+          title: "Profile",
+          url: "/profile",
+        },
+        {
+          title: "Logout",
+          url: "/",
+        },
       ],
     },
   ],
@@ -89,7 +112,6 @@ const data = {
   ],
 };
 
-
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation();
 
@@ -100,101 +122,64 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       isActive: location.pathname === item.url, // Set isActive to true if path matches
     })),
   }));
-  
   return (
     <Sidebar {...props}>
-      <SidebarHeader>
+      <SidebarHeader className="p-2">
         <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton size="lg" asChild>
-                <a href="#">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                    <GalleryVerticalEnd className="size-4" />
-                  </div>
-                  <div className="flex flex-col gap-0.5 leading-none">
-                    <span className="font-semibold text-white">---</span>
-                    <span className="text-white">v1.0.0</span>
-                  </div>
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <a href="#">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <GalleryVerticalEnd className="size-4" />
+                </div>
+                <div className="flex flex-col gap-0.5 leading-none">
+                  <span className="font-semibold text-white">Computer Lab Management</span>
+                  <span className="text-white">v1.0.0</span>
+                </div>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
-        <SidebarContent className="gap-0 px-2">
-          {/* We create a collapsible SidebarGroup for each parent. */}
-          {updatedNav.map((item) => (
-            <Collapsible
-              key={item.title}
-              title={item.title}
-              defaultOpen
-              className="group/collapsible"
-            >
-              <SidebarGroup>
-                <SidebarGroupLabel
-                  asChild
-                  className="group/label text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                >
-                  <CollapsibleTrigger className="bg-transparent text-white">
-                    {item.title}{" "}
-                    <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+      <SidebarContent className="p-2">
+        <SidebarGroup>
+          <SidebarMenu>
+            {updatedNav.map((item, index) => (
+              <Collapsible
+                key={item.title}
+                defaultOpen
+                className="group/collapsible"
+              >
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton className="bg-transparent">
+                      {item.title}{" "}
+                      <ChevronDown className="ml-auto group-data-[state=open]/collapsible:hidden" />
+                      <ChevronUp className="ml-auto group-data-[state=closed]/collapsible:hidden" />
+                    </SidebarMenuButton>
                   </CollapsibleTrigger>
-                </SidebarGroupLabel>
-                <CollapsibleContent>
-                  <SidebarGroupContent>
-                    <SidebarMenu>
-                      {item.items.map((item) => (
-                        <SidebarMenuItem key={item.title}>
-                          <SidebarMenuButton asChild isActive={item.isActive}>
-                            <a href={item.url} className="text-[#d1fae5]">{item.title}</a>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))}
-                    </SidebarMenu>
-                  </SidebarGroupContent>
-                </CollapsibleContent>
-              </SidebarGroup>
-            </Collapsible>
-          ))}
-          {data.navFaculty.map((item) => (
-            <SidebarGroup key={item.title}>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild isActive={item.isActive}>
-                        <a href={item.url} className="text-[#d1fae5]">{item.title}</a>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          ))}
-        </SidebarContent>
-        <SidebarFooter>
-         <SidebarGroup>
-           <SidebarMenu className="gap-2">
-             {data.navSettings.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild>
-                  <span className="font-medium text-white">
-                    {item.title}
-                  </span>
-                </SidebarMenuButton>
-                {item.items?.length ? (
-                  <SidebarMenuSub className="ml-0 border-l-0 px-1.5">
-                    {item.items.map((item) => (
-                      <SidebarMenuSubItem key={item.title}>
-                        <SidebarMenuSubButton asChild>
-                          <a href={item.url}>{item.title}</a>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    ))}
-                  </SidebarMenuSub>
-                ) : null}
-              </SidebarMenuItem>
+                  {item.items?.length ? (
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {item.items.map((item) => (
+                          <SidebarMenuSubItem key={item.title}>
+                            <SidebarMenuSubButton
+                              asChild
+                              isActive={item.isActive}
+                            >
+                              <a href={item.url}>{item.title}</a>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  ) : null}
+                </SidebarMenuItem>
+              </Collapsible>
             ))}
           </SidebarMenu>
         </SidebarGroup>
-      </SidebarFooter>
+      </SidebarContent>
       <SidebarRail />
     </Sidebar>
   )

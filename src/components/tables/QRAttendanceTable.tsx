@@ -84,24 +84,24 @@ export const columns: ColumnDef<Student>[] = [
     },
     cell: ({ row }) => <div>{row.getValue("student_id")}</div>,
   },
-  {
-    accessorKey: "teacher_id",
-    header: ({ column }) => {
-      return (
-        <div className="text-left">
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="text-xs pl-0 bg-transparent"
-          >
-            Teacher
-            <ArrowUpDown />
-          </Button>
-        </div>
-      )
-    },
-    cell: ({ row }) => <div>{row.getValue("teacher_id")}</div>,
-  },
+  // {
+  //   accessorKey: "teacher_id",
+  //   header: ({ column }) => {
+  //     return (
+  //       <div className="text-left">
+  //         <Button
+  //           variant="ghost"
+  //           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+  //           className="text-xs pl-0 bg-transparent"
+  //         >
+  //           Teacher
+  //           <ArrowUpDown />
+  //         </Button>
+  //       </div>
+  //     )
+  //   },
+  //   cell: ({ row }) => <div>{row.getValue("teacher_id")}</div>,
+  // },
   {
     accessorKey: "course_section",
     header: ({ column }) => {
@@ -154,7 +154,7 @@ export const columns: ColumnDef<Student>[] = [
         </div>
       )
     },
-    cell: ({ row }) => <div>{row.getValue("time_in")}</div>,
+    cell: ({ row }) => <div>{row.getValue("time_in") === null ? "-----" : row.getValue("time_in")}</div>,
   },
   {
     accessorKey: "time_out",
@@ -228,7 +228,9 @@ export function QRAttendanceTable({ refreshKey }: QRAttendanceTableProps) {
     const fetchAttendance = async () => {
       try {
         const response = await axios.get("https://comlab-backend.vercel.app/api/student/getAttendance")
-        setAttendanceList(response.data);
+        // Filter the data to show only rows where time_in is not null
+        const filteredData = response.data.filter((student: Student) => student.time_in !== null);
+        setAttendanceList(filteredData);
       } catch (error) {
         console.log(error)
       }

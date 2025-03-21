@@ -36,6 +36,7 @@ export const QrAttendance = () => {
   const [loading, setLoading] = useState(false);
   const [classStarted, setClassStarted] = useState<boolean>(false);
   const [isEndClassEnabled, setIsEndClassEnabled] = useState<boolean>(false);
+  const [endClassLoading, setEndClassLoading] = useState(false);
 
   const [refresh, setRefresh] = useState<number>(0);
 
@@ -94,13 +95,13 @@ export const QrAttendance = () => {
     try {
       const data = {
         student_id: res.toString(),
-        teacher_id: teacherId, //teacher
-        course: course, //teacher
-        section: section, //teacher
+        // teacher_id: teacherId, //teacher
+        // course: course, //teacher
+        // section: section, //teacher
         in_time: startTime,
         out_time: endTime
       };
-      const response = await axios.post('https://comlab-backend.vercel.app/api/student/addAttendance', data);
+      const response = await axios.post('https://comlab-backend.vercel.app/api/student/updateAttendance', data);
       console.log(response);
       toast.error("Added");
       setRefresh(prev => prev += 1);
@@ -121,9 +122,14 @@ export const QrAttendance = () => {
   };
 
   const handleConfirm = async () => {
+    const newData = {teacher_id: teacherId, course: course, section: section}
     try {
-      await axios.delete("https://comlab-backend.vercel.app/api/student/deleteAllStudentAttendance")
-      toast.success("Ended class successfully")
+      // await axios.delete("https://comlab-backend.vercel.app/api/student/deleteAllStudentAttendance")
+      // toast.success("Start class successfully")
+
+      await axios.post("https://comlab-backend.vercel.app/api/student/addToClass", newData)
+      setRefresh(prev => prev += 1);
+      console.log(newData)
     } catch (error) {
       console.error(error)
     }
@@ -135,9 +141,13 @@ export const QrAttendance = () => {
   };
 
   const handleEndClass = async () => {
+    setEndClassLoading(true);
     try {
+      await axios.post("https://comlab-backend.vercel.app/api/student/transferToRecords")
       await axios.delete("https://comlab-backend.vercel.app/api/student/deleteAllStudentAttendance")
-      toast.success("Ended class successfully")
+      setEndClassLoading(false);
+
+      toast.success("Classes ended successfully. Attendance records have been transferred.")
       setRefresh(prev => prev += 1);
     } catch (error) {
       console.error(error)
@@ -182,27 +192,42 @@ export const QrAttendance = () => {
       <div className="h-screen">
         <div className="h-full flex justify-center">
           <Button className="absolute left-5 top-5" onClick={() => navigate("/login")}>Login</Button>
-          <div className="w-[60%] h-full flex justify-center items-center bg-gray-200">
+          <div className="w-[60%] h-full flex justify-center items-center border-r border-gray-200">
             <div className="w-[500px] absolute top-28">
               <Scanner onScan={handleScan} paused={isPaused} />
             </div>
           </div>
 
-          <div className="w-full h-[90%] p-4">
+          <div className="w-full h-[90%] p-4 flex flex-col items-center">
             <QRAttendanceTable refreshKey={refresh} />
+            {!classStarted && (
+              <Button onClick={() => { setIsScanned(false); setIsStartClick(true); }} className='w-[20%] bg-teal-500 hover:bg-teal-600'>Create New Class</Button>
+            )}
 
             {classStarted && (
-              <div className="mt-4 text-center">
+              <div className="mt-4 text-center flex flex-col gap-4 items-center bg-green-100 w-[50%] py-8 rounded-md">
                 <span className="text-sm text-gray-600">
-                  Start Time: <strong>{startTime}</strong> | End Time: <strong>{endTime}</strong>
+                  Start Time: <strong className="text-green-700">{startTime}</strong> | End Time: <strong className="text-green-700">{endTime}</strong>
                 </span>
+                <div className='flex flex-col text-green-700 text-sm'>
+                  <strong>{teacherName}</strong>
+                  <span className="text-gray-500">Teacher</span>
+                </div>
+                <div className='mt-8 w-full'>
+                  {classStarted && (
+                    <div className='flex flex-col gap-2 items-center'>
+                      <Button onClick={handleEndClass} disabled={!isEndClassEnabled} className='w-[20%] bg-green-600 hover:bg-green-700 text-white'>
+                        End Class
+                        {endClassLoading &&
+                          <Loader2 className='animate-spin mx-2'/>
+                        }
+                      </Button>
+                      <span className='text-green-800 text-xs'>Class can only be ended after the scheduled end time.</span>
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-            {!classStarted && (
-              <Button onClick={() => { setIsScanned(false); setIsStartClick(true); }}>Create New Class</Button>
-            )}
-            {classStarted && (
-              <Button onClick={handleEndClass} disabled={!isEndClassEnabled}>End Class</Button>
+
             )}
             <Dialog open={isStartClick} onOpenChange={() => setIsStartClick(false)}>
               <DialogContent>

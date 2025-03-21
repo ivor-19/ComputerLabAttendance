@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { QRCodeSVG } from 'qrcode.react';
+import { Skeleton } from "@/components/ui/skeleton"
 
 export type Student = {
   student_id: string;
@@ -210,12 +211,14 @@ export function CoursesAndSectionTable() {
   const [openQRModal, setOpenQRModal] = React.useState(false);
   const [students, setStudents] = React.useState<Student[]>([]);
   const [id, setId] = React.useState<string>('')
+  const [loadingTable, setLoadingTable] = React.useState(true);
 
   const fetchStudents = async () => {
     try {
       const response = await axios.get("https://comlab-backend.vercel.app/api/student/getStudents");
       setStudents(response.data);
       console.log(response.data);
+      setLoadingTable(false)
     } catch (error) {
       console.error("Error fetching users", error);
     }
@@ -271,143 +274,172 @@ export function CoursesAndSectionTable() {
   const uniqueSections = Array.from(new Set(students.map((student) => student.section)));
 
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between py-4">
-        <div className="flex justify-between">
-          <Input
-            placeholder="Filter by name..."
-            value={(table.getColumn("lastname")?.getFilterValue() as string) ?? ""}
-            onChange={(event) => table.getColumn("lastname")?.setFilterValue(event.target.value)}
-            className="max-w-sm"
-          />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-2 border-dashed bg-transparent">
-                <PlusCircle className="mr-1" /> Course
-                {table.getColumn("course")?.getFilterValue() ? (
-                  <div className="flex gap-2">
-                    <span className="font-thin text-gray-500">|</span>
-                    <Badge variant={"secondary"}>
-                      {String(table.getColumn("course")?.getFilterValue())}
-                    </Badge>
-                  </div>
-                ) : null}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="font-geist w-40">
-              {uniqueCourses.map((course) => (
-                <DropdownMenuItem key={course} onClick={() => table.getColumn("course")?.setFilterValue(course)}>
-                  {course}
-                </DropdownMenuItem>
-              ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => table.getColumn("course")?.setFilterValue(undefined)}>
-                <FilterX size={16} /> Clear Filter
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-2 border-dashed bg-transparent">
-                <PlusCircle className="mr-1" /> Section
-                {table.getColumn("section")?.getFilterValue() ? (
-                  <div className="flex gap-2">
-                    <span className="font-thin text-gray-500">|</span>
-                    <Badge variant={"secondary"}>
-                      {String(table.getColumn("section")?.getFilterValue())}
-                    </Badge>
-                  </div>
-                ) : null}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="font-geist w-40">
-              {uniqueSections.map((section) => (
-                <DropdownMenuItem key={section} onClick={() => table.getColumn("section")?.setFilterValue(section)}>
-                  {section}
-                </DropdownMenuItem>
-              ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => table.getColumn("section")?.setFilterValue(undefined)}>
-                <FilterX size={16} /> Clear Filter
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <div className="flex gap-2">
-          {Object.keys(rowSelection).length !== 0 && (
-            <DeleteModal
-              title={`Delete (${Object.keys(rowSelection).length})`}
-              description={`Are you sure you want to delete ${Object.keys(rowSelection).length} student(s)?`}
-              open={openDelete}
-              setOpen={setOpenDelete}
-              onClick={deleteUser}
-              loading={loading}
-            />
-          )}
-          <AddStudent open={open} setOpen={setOpen} fetch={fetchStudents} />
-        </div>
-      </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-        <div className="space-x-2">
-          <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-            Previous
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-            Next
-          </Button>
-        </div>
-      </div>
-      <Dialog open={openQRModal} onOpenChange={setOpenQRModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>QR Code</DialogTitle>
-            <DialogDescription>
-              This is the QR code for the selected student ({id})
-            </DialogDescription>
-            <div className="w-full flex items-center justify-center">
-              <div className="w-fit">
-                <QRCodeSVG value={id.toString()} size={300} />
+    <>
+      {loadingTable ? (
+        <div className="w-full">
+          <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min relative ">
+            <div className="flex items-center py-4 font-geist justify-between">
+              <div className="w-1/2 flex gap-2">
+                <Skeleton className="w-[50%] h-10"/>
+                <Skeleton className="w-[10%]"/>
+                <Skeleton className="w-[10%]"/>
+              </div>
+              <div className="flex gap-2">
+                <Skeleton className="w-20 h-10"/>
               </div>
             </div>
-          </DialogHeader>
-          {/* Add QR Code rendering logic here */}
-        </DialogContent>
-      </Dialog>
-    </div>
+            <div className="rounded-md border font-geist">
+              <Skeleton className="h-96 w-full"></Skeleton>
+            </div>
+            <div className="flex items-center justify-between space-x-2 py-4 font-geist">
+              <Skeleton className="h-10 w-20"></Skeleton>
+              <div className="space-x-2 flex">
+              <Skeleton className="w-20 h-8"/>
+              <Skeleton className="w-20 h-8"/>
+              </div>
+            </div>
+          </div>
+        </div>
+    ):(
+      <div className="w-full">
+        <div className="flex items-center justify-between py-4">
+          <div className="flex justify-between">
+            <Input
+              placeholder="Filter by name..."
+              value={(table.getColumn("lastname")?.getFilterValue() as string) ?? ""}
+              onChange={(event) => table.getColumn("lastname")?.setFilterValue(event.target.value)}
+              className="max-w-sm"
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="ml-2 border-dashed bg-transparent">
+                  <PlusCircle className="mr-1" /> Course
+                  {table.getColumn("course")?.getFilterValue() ? (
+                    <div className="flex gap-2">
+                      <span className="font-thin text-gray-500">|</span>
+                      <Badge variant={"secondary"}>
+                        {String(table.getColumn("course")?.getFilterValue())}
+                      </Badge>
+                    </div>
+                  ) : null}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="font-geist w-40">
+                {uniqueCourses.map((course) => (
+                  <DropdownMenuItem key={course} onClick={() => table.getColumn("course")?.setFilterValue(course)}>
+                    {course}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => table.getColumn("course")?.setFilterValue(undefined)}>
+                  <FilterX size={16} /> Clear Filter
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="ml-2 border-dashed bg-transparent">
+                  <PlusCircle className="mr-1" /> Section
+                  {table.getColumn("section")?.getFilterValue() ? (
+                    <div className="flex gap-2">
+                      <span className="font-thin text-gray-500">|</span>
+                      <Badge variant={"secondary"}>
+                        {String(table.getColumn("section")?.getFilterValue())}
+                      </Badge>
+                    </div>
+                  ) : null}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="font-geist w-40">
+                {uniqueSections.map((section) => (
+                  <DropdownMenuItem key={section} onClick={() => table.getColumn("section")?.setFilterValue(section)}>
+                    {section}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => table.getColumn("section")?.setFilterValue(undefined)}>
+                  <FilterX size={16} /> Clear Filter
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <div className="flex gap-2">
+            {Object.keys(rowSelection).length !== 0 && (
+              <DeleteModal
+                title={`Delete (${Object.keys(rowSelection).length})`}
+                description={`Are you sure you want to delete ${Object.keys(rowSelection).length} student(s)?`}
+                open={openDelete}
+                setOpen={setOpenDelete}
+                onClick={deleteUser}
+                loading={loading}
+              />
+            )}
+            <AddStudent open={open} setOpen={setOpen} fetch={fetchStudents} />
+          </div>
+        </div>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <div className="flex-1 text-sm text-muted-foreground">
+            {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
+          </div>
+          <div className="space-x-2">
+            <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+              Previous
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+              Next
+            </Button>
+          </div>
+        </div>
+        <Dialog open={openQRModal} onOpenChange={setOpenQRModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>QR Code</DialogTitle>
+              <DialogDescription>
+                This is the QR code for the selected student ({id})
+              </DialogDescription>
+              <div className="w-full flex items-center justify-center">
+                <div className="w-fit">
+                  <QRCodeSVG value={id.toString()} size={300} />
+                </div>
+              </div>
+            </DialogHeader>
+            {/* Add QR Code rendering logic here */}
+          </DialogContent>
+        </Dialog>
+      </div>
+    )}
+    </>
   );
 }
