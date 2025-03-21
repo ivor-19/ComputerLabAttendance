@@ -45,7 +45,7 @@ interface ComputerItem {
   name: string;
   condition: string;
   status: string;
-  dateAdded: string;
+  date_added: string;
 }
 
 export default function CMDetails() {
@@ -149,7 +149,7 @@ export default function CMDetails() {
                         <span>Status: <Badge className={
                           item.status === "Active" ? "bg-green-500" : "bg-red-500"
                         }>{item.status}</Badge></span>
-                        <span>Date Added: {item.dateAdded}</span>
+                        <span>Date Added: {item.date_added}</span>
                       </div>
                       <Dialog>
                         <DialogTrigger asChild>
