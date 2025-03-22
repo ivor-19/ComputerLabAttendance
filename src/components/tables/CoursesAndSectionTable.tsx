@@ -212,12 +212,14 @@ export function CoursesAndSectionTable() {
   const [students, setStudents] = React.useState<Student[]>([]);
   const [id, setId] = React.useState<string>('')
   const [loadingTable, setLoadingTable] = React.useState(true);
+  const [studentCount, setStudentCount] = React.useState(0);
 
   const fetchStudents = async () => {
     try {
       const response = await axios.get("https://comlab-backend.vercel.app/api/student/getStudents");
       setStudents(response.data);
       console.log(response.data);
+      setStudentCount(response.data.length)
       setLoadingTable(false)
     } catch (error) {
       console.error("Error fetching users", error);
@@ -381,7 +383,7 @@ export function CoursesAndSectionTable() {
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
+                <TableRow key={headerGroup.id} className="text-xs">
                   {headerGroup.headers.map((header) => (
                     <TableHead key={header.id}>
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
@@ -393,7 +395,7 @@ export function CoursesAndSectionTable() {
             <TableBody>
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} className="text-xs">
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                     ))}
@@ -410,8 +412,9 @@ export function CoursesAndSectionTable() {
           </Table>
         </div>
         <div className="flex items-center justify-end space-x-2 py-4">
-          <div className="flex-1 text-sm text-muted-foreground">
+          <div className="flex-1 text-sm text-muted-foreground flex flex-col">
             {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
+            <span className="text-xs">Total Students: {studentCount}</span>
           </div>
           <div className="space-x-2">
             <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>

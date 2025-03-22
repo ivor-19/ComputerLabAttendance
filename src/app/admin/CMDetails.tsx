@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { SVGProps } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Loader2 } from "lucide-react";
+import { Loader2, Pencil } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -28,6 +28,8 @@ interface ComputerItem {
   condition: string;
   status: string;
   date_added: string;
+  updated_at: string;
+  comment: string;
 }
 
 const FormSchema = z.object({
@@ -35,6 +37,7 @@ const FormSchema = z.object({
   name: z.string().min(1, {message: "Name is required"}),
   condition: z.string().optional(),
   status: z.string().optional(),
+  comment: z.string().optional(),
 })
 
 type FormData = z.infer<typeof FormSchema>;
@@ -49,11 +52,13 @@ export default function CMDetails() {
   const { room, id } = location.state || {};
   
   const [open, setOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [list, setList] = useState<ComputerItem[]>([]);
   const [disable, setDisable] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [selectedItem, setSelectedItem] = useState<ComputerItem | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
 
   const fetchList = async () => {
     try {
@@ -78,11 +83,13 @@ export default function CMDetails() {
   const deleteComputerSet = async (id: string) => {
     console.log(id);
     try {
+      setLoading(true);
       await axios.delete(`https://comlab-backend.vercel.app/api/computerStat/deleteComputerSet/${id}`);
-      window.location.reload();
+      fetchList();
     } catch (error) {
       console.error("Error deleting computer set", error);
     } finally {
+      setLoading(false);
     }
   }
 
@@ -93,7 +100,32 @@ export default function CMDetails() {
       name: item.name,
       condition: item.condition,
       status: item.status,
+      comment: item.comment
     });
+    setEditDialogOpen(true);
+  };
+
+  const onSubmit = async (data: FormData) => {
+    if (!selectedItem) return;
+    const editData = {
+      pc_id: data.pc_id,
+      name: data.name,
+      condition: data.condition,
+      status: data.status,
+      comment: data.comment
+    }
+    try {
+      setEditLoading(true);
+      await axios.post(`https://comlab-backend.vercel.app/api/computerStat/editComputerSet/${selectedItem._id}`, editData);
+      console.log(editData)
+      
+      fetchList();
+      setEditDialogOpen(false);
+    } catch (error) {
+      console.error("Error updating computer set", error)
+    } finally {
+      setEditLoading(false);
+    }
   };
 
   return (
@@ -137,13 +169,13 @@ export default function CMDetails() {
                         <div className="flex flex-col p-4 gap-2">
                           <span>PC ID: {item.pc_id}</span>
                           <span>Name: {item.name}</span>
-                          <span>Condition: <Badge className={item.condition === "Good" ? "bg-green-500" : item.condition === "Fair" ? "bg-yellow-500" : "bg-red-500"}>{item.condition}</Badge></span>
-                          <span>Status: <Badge className={item.status === "Active" ? "bg-green-500" : "bg-red-500"}>{item.status}</Badge></span>
+                          <span>Condition: <Badge className={item.condition === "Good" ? "bg-green-200 text-green-800 hover:bg-green-200" : item.condition === "Fair" ? "bg-yellow-200 text-yellow-800 hover:bg-yellow-200" : "bg-red-200 text-red-900 hover:bg-red-200"}>{item.condition}</Badge></span>
+                          <span>Status: <Badge className={item.status === "Active" ? "bg-green-200 text-green-800 hover:bg-green-200" : "bg-red-500"}>{item.status}</Badge></span>
                           <span>Created at: {item.date_added}</span>
-                          <span>Updated at: updated</span>
+                          <span>Updated at: {item.updated_at}</span>
                           <div className="grid w-full gap-2">
                             <span>Comment: </span>
-                            <Textarea placeholder="Type your message here." value={"No comment..."} disabled/>
+                            <Textarea placeholder="Type your message here." value={item.comment} disabled/>
                           </div>
                         </div>
                         <div className="w-full flex justify-end gap-2">
@@ -159,63 +191,17 @@ export default function CMDetails() {
                               </div>
                               <DialogFooter>
                                 <Button variant="destructive" onClick={() => deleteComputerSet(item._id)}>
-                                  {loading ? <>Deleting<Loader2 className="animate-spin"/></> : <>Delete</>}
+                                  {loading ? <>Deleting<Loader2 className="ml-2 animate-spin"/></> : <>Delete</>}
                                 </Button>
                               </DialogFooter>
                             </DialogContent>
                           </Dialog>
-                          <Dialog>
-                            <DialogTrigger asChild><Button className="font-geist" onClick={() => handleEditClick(item)}>Edit</Button></DialogTrigger>
-                            <DialogContent className="sm:max-w-[425px]">
-                              <DialogHeader>
-                                <DialogTitle>Edit profile</DialogTitle>
-                                <DialogDescription>Make changes. Click save when you're done.</DialogDescription>
-                              </DialogHeader>
-                              <div className="grid gap-4 py-4">
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="pc_id" className="text-right">PC ID</Label>
-                                  <div className="col-span-3 relative">
-                                    <Input id="pc_id" className="col-span-3" type="text" {...register("pc_id")} placeholder="PC ID" />
-                                    {errors.pc_id && <span className="text-red-500 text-xs font-geist">{errors.pc_id.message}</span>}
-                                  </div>
-                                </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="name" className="text-right">Name</Label>
-                                  <div className="col-span-3 relative">
-                                    <Input id="name" className="col-span-3" type="text" {...register("name")} placeholder="Name" />
-                                    {errors.name && <span className="text-red-500 text-xs font-geist">{errors.name.message}</span>}
-                                  </div>
-                                </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="condition" className="text-right">Condition</Label>
-                                  <div className="col-span-3 font-geist text-[14px]">
-                                    <select id="condition" {...register("condition")} className="w-[180px] p-2 border rounded-md font-geist">
-                                      <option value="" disabled>Good</option>
-                                      <option value="Good">Good</option>
-                                      <option value="Bad">Bad</option>
-                                    </select>
-                                    {errors.condition && <p className="text-red-500 text-xs">{errors.condition.message}</p>}
-                                  </div>
-                                </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="status" className="text-right">Status</Label>
-                                  <div className="col-span-3 font-geist text-[14px]">
-                                    <select id="status" {...register("status")} className="w-[180px] p-2 border rounded-md font-geist">
-                                      <option value="" disabled>Active</option>
-                                      <option value="Active">Active</option>
-                                      <option value="Inactive">Inactive</option>
-                                    </select>
-                                    {errors.status && <p className="text-red-500 text-xs">{errors.status.message}</p>}
-                                  </div>
-                                </div>
-                                <div className="grid grid-cols-4 items-center gap-4">
-                                  <Label htmlFor="status" className="text-right">Comment</Label>
-                                  <div className="col-span-3 font-geist text-[14px]"><Textarea /></div>
-                                </div>
-                              </div>
-                              <DialogFooter><Button type="submit">Save changes</Button></DialogFooter>
-                            </DialogContent>
-                          </Dialog>
+                          <Button 
+                            className="font-geist bg-[#022c22] hover:bg-[#064e3b]" 
+                            onClick={() => handleEditClick(item)}
+                          >
+                            <Pencil className="mr-2" />Edit
+                          </Button>
                         </div>
                       </AccordionContent>
                     </AccordionItem>
@@ -229,6 +215,73 @@ export default function CMDetails() {
           </div>
         </div>
       </SidebarInset>
+
+      {/* Edit Dialog - Moved outside of the accordion loop */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Computer</DialogTitle>
+            <DialogDescription>Make changes. Click save when you're done.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="grid gap-4 py-4">
+              {selectedItem && <span className="text-xs text-gray-500">ID: {selectedItem._id}</span>}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="pc_id" className="text-right">PC ID</Label>
+                <div className="col-span-3 relative">
+                  <Input id="pc_id" className="col-span-3" type="text" {...register("pc_id")} placeholder="PC ID" />
+                  {errors.pc_id && <span className="text-red-500 text-xs font-geist">{errors.pc_id.message}</span>}
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">Name</Label>
+                <div className="col-span-3 relative">
+                  <Input id="name" className="col-span-3" type="text" {...register("name")} placeholder="Name" />
+                  {errors.name && <span className="text-red-500 text-xs font-geist">{errors.name.message}</span>}
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="condition" className="text-right">Condition</Label>
+                <div className="col-span-3 font-geist text-[14px]">
+                  <select id="condition" {...register("condition")} className="w-full p-2 border rounded-md font-geist">
+                    <option value="Good">Good</option>
+                    <option value="Fair">Fair</option>
+                    <option value="Bad">Bad</option>
+                  </select>
+                  {errors.condition && <p className="text-red-500 text-xs">{errors.condition.message}</p>}
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="status" className="text-right">Status</Label>
+                <div className="col-span-3 font-geist text-[14px]">
+                  <select id="status" {...register("status")} className="w-full p-2 border rounded-md font-geist">
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
+                  {errors.status && <p className="text-red-500 text-xs">{errors.status.message}</p>}
+                </div>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="comment" className="text-right">Comment</Label>
+                <div className="col-span-3 font-geist text-[14px]">
+                  <Textarea id="comment" {...register('comment')} placeholder="Add a comment..." />
+                </div>
+              </div>
+              {errors.root && <p className="text-red-500 text-sm text-center">{errors.root.message}</p>}
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>Cancel</Button>
+              <Button disabled={editLoading}>
+                {editLoading ? (
+                  <>Saving<Loader2 className="ml-2 h-4 w-4 animate-spin"/></>
+                ) : (
+                  <>Save changes</>
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   );
 }

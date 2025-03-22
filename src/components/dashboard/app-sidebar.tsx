@@ -63,6 +63,11 @@ const data = {
           url: "/admin/computermanagement",
           isActive: false,
         },
+        {
+          title: "Attendance Record",
+          url: "/admin/attendanceRecord",
+          isActive: false,
+        },
       ],
     },
     {

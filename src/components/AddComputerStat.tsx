@@ -12,12 +12,21 @@ import { Label } from "@/components/ui/label"
 import { CSSProperties, useEffect, useState } from "react"
 import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import axios from 'axios'
 import { toast } from 'sonner'
 import { CirclePlus, Loader2, Plus } from 'lucide-react'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface AddComputerStatProps {
   fetch: () => void;
@@ -37,7 +46,7 @@ const FormSchema = z.object({
 type FormData = z.infer<typeof FormSchema>;
 
 export const AddComputerStat = ({open, setOpen, fetch, id, disabled} : AddComputerStatProps) => {
-  const { register, handleSubmit, formState: {errors}, reset, setError, watch } = useForm<FormData>({
+  const { register, handleSubmit, formState: {errors}, reset, setError, control } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
   })
   const [userExists, setUserExists] = useState(false);
@@ -54,6 +63,12 @@ export const AddComputerStat = ({open, setOpen, fetch, id, disabled} : AddComput
       toast.success("New Data has been created.")
       setLoading(false);
       fetch();
+      reset({
+        pc_id: "",
+        name: "",
+        condition: "",
+        status: "",
+      })
     } catch (error) {
       console.error("Error adding computer set", error)
       setOpen(false);
@@ -105,38 +120,50 @@ export const AddComputerStat = ({open, setOpen, fetch, id, disabled} : AddComput
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="condition" className="text-right">
-              Condition
-            </Label>
-            <div className="col-span-3 font-geist text-[14px]">
-              <select 
-                id="condition"
-                {...register("condition")}
-                className="w-[180px] p-2 border rounded-md font-geist"
-              >
-                <option value="" disabled>Good</option>
-                <option value="Good">Good</option>
-                <option value="Bad">Bad</option>
-              </select>
-              {errors.condition && <p className="text-red-500 text-xs">{errors.condition.message}</p>}
-            </div>
+            <Label htmlFor="condition">Condition</Label>
+            <Controller
+              name="condition"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <Select {...field} onValueChange={field.onChange}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select a condition" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Condition</SelectLabel>
+                      <SelectItem value="Good">Good</SelectItem>
+                      <SelectItem value="Bad">Bad</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.condition && <p className="text-red-500 text-xs">{errors.condition.message}</p>}
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="status" className="text-right">
-              Status
-            </Label>
-            <div className="col-span-3 font-geist text-[14px]">
-              <select 
-                id="status"
-                {...register("status")}
-                className="w-[180px] p-2 border rounded-md font-geist"
-              >
-                <option value="" disabled>Active</option>
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </select>
-              {errors.status && <p className="text-red-500 text-xs">{errors.status.message}</p>}
-            </div>
+            <Label htmlFor="status">Status</Label>
+            <Controller
+              name="status"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <Select {...field} onValueChange={field.onChange}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select a status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Status</SelectLabel>
+                      <SelectItem value="Active">Active</SelectItem>
+                      <SelectItem value="Inactive">Inactive</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.status && <p className="text-red-500 text-xs">{errors.status.message}</p>}
           </div>
         </div>
         <DialogFooter className="flex items-center">

@@ -16,6 +16,15 @@ import {
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 
 export const QrAttendance = () => {
@@ -106,15 +115,19 @@ export const QrAttendance = () => {
       toast.error("Added");
       setRefresh(prev => prev += 1);
     } catch (error: any) {
-      if (error.response && error.response.status === 403) {
-        toast.error("Student is not enrolled in this section.");
-        setLoading(false);
-      }
-      else if (error.response && error.response.status === 402) {
+      if (error.message.includes("402")) {
         toast.error("Cannot time out before the end time.");
         setLoading(false);
-      }
-      else {
+      } else if (error.message.includes("403")) {
+        toast.error("You cannot enter this class now.");
+        setLoading(false);
+      } else if (error.message.includes("404")) {
+        toast.error("Student not found or failed to update.");
+        setLoading(false);
+      } else if (error.message.includes("405")) {
+        toast.error("Failed to update in-time.");
+        setLoading(false);
+      } else {
         toast.error("An unknown error has occurred.");
         setLoading(false);
       }
@@ -124,8 +137,8 @@ export const QrAttendance = () => {
   const handleConfirm = async () => {
     const newData = {teacher_id: teacherId, course: course, section: section}
     try {
-      // await axios.delete("https://comlab-backend.vercel.app/api/student/deleteAllStudentAttendance")
-      // toast.success("Start class successfully")
+      await axios.delete("https://comlab-backend.vercel.app/api/student/deleteAllStudentAttendance")
+      toast.success("Class is starting! Scan your QR code to mark attendance.");
 
       await axios.post("https://comlab-backend.vercel.app/api/student/addToClass", newData)
       setRefresh(prev => prev += 1);
@@ -192,7 +205,7 @@ export const QrAttendance = () => {
       <div className="h-screen">
         <div className="h-full flex justify-center">
           <Button className="absolute left-5 top-5" onClick={() => navigate("/login")}>Login</Button>
-          <div className="w-[60%] h-full flex justify-center items-center border-r border-gray-200">
+          <div className="w-[60%] h-full flex justify-center items-center bg-[#18181b] border-r border-gray-200">
             <div className="w-[500px] absolute top-28">
               <Scanner onScan={handleScan} paused={isPaused} />
             </div>
@@ -201,15 +214,16 @@ export const QrAttendance = () => {
           <div className="w-full h-[90%] p-4 flex flex-col items-center">
             <QRAttendanceTable refreshKey={refresh} />
             {!classStarted && (
-              <Button onClick={() => { setIsScanned(false); setIsStartClick(true); }} className='w-[20%] bg-teal-500 hover:bg-teal-600'>Create New Class</Button>
+              <Button onClick={() => { setIsScanned(false); setIsStartClick(true); }} className='w-[20%] bg-[#022c22] hover:bg-[#064e3b]'>Create New Class</Button>
             )}
 
             {classStarted && (
               <div className="mt-4 text-center flex flex-col gap-4 items-center bg-green-100 w-[50%] py-8 rounded-md">
                 <span className="text-sm text-gray-600">
-                  Start Time: <strong className="text-green-700">{startTime}</strong> | End Time: <strong className="text-green-700">{endTime}</strong>
+                  Start Time: <strong className={`${isEndClassEnabled === true ? 'text-green-700' : 'text-yellow-700'}`}>{startTime}</strong> | 
+                  End Time: <strong className={`${isEndClassEnabled === true ? 'text-green-700' : 'text-yellow-700'}`}>{endTime}</strong>
                 </span>
-                <div className='flex flex-col text-green-700 text-sm'>
+                <div className={`flex flex-col ${isEndClassEnabled === true ? 'text-green-700' : 'text-yellow-700'} text-sm`}>
                   <strong>{teacherName}</strong>
                   <span className="text-gray-500">Teacher</span>
                 </div>
@@ -222,7 +236,9 @@ export const QrAttendance = () => {
                           <Loader2 className='animate-spin mx-2'/>
                         }
                       </Button>
-                      <span className='text-green-800 text-xs'>Class can only be ended after the scheduled end time.</span>
+                      <span className={`${isEndClassEnabled === true ? 'text-green-700' : 'text-yellow-700'} text-xs`}>
+                        {`${isEndClassEnabled === true ? 'Class ended' : 'Class can only be ended after the scheduled end time'}`}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -255,21 +271,35 @@ export const QrAttendance = () => {
                           </div>
                           <div className='flex flex-col gap-2'>
                             <Label htmlFor="course">Course</Label>
-                            <select id="course" className="w-[180px] p-2 border rounded-md" value={course} onChange={(e) => setCourse(e.target.value)}>
-                              <option value="" disabled>Select a course</option>
-                              {teacher?.courses?.map((course: string, index: number) => (
-                                <option key={index} value={course}>{course}</option>
-                              ))}
-                            </select>
+                            <Select value={course} onValueChange={setCourse}>
+                              <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Select a course" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectGroup>
+                                  <SelectLabel>Courses</SelectLabel>
+                                  {teacher?.courses?.map((course: string, index: number) => (
+                                    <SelectItem key={index} value={course}>{course}</SelectItem>
+                                  ))}
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
                           </div>
                           <div className='flex flex-col gap-2'>
                             <Label htmlFor="section">Section</Label>
-                            <select id="section" className="w-[180px] p-2 border rounded-md" value={section} onChange={(e) => setSection(e.target.value)}>
-                              <option value="" disabled>Select a section</option>
-                              {teacher?.sections?.map((section: string, index: number) => (
-                                <option key={index} value={section}>{section}</option>
-                              ))}
-                            </select>
+                            <Select value={section} onValueChange={setSection}>
+                              <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Select a section" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectGroup>
+                                  <SelectLabel>Sections</SelectLabel>
+                                  {teacher?.sections?.map((section: string, index: number) => (
+                                    <SelectItem key={index} value={section}>{section}</SelectItem>
+                                  ))}
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
                           </div>
                           <div className="flex flex-col">
                             <label htmlFor="time" className="text-sm font-medium mb-2">Select Time:</label>
@@ -294,9 +324,9 @@ export const QrAttendance = () => {
                           </div>
                         </div>
 
-                        <div className="w-full flex justify-between">
-                          <Button type="button" onClick={() => { setIsStartClick(false); setIsScanned(false); }}>Cancel</Button>
-                          <Button onClick={handleConfirm}>Start Class</Button>
+                        <div className="w-full flex justify-end gap-2">
+                          <Button type="button" onClick={() => { setIsStartClick(false); setIsScanned(false); }} className='bg-[#022c22] hover:bg-[#064e3b]'>Cancel</Button>
+                          <Button onClick={handleConfirm} className='bg-[#022c22] hover:bg-[#064e3b]'>Start Class</Button>
                         </div>
                       </div>
                     )}
