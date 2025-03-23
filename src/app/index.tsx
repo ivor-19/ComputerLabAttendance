@@ -9,10 +9,12 @@ import CMDetails from './admin/CMDetails'
 import AdminRecords from './admin/AdminRecords'
 import Record from './teacher/Record'
 import Schedule from './teacher/Schedule'
+import { Toaster } from '@/components/ui/sonner'
 
 function App() {
   return (
     <BrowserRouter>
+     <Toaster />
       <Routes>
         <Route path={'/'} element={<QrAttendance />}/>
         <Route path={'/login'} element={<Login />}/>

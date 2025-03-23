@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, FilterX, MoreHorizontal, PlusCircle, SquarePen } from "lucide-react"
+import { ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, FilterX, Loader2, MoreHorizontal, Pencil, PlusCircle, SquarePen } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -36,8 +36,17 @@ import {
 import { Badge } from "../ui/badge"
 import axios from "axios"
 import { Skeleton } from "../ui/skeleton"
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog"
+import { DialogDescription } from "@radix-ui/react-dialog"
+import { Label } from "../ui/label"
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, Controller } from "react-hook-form";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "../ui/select"
+import { toast } from "sonner"
 
 export type Student = {
+  _id: string,
   student_id: string,
   teacher_id: string,
   course_section: string,
@@ -50,7 +59,13 @@ export type Student = {
   student_name: string,
 }
 
-export const columns: ColumnDef<Student>[] = [
+const FormSchema = z.object({
+  status: z.string().optional(),
+});
+
+type FormData = z.infer<typeof FormSchema>;
+
+export const columns = ( handleEdit: (student: Student) => void) : ColumnDef<Student>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -254,9 +269,9 @@ export const columns: ColumnDef<Student>[] = [
               Copy student ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              
-              Edit
+            <DropdownMenuItem onClick={() => handleEdit(student)}>
+              <Pencil className="mr-2 h-4 w-4"/>
+              Edit Status
             </DropdownMenuItem>
           
           </DropdownMenuContent>
@@ -277,26 +292,70 @@ export function RecordTable() {
   const [rowSelection, setRowSelection] = React.useState({});
   const [attendanceList, setAttendanceList] = React.useState<Student[]>([]);
   const [loadingTable, setLoadingTable] = React.useState(true);
+  const [rowData, setRowData] = React.useState<Student | null>(null);
+  const [openEditModal, setOpenEditModal] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [status, setStatus] = React.useState("")
 
   const initialRender = React.useRef(true);
 
-  React.useEffect(() => {
-    const fetchAttendance = async () => {
-      try {
-        const response = await axios.get("https://comlab-backend.vercel.app/api/student/getTotalAttendance");
-        setAttendanceList(response.data);
-        setLoadingTable(false);
-      } catch (error) {
-        console.log(error);
-      }
-    };
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      status: rowData?.status || "",
+    },
+  });
 
+  const fetchAttendance = async () => {
+    try {
+      const response = await axios.get("https://comlab-backend.vercel.app/api/student/getTotalAttendance");
+      setAttendanceList(response.data);
+      setLoadingTable(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  React.useEffect(() => {
     fetchAttendance();
   }, []);
 
+  const handleEdit = (student: Student) => {
+    console.log(student.status)
+    setRowData(student)
+    reset({ status: student.status });
+    setOpenEditModal(true)
+  }
+
+  const onSubmit = async(data: FormData) => {
+    setLoading(true)
+    try {
+      const response = await axios.post(`https://comlab-backend.vercel.app/api/student/editStatus/${rowData?._id}`, {status: data.status})
+      fetchAttendance();
+      setOpenEditModal(false)
+      setLoading(false)
+      toast.success("Student status have been updated")
+    } catch (error) {
+      console.error(error)
+      setLoading(false)
+    }
+  }
+
+  React.useEffect(() => {
+    if (rowData) {
+      setStatus(rowData.status);
+    }
+  }, [rowData]);
+
   const table = useReactTable({
     data: attendanceList,
-    columns,
+    columns: columns(handleEdit),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -517,6 +576,54 @@ export function RecordTable() {
               </Button>
             </div>
           </div>
+          <Dialog open={openEditModal} onOpenChange={setOpenEditModal}>
+            <DialogContent className="sm:max-w-[425px] font-geist">
+              <DialogHeader>
+                <DialogTitle>Edit Status</DialogTitle>
+                <DialogDescription>
+                  Click update when you're done.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit(onSubmit)} > 
+                <div className='flex flex-col gap-2'>
+                  <Controller
+                    name="status"
+                    control={control}
+                    render={({ field }) => (
+                      <>
+                        <Label htmlFor="status">Status</Label>
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectItem value="Present">Present</SelectItem>
+                              <SelectItem value="Late">Late</SelectItem>
+                              <SelectItem value="Absent">Absent</SelectItem>
+                              <SelectItem value="Excused">Excused</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </>
+                    )}
+                  />
+                </div>
+                <DialogFooter className="flex items-center">
+                  <Button type="submit" disabled={loading}>
+                    {loading ? (
+                      <>
+                        Updating
+                        <Loader2 className="animate-spin ml-2" />
+                      </>
+                    ) : (
+                      "Update"
+                    )}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       )}
     </>

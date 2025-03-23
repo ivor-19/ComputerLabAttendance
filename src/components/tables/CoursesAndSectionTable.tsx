@@ -68,11 +68,7 @@ const FormSchema = z.object({
 type FormData = z.infer<typeof FormSchema>;
 
 // Define the table columns
-export const columns = (
-  setOpenQRModal: (open: boolean) => void,
-  setId: (id: string) => void,
-  handleEdit: (student: Student) => void
-): ColumnDef<Student>[] => [
+export const columns = ( setOpenQRModal: (open: boolean) => void,setId: (id: string) => void,handleEdit: (student: Student) => void): ColumnDef<Student>[] => [
   {
     id: "select",
     header: ({ table }) => (

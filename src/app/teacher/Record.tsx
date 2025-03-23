@@ -41,7 +41,7 @@ export default function Record() {
           </Breadcrumb>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <TeacherAttendance />
+          <StudentAttendanceRecord />
         </div>
       </SidebarInset>
     </SidebarProvider>

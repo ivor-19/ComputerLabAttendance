@@ -1,3 +1,4 @@
+import { SchedulerComponent } from "@/components/SchedulerComponent"
 import { RecordTable } from "@/components/tables/RecordTable"
 import { StudentAttendanceRecord } from "@/components/tables/StudentAttendanceRecord"
 import { AppSidebarTeacher } from "@/components/teacher/app-sidebar"
@@ -40,7 +41,7 @@ export default function Schedule() {
           </Breadcrumb>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          {/* <RecordTable /> */}
+         <SchedulerComponent />
         </div>
       </SidebarInset>
       <SidebarRight />
