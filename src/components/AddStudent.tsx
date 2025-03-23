@@ -80,7 +80,7 @@ export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
         setLoading(false);
       } else {
 
-        toast.error("Failed to add student");
+        toast.error("Failed to add data");
         setOpen(false);
       }
     }
@@ -236,6 +236,6 @@ export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
           </Button>
         </DialogFooter>
       </DialogContent>
-  </Dialog>
+    </Dialog>
   )
 }
