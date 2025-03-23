@@ -26,8 +26,8 @@ interface AddComProps {
 }
 
 const FormSchema = z.object({
-  name: z.string().min(1, {message: "Last Name is required"}),
-  room: z.string().min(1, {message: "First Name is required"}),
+  name: z.string().min(1, {message: "Name is required"}),
+  room: z.string().min(1, {message: "Room is required"}),
   computerSets: z.string().optional(),
 })
 

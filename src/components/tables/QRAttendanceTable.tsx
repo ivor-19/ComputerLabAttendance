@@ -40,7 +40,10 @@ export type Student = {
   date: string,
   time_in: string,
   time_out: string,
-  status: "Present" | "Absent" | "Late" | "Excused"
+  status: "Present" | "Absent" | "Late" | "Excused",
+  teacher_name: string,
+  subject: string,
+  student_name: string,
 }
 
 export const columns: ColumnDef<Student>[] = [
@@ -67,7 +70,7 @@ export const columns: ColumnDef<Student>[] = [
   //   enableHiding: false,
   // },
   {
-    accessorKey: "student_id",
+    accessorKey: "student_name",
     header: ({ column }) => {
       return (
         <div className="text-left">
@@ -82,26 +85,26 @@ export const columns: ColumnDef<Student>[] = [
         </div>
       )
     },
-    cell: ({ row }) => <div>{row.getValue("student_id")}</div>,
+    cell: ({ row }) => <div>{row.getValue("student_name")}</div>,
   },
-  // {
-  //   accessorKey: "teacher_id",
-  //   header: ({ column }) => {
-  //     return (
-  //       <div className="text-left">
-  //         <Button
-  //           variant="ghost"
-  //           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-  //           className="text-xs pl-0 bg-transparent"
-  //         >
-  //           Teacher
-  //           <ArrowUpDown />
-  //         </Button>
-  //       </div>
-  //     )
-  //   },
-  //   cell: ({ row }) => <div>{row.getValue("teacher_id")}</div>,
-  // },
+  {
+    accessorKey: "subject",
+    header: ({ column }) => {
+      return (
+        <div className="text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="text-xs pl-0 bg-transparent"
+          >
+            Subject
+            <ArrowUpDown />
+          </Button>
+        </div>
+      )
+    },
+    cell: ({ row }) => <div>{row.getValue("subject")}</div>,
+  },
   {
     accessorKey: "course_section",
     header: ({ column }) => {
@@ -263,9 +266,9 @@ export function QRAttendanceTable({ refreshKey }: QRAttendanceTableProps) {
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter student..."
-          value={(table.getColumn("student_id")?.getFilterValue() as string) ?? ""}
+          value={(table.getColumn("student_name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("student_id")?.setFilterValue(event.target.value)
+            table.getColumn("student_name")?.setFilterValue(event.target.value)
           }
           className="max-w-sm text-xs"
         />

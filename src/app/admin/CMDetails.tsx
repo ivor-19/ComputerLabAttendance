@@ -220,7 +220,7 @@ export default function CMDetails() {
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Edit Computer</DialogTitle>
+            <DialogTitle>Edit Details</DialogTitle>
             <DialogDescription>Make changes. Click save when you're done.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)}>

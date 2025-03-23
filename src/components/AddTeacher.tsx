@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -9,16 +9,17 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Loader2, Plus } from 'lucide-react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { Checkbox } from './ui/checkbox'; // Assuming you have a Checkbox component
+import Subjects from '@/app/admin/Subjects';
+import MultiSelectDropdown from './MultiSelectDropdown';
+ // Import the MultiSelectDropdown component
 
 interface AddTeacherProps {
   fetch: () => void;
@@ -28,10 +29,12 @@ interface AddTeacherProps {
 
 const FormSchema = z.object({
   teacher_id: z.string().min(10, { message: 'ID must have at least 10 characters' }),
+  teacher_email: z.string().email({ message: "Invalid email address" }).min(1, { message: "Email is required" }),
   lastname: z.string().min(1, { message: 'Last Name is required' }),
   firstname: z.string().min(1, { message: 'First Name is required' }),
-  courses: z.array(z.string()).min(1, { message: 'At least one course is required' }), // Array of courses
-  sections: z.array(z.string()).min(1, { message: 'At least one section is required' }), // Array of sections
+  courses: z.array(z.string()).min(1, { message: 'At least one course is required' }),
+  sections: z.array(z.string()).min(1, { message: 'At least one section is required' }),
+  subjects: z.array(z.string()).min(1, { message: 'At least one subject is required' }),
 });
 
 type FormData = z.infer<typeof FormSchema>;
@@ -52,8 +55,8 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
     },
   });
 
-  const [userExists, setUserExists] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [userExists, setUserExists] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   // Generate all possible sections (1A, 1B, ..., 4J)
   const allSections = Array.from({ length: 4 }, (_, year) =>
@@ -63,30 +66,16 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
   const course = watch('courses');
   const section = watch('sections');
 
-  // Handle course selection
-  const handleCourseChange = (value: string) => {
-    const updatedCourses = course.includes(value)
-      ? course.filter((c) => c !== value) // Remove if already selected
-      : [...course, value]; // Add if not selected
-    setValue('courses', updatedCourses);
-  };
-
-  // Handle section selection
-  const handleSectionChange = (value: string) => {
-    const updatedSections = section.includes(value)
-      ? section.filter((s) => s !== value) // Remove if already selected
-      : [...section, value]; // Add if not selected
-    setValue('sections', updatedSections);
-  };
-
   const addNewTeacher = async (data: FormData) => {
     setLoading(true);
     const newTeacher = {
       teacher_id: data.teacher_id,
       lastname: data.lastname,
       firstname: data.firstname,
-      courses: data.courses, // Array of courses
-      sections: data.sections, // Array of sections (e.g., ["1A", "2B"])
+      courses: data.courses,
+      sections: data.sections,
+      subjects: data.subjects,
+      teacher_email: data.teacher_email
     };
 
     try {
@@ -103,6 +92,8 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
         firstname: '',
         courses: [],
         sections: [],
+        subjects: [],
+        teacher_email: '',
       });
     } catch (error: any) {
       console.error('Error adding teacher', error);
@@ -130,108 +121,79 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
           <DialogDescription>Click submit when you're done.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
+          {/* Teacher ID */}
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="id" className="text-right">
-              ID
-            </Label>
+            <Label htmlFor="id" className="text-right">ID</Label>
             <div className="col-span-3 relative">
-              <Input
-                id="id"
-                className="col-span-3"
-                type="text"
-                {...register('teacher_id')}
-                placeholder="########"
-              />
-              {errors.teacher_id && (
-                <span className="text-red-500 text-xs font-geist">{errors.teacher_id.message}</span>
-              )}
+              <Input id="id" {...register('teacher_id')} placeholder="########" />
+              {errors.teacher_id && <span className="text-red-500 text-xs font-geist">{errors.teacher_id.message}</span>}
             </div>
           </div>
+
+           {/* Teacher Email */}
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="lastname" className="text-right">
-              Last Name
-            </Label>
+            <Label htmlFor="teacher_email" className="text-right">Email</Label>
             <div className="col-span-3 relative">
-              <Input
-                id="lastname"
-                className="col-span-3"
-                type="text"
-                {...register('lastname')}
-                placeholder="Last Name"
-              />
-              {errors.lastname && (
-                <span className="text-red-500 text-xs font-geist">{errors.lastname.message}</span>
-              )}
+              <Input id="teacher_email" {...register('teacher_email')} placeholder="Email" />
+              {errors.teacher_email && <span className="text-red-500 text-xs font-geist">{errors.teacher_email.message}</span>}
             </div>
           </div>
+
+          {/* Last Name */}
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="firstname" className="text-right">
-              First Name
-            </Label>
+            <Label htmlFor="lastname" className="text-right">Last Name</Label>
             <div className="col-span-3 relative">
-              <Input
-                id="firstname"
-                className="col-span-3"
-                type="text"
-                {...register('firstname')}
-                placeholder="First Name"
+              <Input id="lastname" {...register('lastname')} placeholder="Last Name" />
+              {errors.lastname && <span className="text-red-500 text-xs font-geist">{errors.lastname.message}</span>}
+            </div>
+          </div>
+
+          {/* First Name */}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="firstname" className="text-right">First Name</Label>
+            <div className="col-span-3 relative">
+              <Input id="firstname" {...register('firstname')} placeholder="First Name" />
+              {errors.firstname && <span className="text-red-500 text-xs font-geist">{errors.firstname.message}</span>}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="subjects" className="text-right">Subjects</Label>
+            <div className="col-span-3 relative">
+              <MultiSelectDropdown
+                options={['Programming', 'Database Management', 'Web Development']}
+                onChange={(selectedOptions) => setValue('subjects', selectedOptions)}
               />
-              {errors.firstname && (
-                <span className="text-red-500 text-xs font-geist">{errors.firstname.message}</span>
-              )}
+              {errors.subjects && <p className="text-red-500 text-xs">{errors.subjects.message}</p>}
             </div>
           </div>
+
+          {/* Courses */}
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="course" className="text-right">
-              Course
-            </Label>
-            <div className="col-span-3 font-geist text-[14px]">
-              <div className="flex flex-wrap gap-2">
-                {['BSIS', 'BSAIS', 'BSOM'].map((courseOption) => (
-                  <div key={courseOption} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={courseOption}
-                      checked={course.includes(courseOption)}
-                      onCheckedChange={() => handleCourseChange(courseOption)}
-                    />
-                    <Label htmlFor={courseOption}>{courseOption}</Label>
-                  </div>
-                ))}
-              </div>
-              {errors.courses && (
-                <p className="text-red-500 text-xs">{errors.courses.message}</p>
-              )}
+            <Label htmlFor="courses" className="text-right">Courses</Label>
+            <div className="col-span-3 relative">
+              <MultiSelectDropdown
+                options={['BSIS', 'BSAIS', 'BSOM']}
+                onChange={(selectedOptions) => setValue('courses', selectedOptions)}
+              />
+              {errors.courses && <p className="text-red-500 text-xs">{errors.courses.message}</p>}
             </div>
           </div>
+
+          {/* Sections */}
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="section" className="text-right">
-              Section
-            </Label>
-            <div className="col-span-3 font-geist text-[14px]">
-              <div className="flex flex-wrap gap-2">
-                {allSections.map((sec) => (
-                  <div key={sec} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={sec}
-                      checked={section.includes(sec)}
-                      onCheckedChange={() => handleSectionChange(sec)}
-                    />
-                    <Label htmlFor={sec}>{sec}</Label>
-                  </div>
-                ))}
-              </div>
-              {errors.sections && (
-                <p className="text-red-500 text-xs">{errors.sections.message}</p>
-              )}
+            <Label htmlFor="sections" className="text-right">Sections</Label>
+            <div className="col-span-3 relative">
+              <MultiSelectDropdown
+                options={allSections}
+                onChange={(selectedOptions) => setValue('sections', selectedOptions)}
+              />
+              {errors.sections && <p className="text-red-500 text-xs">{errors.sections.message}</p>}
             </div>
           </div>
         </div>
         <DialogFooter className="flex items-center">
-          {userExists && (
-            <span className="text-red-500 text-xs font-geist">
-              Teacher already exists. Please choose a different account ID.
-            </span>
-          )}
+          {userExists && <span className="text-red-500 text-xs font-geist">Teacher already exists. Please choose a different account ID.</span>}
           <Button onClick={handleSubmit(addNewTeacher)}>
             {loading ? (
               <>

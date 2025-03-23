@@ -7,6 +7,8 @@ import CourseAndSection from './admin/CourseAndSection'
 import ComputerManagement from './admin/ComputerManagement'
 import CMDetails from './admin/CMDetails'
 import AdminRecords from './admin/AdminRecords'
+import Record from './teacher/Record'
+import Schedule from './teacher/Schedule'
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
         <Route path={'/admin/computermanagement'} element={<ComputerManagement />}/>
         <Route path={'/admin/computermanagement/:name'} element={<CMDetails />}/>
         <Route path={'/admin/attendanceRecord'} element={<AdminRecords />}/>
+        <Route path={'/teacher/Record'} element={<Record />}/>
+        <Route path={'/teacher/schedule'} element={<Schedule />}/>
         {/* <Route path={'/admin/accounts'} element={<Users />}/> */}
       </Routes>
     </BrowserRouter>

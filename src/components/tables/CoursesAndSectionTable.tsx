@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, FilterX, MoreHorizontal, PlusCircle, QrCode, SquarePen } from "lucide-react";
+import { ArrowUpDown, FilterX, Loader2, MoreHorizontal, Pencil, PlusCircle, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -32,13 +32,19 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { QRCodeSVG } from 'qrcode.react';
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton";
+import { Label } from "../ui/label";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, Controller } from "react-hook-form";
 
+// Define the Student type
 export type Student = {
   student_id: string;
   email: string;
@@ -48,7 +54,25 @@ export type Student = {
   section: string;
 };
 
-export const columns = (setOpenQRModal: (open: boolean) => void, setId: (id: string) => void): ColumnDef<Student>[] => [
+// Define the Zod schema for form validation
+const FormSchema = z.object({
+  student_id: z.string().min(10, { message: "ID must have at least 10 characters" }),
+  email: z.string().email({ message: "Invalid email address" }).min(1, { message: "Email is required" }),
+  lastname: z.string().min(1, { message: "Last Name is required" }),
+  firstname: z.string().min(1, { message: "First Name is required" }),
+  course: z.string().optional(),
+  yearlevel: z.string().optional(),
+  section: z.string().optional(),
+});
+
+type FormData = z.infer<typeof FormSchema>;
+
+// Define the table columns
+export const columns = (
+  setOpenQRModal: (open: boolean) => void,
+  setId: (id: string) => void,
+  handleEdit: (student: Student) => void
+): ColumnDef<Student>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -74,93 +98,83 @@ export const columns = (setOpenQRModal: (open: boolean) => void, setId: (id: str
     cell: ({ row }) => <div className="capitalize">{row.getValue("student_id")}</div>,
   },
   {
-    accessorKey: "email",
-    header: ({ column }) => {
-      return (
-        <div className="text-left">
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="text-xs pl-0 bg-transparent"
-          >
-            Email
-            <ArrowUpDown />
-          </Button>
-        </div>
-      );
-    },
-    cell: ({ row }) => <div>{row.getValue("email")}</div>,
-  },
-  {
     accessorKey: "lastname",
-    header: ({ column }) => {
-      return (
-        <div className="text-left">
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="text-xs pl-0 bg-transparent"
-          >
-            Last Name
-            <ArrowUpDown />
-          </Button>
-        </div>
-      );
-    },
+    header: ({ column }) => (
+      <div className="text-left">
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="text-xs pl-0 bg-transparent"
+        >
+          Last Name
+          <ArrowUpDown />
+        </Button>
+      </div>
+    ),
     cell: ({ row }) => <div>{row.getValue("lastname")}</div>,
   },
   {
     accessorKey: "firstname",
-    header: ({ column }) => {
-      return (
-        <div className="text-left">
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="text-xs pl-0 bg-transparent"
-          >
-            First Name
-            <ArrowUpDown />
-          </Button>
-        </div>
-      );
-    },
+    header: ({ column }) => (
+      <div className="text-left">
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="text-xs pl-0 bg-transparent"
+        >
+          First Name
+          <ArrowUpDown />
+        </Button>
+      </div>
+    ),
     cell: ({ row }) => <div>{row.getValue("firstname")}</div>,
   },
   {
+    accessorKey: "email",
+    header: ({ column }) => (
+      <div className="text-left">
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="text-xs pl-0 bg-transparent"
+        >
+          Email
+          <ArrowUpDown />
+        </Button>
+      </div>
+    ),
+    cell: ({ row }) => <div>{row.getValue("email")}</div>,
+  },
+  {
     accessorKey: "course",
-    header: ({ column }) => {
-      return (
-        <div className="text-left">
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="text-xs pl-0 bg-transparent"
-          >
-            Course
-            <ArrowUpDown />
-          </Button>
-        </div>
-      );
-    },
+    header: ({ column }) => (
+      <div className="text-left">
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="text-xs pl-0 bg-transparent"
+        >
+          Course
+          <ArrowUpDown />
+        </Button>
+      </div>
+    ),
     cell: ({ row }) => <div>{row.getValue("course")}</div>,
   },
   {
     accessorKey: "section",
-    header: ({ column }) => {
-      return (
-        <div className="text-left">
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="text-xs pl-0 bg-transparent"
-          >
-            Section
-            <ArrowUpDown />
-          </Button>
-        </div>
-      );
-    },
+    header: ({ column }) => (
+      <div className="text-left">
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="text-xs pl-0 bg-transparent"
+        >
+          Section
+          <ArrowUpDown />
+        </Button>
+      </div>
+    ),
     cell: ({ row }) => <div>{row.getValue("section")}</div>,
   },
   {
@@ -179,20 +193,21 @@ export const columns = (setOpenQRModal: (open: boolean) => void, setId: (id: str
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(student.student_id)}
-            >
+            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(student.student_id)}>
               Copy student ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => {
-              setId(row.original.student_id)
+              setId(row.original.student_id);
               setOpenQRModal(true);
             }}>
               <QrCode className="mr-2 h-4 w-4" />
               View QR Code
             </DropdownMenuItem>
-          
+            <DropdownMenuItem onClick={() => handleEdit(student)}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Edit Details
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -200,61 +215,117 @@ export const columns = (setOpenQRModal: (open: boolean) => void, setId: (id: str
   },
 ];
 
+// Main Component
 export function CoursesAndSectionTable() {
   const [open, setOpen] = React.useState(false);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [sorting, setSorting] = React.useState<SortingState>([{ id: "lastname", desc: false }]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
   const [openQRModal, setOpenQRModal] = React.useState(false);
   const [students, setStudents] = React.useState<Student[]>([]);
-  const [id, setId] = React.useState<string>('')
+  const [id, setId] = React.useState<string>('');
   const [loadingTable, setLoadingTable] = React.useState(true);
   const [studentCount, setStudentCount] = React.useState(0);
+  const [openEditModal, setOpenEditModal] = React.useState(false);
+  const [studentData, setStudentData] = React.useState<Student | null>(null);
 
+  // React Hook Form setup
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      student_id: studentData?.student_id || "",
+      email: studentData?.email || "",
+      lastname: studentData?.lastname || "",
+      firstname: studentData?.firstname || "",
+      course: studentData?.course || "",
+      section: studentData?.section || "",
+    },
+  });
+
+  // Fetch students from the backend
   const fetchStudents = async () => {
     try {
       const response = await axios.get("https://comlab-backend.vercel.app/api/student/getStudents");
       setStudents(response.data);
-      console.log(response.data);
-      setStudentCount(response.data.length)
-      setLoadingTable(false)
+      setStudentCount(response.data.length);
+      setLoadingTable(false);
     } catch (error) {
       console.error("Error fetching users", error);
     }
   };
 
+  const yearLevel = watch("yearlevel");
+  const section = watch("section");
+  const combinedSection = yearLevel && section ? `${yearLevel}${section}` : "1A";
+
+  // Handle edit action
+  const handleEdit = (student: Student) => {
+    setStudentData(student);
+    setOpenEditModal(true);
+    reset(student); 
+  };
+
+  // Handle form submission
+  const onSubmit = async (data: FormData) => {
+    setLoading(true);
+  
+    const newData = {student_id: data.student_id, firstname: data.firstname, lastname: data.lastname, course: data.course, section: combinedSection}; 
+    try{
+      const response = await axios.post("https://comlab-backend.vercel.app/api/student/editStudent", newData)
+      if (response.status === 200) {
+        toast.success("Student updated successfully");
+        fetchStudents(); // Refresh the student list
+        setOpenEditModal(false);
+        setLoading(false)
+      }
+    }
+    catch(error){
+      console.error(error)
+      setLoading(false)
+    }
+  };
+
+  // Handle delete action
   const deleteUser = async () => {
     setLoading(true);
     try {
       const selectedRows = table.getSelectedRowModel().rows;
       for (const row of selectedRows) {
-        const studentId = row.original.student_id; // Access the user's _id
+        const studentId = row.original.student_id;
         await axios.delete(`https://comlab-backend.vercel.app/api/student/deleteStudent/${studentId}`);
         console.log(`Deleted user with ID: ${studentId}`);
       }
       toast.info(`${selectedRows.length} User/s has been deleted.`);
-
       fetchStudents();
       setRowSelection({});
-      setLoading(false);
       setOpenDelete(false);
     } catch (error) {
       console.error("Error deleting a user", error);
-      setOpenDelete(false);
-      toast.error("Unknown error has occured");
+      toast.error("Unknown error has occurred");
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Fetch students on component mount
   React.useEffect(() => {
     fetchStudents();
   }, []);
 
+  // React Table setup
   const table = useReactTable({
     data: students,
-    columns: columns(setOpenQRModal, setId),
+    columns: columns(setOpenQRModal, setId, handleEdit),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -296,153 +367,289 @@ export function CoursesAndSectionTable() {
             <div className="flex items-center justify-between space-x-2 py-4 font-geist">
               <Skeleton className="h-10 w-20"></Skeleton>
               <div className="space-x-2 flex">
-              <Skeleton className="w-20 h-8"/>
-              <Skeleton className="w-20 h-8"/>
+                <Skeleton className="w-20 h-8"/>
+                <Skeleton className="w-20 h-8"/>
               </div>
             </div>
           </div>
         </div>
-    ):(
-      <div className="w-full">
-        <div className="flex items-center justify-between py-4">
-          <div className="flex justify-between">
-            <Input
-              placeholder="Filter by name..."
-              value={(table.getColumn("lastname")?.getFilterValue() as string) ?? ""}
-              onChange={(event) => table.getColumn("lastname")?.setFilterValue(event.target.value)}
-              className="max-w-sm"
-            />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="ml-2 border-dashed bg-transparent">
-                  <PlusCircle className="mr-1" /> Course
-                  {table.getColumn("course")?.getFilterValue() ? (
-                    <div className="flex gap-2">
-                      <span className="font-thin text-gray-500">|</span>
-                      <Badge variant={"secondary"}>
-                        {String(table.getColumn("course")?.getFilterValue())}
-                      </Badge>
-                    </div>
-                  ) : null}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="font-geist w-40">
-                {uniqueCourses.map((course) => (
-                  <DropdownMenuItem key={course} onClick={() => table.getColumn("course")?.setFilterValue(course)}>
-                    {course}
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => table.getColumn("course")?.setFilterValue(undefined)}>
-                  <FilterX size={16} /> Clear Filter
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="ml-2 border-dashed bg-transparent">
-                  <PlusCircle className="mr-1" /> Section
-                  {table.getColumn("section")?.getFilterValue() ? (
-                    <div className="flex gap-2">
-                      <span className="font-thin text-gray-500">|</span>
-                      <Badge variant={"secondary"}>
-                        {String(table.getColumn("section")?.getFilterValue())}
-                      </Badge>
-                    </div>
-                  ) : null}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="font-geist w-40">
-                {uniqueSections.map((section) => (
-                  <DropdownMenuItem key={section} onClick={() => table.getColumn("section")?.setFilterValue(section)}>
-                    {section}
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => table.getColumn("section")?.setFilterValue(undefined)}>
-                  <FilterX size={16} /> Clear Filter
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <div className="flex gap-2">
-            {Object.keys(rowSelection).length !== 0 && (
-              <DeleteModal
-                title={`Delete (${Object.keys(rowSelection).length})`}
-                description={`Are you sure you want to delete ${Object.keys(rowSelection).length} student(s)?`}
-                open={openDelete}
-                setOpen={setOpenDelete}
-                onClick={deleteUser}
-                loading={loading}
+      ) : (
+        <div className="w-full">
+          <div className="flex items-center justify-between py-4">
+            <div className="flex justify-between">
+              <Input
+                placeholder="Filter by name..."
+                value={(table.getColumn("lastname")?.getFilterValue() as string) ?? ""}
+                onChange={(event) => table.getColumn("lastname")?.setFilterValue(event.target.value)}
+                className="max-w-sm"
               />
-            )}
-            <AddStudent open={open} setOpen={setOpen} fetch={fetchStudents} />
-          </div>
-        </div>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id} className="text-xs">
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="ml-2 border-dashed bg-transparent">
+                    <PlusCircle className="mr-1" /> Course
+                    {table.getColumn("course")?.getFilterValue() ? (
+                      <div className="flex gap-2">
+                        <span className="font-thin text-gray-500">|</span>
+                        <Badge variant={"secondary"}>
+                          {String(table.getColumn("course")?.getFilterValue())}
+                        </Badge>
+                      </div>
+                    ) : null}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="font-geist w-40">
+                  {uniqueCourses.map((course) => (
+                    <DropdownMenuItem key={course} onClick={() => table.getColumn("course")?.setFilterValue(course)}>
+                      {course}
+                    </DropdownMenuItem>
                   ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} className="text-xs">
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => table.getColumn("course")?.setFilterValue(undefined)}>
+                    <FilterX size={16} /> Clear Filter
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="ml-2 border-dashed bg-transparent">
+                    <PlusCircle className="mr-1" /> Section
+                    {table.getColumn("section")?.getFilterValue() ? (
+                      <div className="flex gap-2">
+                        <span className="font-thin text-gray-500">|</span>
+                        <Badge variant={"secondary"}>
+                          {String(table.getColumn("section")?.getFilterValue())}
+                        </Badge>
+                      </div>
+                    ) : null}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="font-geist w-40">
+                  {uniqueSections.map((section) => (
+                    <DropdownMenuItem key={section} onClick={() => table.getColumn("section")?.setFilterValue(section)}>
+                      {section}
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => table.getColumn("section")?.setFilterValue(undefined)}>
+                    <FilterX size={16} /> Clear Filter
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div className="flex gap-2">
+              {Object.keys(rowSelection).length !== 0 && (
+                <DeleteModal
+                  title={`Delete (${Object.keys(rowSelection).length})`}
+                  description={`Are you sure you want to delete ${Object.keys(rowSelection).length} student(s)?`}
+                  open={openDelete}
+                  setOpen={setOpenDelete}
+                  onClick={deleteUser}
+                  loading={loading}
+                />
+              )}
+              <AddStudent open={open} setOpen={setOpen} fetch={fetchStudents} />
+            </div>
+          </div>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id} className="text-xs">
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
                     ))}
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <div className="flex-1 text-sm text-muted-foreground flex flex-col">
-            {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
-            <span className="text-xs">Total Students: {studentCount}</span>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} className="text-xs">
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </div>
-          <div className="space-x-2">
-            <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-              Previous
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-              Next
-            </Button>
+          <div className="flex items-center justify-end space-x-2 py-4">
+            <div className="flex-1 text-sm text-muted-foreground flex flex-col">
+              {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
+              <span className="text-xs">Total Students: {studentCount}</span>
+            </div>
+            <div className="space-x-2">
+              <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+                Previous
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                Next
+              </Button>
+            </div>
           </div>
-        </div>
-        <Dialog open={openQRModal} onOpenChange={setOpenQRModal}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>QR Code</DialogTitle>
-              <DialogDescription>
-                This is the QR code for the selected student ({id})
-              </DialogDescription>
-              <div className="w-full flex items-center justify-center">
-                <div className="w-fit">
-                  <QRCodeSVG value={id.toString()} size={300} />
+          <Dialog open={openQRModal} onOpenChange={setOpenQRModal}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>QR Code</DialogTitle>
+                <DialogDescription>
+                  This is the QR code for the selected student ({id})
+                </DialogDescription>
+                <div className="w-full flex items-center justify-center">
+                  <div className="w-fit">
+                    <QRCodeSVG value={id.toString()} size={300} />
+                  </div>
                 </div>
-              </div>
-            </DialogHeader>
-            {/* Add QR Code rendering logic here */}
-          </DialogContent>
-        </Dialog>
-      </div>
-    )}
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={openEditModal} onOpenChange={setOpenEditModal}>
+            <DialogContent className="sm:max-w-[425px] font-geist">
+              <DialogHeader>
+                <DialogTitle>Edit Details</DialogTitle>
+                <DialogDescription>
+                  Click submit when you're done.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="student_id" className="text-right">
+                      ID
+                    </Label>
+                    <div className="col-span-3 relative">
+                      <Input
+                        id="student_id"
+                        className="col-span-3"
+                        {...register("student_id")}
+                      />
+                      {errors.student_id && <span className="text-red-500 text-xs">{errors.student_id.message}</span>}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="email" className="text-right">
+                      Email
+                    </Label>
+                    <div className="col-span-3 relative">
+                      <Input
+                        id="email"
+                        className="col-span-3"
+                        {...register("email")}
+                      />
+                      {errors.email && <span className="text-red-500 text-xs">{errors.email.message}</span>}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="lastname" className="text-right">
+                      Last Name
+                    </Label>
+                    <div className="col-span-3 relative">
+                      <Input
+                        id="lastname"
+                        className="col-span-3"
+                        {...register("lastname")}
+                      />
+                      {errors.lastname && <span className="text-red-500 text-xs">{errors.lastname.message}</span>}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="firstname" className="text-right">
+                      First Name
+                    </Label>
+                    <div className="col-span-3 relative">
+                      <Input
+                        id="firstname"
+                        className="col-span-3"
+                        {...register("firstname")}
+                      />
+                      {errors.firstname && <span className="text-red-500 text-xs">{errors.firstname.message}</span>}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="course" className="text-right">
+                      Course
+                    </Label>
+                    <div className="col-span-3 font-geist text-[14px]">
+                      <select
+                        id="course"
+                        {...register("course")}
+                        className="w-[180px] p-2 border rounded-md font-geist"
+                      >
+                        <option value="" disabled>Select course</option>
+                        <option value="BSIS">BSIS</option>
+                        <option value="BSAIS">BSAIS</option>
+                        <option value="BSOM">BSOM</option>
+                      </select>
+                      {errors.course && <p className="text-red-500 text-xs">{errors.course.message}</p>}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="section" className="text-right">
+                      Section
+                    </Label>
+                    <div className="flex gap-4">
+                      <div className="font-geist text-[14px]">
+                        <select
+                          id="yearlevel"
+                          {...register("yearlevel")}
+                          className="w-[130px] p-2 border rounded-md font-geist"
+                        >
+                          <option value="" disabled>Year Level</option>
+                          <option value="1">1</option>
+                          <option value="2">2</option>
+                          <option value="3">3</option>
+                          <option value="4">4</option>
+                        </select>
+                        {errors.yearlevel && <p className="text-red-500 text-xs">{errors.yearlevel.message}</p>}
+                      </div>
+                      <div className="w-full font-geist text-[14px]">
+                        <select
+                          id="section"
+                          {...register("section")}
+                          className="p-2 border rounded-md font-geist"
+                        >
+                          <option value="" disabled>Select section</option>
+                          <option value="A">A</option>
+                          <option value="B">B</option>
+                          <option value="C">C</option>
+                          <option value="D">D</option>
+                          <option value="E">E</option>
+                          <option value="F">F</option>
+                          <option value="G">G</option>
+                          <option value="H">H</option>
+                          <option value="I">I</option>
+                          <option value="J">J</option>
+                        </select>
+                        {errors.section && <p className="text-red-500 text-xs">{errors.section.message}</p>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter className="flex items-center">
+                  <Button type="submit" disabled={loading}>
+                    {loading ? (
+                      <>
+                        Updating
+                        <Loader2 className="animate-spin ml-2" />
+                      </>
+                    ) : (
+                      "Update"
+                    )}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+      )}
     </>
   );
 }

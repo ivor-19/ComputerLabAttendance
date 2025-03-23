@@ -20,7 +20,6 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { useLocation } from "react-router-dom";
-import { NavUser } from "./nav-user";
 
 // This is sample data.
 const data = {
@@ -31,54 +30,26 @@ const data = {
       icon: SquareTerminal,
       items: [
         {
-          title: "Dashboard",
-          url: "",
-          isActive: false,
-        },
-      ],
-    },
-    {
-      title: "Course & Student Management",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Course & Section",
-          url: "/admin/course&section",
-          isActive: false,
-        },
-      ],
-    },
-    {
-      title: "Administration",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Faculty",
-          url: "/admin/faculty",
-          isActive: false,
-        },
-        {
-          title: "Computer Management",
-          url: "/admin/computermanagement",
-          isActive: false,
-        },
-        {
           title: "Attendance Record",
-          url: "/admin/attendanceRecord",
+          url: "/teacher/Record",
+          isActive: false,
+        },
+        {
+          title: "Schedule",
+          url: "/teacher/schedule",
           isActive: false,
         },
       ],
     },
     {
-      title: "Account Settings",
+      title: "Settings",
       url: "#",
-      icon: Bot,
+      icon: SquareTerminal,
       items: [
         {
           title: "Logout",
           url: "/",
+          isActive: false,
         },
       ],
     },
@@ -114,7 +85,7 @@ const data = {
   ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebarTeacher({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation();
 
   const updatedNav = data.navMain.map((section) => ({

@@ -1,6 +1,7 @@
 import { AppSidebar } from "@/components/dashboard/app-sidebar"
 import { ComputerManagementTable } from "@/components/tables/ComputerManagementTable"
 import { CoursesAndSectionTable } from "@/components/tables/CoursesAndSectionTable"
+import { SidebarRight } from "@/components/teacher/sidebar-right"
 import {
   Breadcrumb,
   BreadcrumbItem,

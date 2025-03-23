@@ -37,19 +37,18 @@ import { Badge } from "../ui/badge"
 import axios from "axios"
 import { Skeleton } from "../ui/skeleton"
 
-export type Student = {
-  student_id: string,
+export type Teacher = {
   teacher_id: string,
   course_section: string,
   date: string,
   time_in: string,
   time_out: string,
-  status: "Present" | "Absent" | "Late" | "Excused",
   teacher_name: string,
   subject: string,
+  unique: string,
 }
 
-export const columns: ColumnDef<Student>[] = [
+export const columns: ColumnDef<Teacher>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -73,7 +72,7 @@ export const columns: ColumnDef<Student>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "student_id",
+    accessorKey: "teacher_id",
     header: ({ column }) => {
       return (
         <div className="text-left">
@@ -82,13 +81,31 @@ export const columns: ColumnDef<Student>[] = [
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             className="text-xs pl-0 bg-transparent"
           >
-            Student ID
+            ID
             <ArrowUpDown />
           </Button>
         </div>
       )
     },
-    cell: ({ row }) => <div>{row.getValue("student_id")}</div>,
+    cell: ({ row }) => <div>{row.getValue("teacher_id")}</div>,
+  },
+  {
+    accessorKey: "teacher_name",
+    header: ({ column }) => {
+      return (
+        <div className="text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="text-xs pl-0 bg-transparent"
+          >
+            Teacher
+            <ArrowUpDown />
+          </Button>
+        </div>
+      )
+    },
+    cell: ({ row }) => <div>{row.getValue("teacher_name")}</div>,
   },
   {
     accessorKey: "subject",
@@ -181,43 +198,10 @@ export const columns: ColumnDef<Student>[] = [
     cell: ({ row }) => <div>{row.getValue("time_out") === null ? "-----" : row.getValue("time_out")}</div>,
   },
   {
-    accessorKey: "status",
-    header: ({ column }) => {
-      return (
-        <div className="text-left">
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="text-xs pl-0 bg-transparent"
-          >
-            Status
-            <ArrowUpDown />
-          </Button>
-        </div>
-      )
-    },
-    cell: ({ row }) => (
-      <div className="capitalize">
-        <Badge
-          className={`
-            ${row.getValue("status") === 'Absent' ? 'bg-red-200 text-red-900 hover:bg-red-200' :
-              row.getValue("status") === 'Late' ? 'bg-yellow-200 text-yellow-800 hover:bg-yellow-200' :
-                row.getValue("status") === 'Excused' ? 'bg-blue-200 text-blue-800 hover:bg-blue-200' :
-                  'bg-green-200 text-green-800 hover:bg-green-200'
-            }
-            cursor-default
-          `}
-        >
-          {row.getValue("status")}
-        </Badge>
-      </div>
-    )
-  },
-  {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const student = row.original;
+      const teacher = row.original;
 
       return (
         <DropdownMenu>
@@ -230,9 +214,9 @@ export const columns: ColumnDef<Student>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(student.student_id)}
+              onClick={() => navigator.clipboard.writeText(teacher.teacher_id)}
             >
-              Copy student ID
+              Copy teacher ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
@@ -247,16 +231,16 @@ export const columns: ColumnDef<Student>[] = [
   },
 ]
 
-interface StudentAttendanceRecordProps {
+interface TeacherAttendanceRecordProps {
   refreshKey: number;
 }
 
-export function StudentAttendanceRecord() {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+export function TeacherAttendance() {
+  const [sorting, setSorting] = React.useState<SortingState>([{id: "teacher_name", desc: false}]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
-  const [attendanceList, setAttendanceList] = React.useState<Student[]>([]);
+  const [attendanceList, setAttendanceList] = React.useState<Teacher[]>([]);
   const [loadingTable, setLoadingTable] = React.useState(true);
 
   const initialRender = React.useRef(true);
@@ -264,9 +248,10 @@ export function StudentAttendanceRecord() {
   React.useEffect(() => {
     const fetchAttendance = async () => {
       try {
-        const response = await axios.get("https://comlab-backend.vercel.app/api/student/getTotalAttendance");
+        const response = await axios.get("https://comlab-backend.vercel.app/api/teacher/getTeacherAttendance");
         setAttendanceList(response.data);
         setLoadingTable(false);
+        console.log("API Response:", response.data);
       } catch (error) {
         console.log(error);
       }
@@ -296,8 +281,6 @@ export function StudentAttendanceRecord() {
 
   const uniqueCourses = Array.from(new Set(attendanceList.map((attendanceList) => attendanceList.course_section)));
   const uniqueDates = Array.from(new Set(attendanceList.map((attendanceList) => attendanceList.date)));
-  const uniqueTeachers = Array.from(new Set(attendanceList.map((attendanceList) => attendanceList.teacher_name)));
-  const uniqueSubjects = Array.from(new Set(attendanceList.map((attendanceList) => attendanceList.subject)));
 
   React.useEffect(() => {
     if (initialRender.current && uniqueDates.length > 0 && !table.getColumn("date")?.getFilterValue()) {
@@ -338,37 +321,11 @@ export function StudentAttendanceRecord() {
           <div className="flex items-center py-4">
             <div className="flex justify-between">
               <Input
-                placeholder="Filter by student id..."
-                value={(table.getColumn("student_id")?.getFilterValue() as string) ?? ""}
-                onChange={(event) => table.getColumn("student_id")?.setFilterValue(event.target.value)}
+                placeholder="Filter by teacher name..."
+                value={(table.getColumn("teacher_name")?.getFilterValue() as string) ?? ""}
+                onChange={(event) => table.getColumn("teacher_name")?.setFilterValue(event.target.value)}
                 className="max-w-sm"
               />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="ml-2 border-dashed bg-transparent">
-                    <PlusCircle className="mr-1" /> Subject
-                    {table.getColumn("subject")?.getFilterValue() ? (
-                      <div className="flex gap-2">
-                        <span className="font-thin text-gray-500">|</span>
-                        <Badge variant={"secondary"}>
-                          {String(table.getColumn("subject")?.getFilterValue())}
-                        </Badge>
-                      </div>
-                    ) : null}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="font-geist w-40">
-                  {uniqueSubjects.map((subject) => (
-                    <DropdownMenuItem key={subject} onClick={() => table.getColumn("subject")?.setFilterValue(subject)}>
-                      {subject}
-                    </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => table.getColumn("subject")?.setFilterValue(undefined)}>
-                    <FilterX size={16} /> Clear Filter
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="ml-2 border-dashed bg-transparent">

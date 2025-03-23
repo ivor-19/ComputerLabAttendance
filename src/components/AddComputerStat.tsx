@@ -79,7 +79,7 @@ export const AddComputerStat = ({open, setOpen, fetch, id, disabled} : AddComput
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button onClick={() => setOpen(true)} disabled={disabled}><Plus strokeWidth={3}/>Add Computer Set</Button>
+        <Button onClick={() => setOpen(true)} disabled={disabled}><Plus strokeWidth={3}/>Add</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] font-geist">
         <DialogHeader>

@@ -1,7 +1,8 @@
-import { AppSidebar } from "@/components/dashboard/app-sidebar"
-import { FacultyTable } from "@/components/tables/FacultyTable"
 import { RecordTable } from "@/components/tables/RecordTable"
 import { StudentAttendanceRecord } from "@/components/tables/StudentAttendanceRecord"
+import { TeacherAttendance } from "@/components/tables/TeacherAttendance"
+import { AppSidebarTeacher } from "@/components/teacher/app-sidebar"
+import { SidebarRight } from "@/components/teacher/sidebar-right"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -17,7 +18,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
-export default function AdminRecords() {
+export default function Record() {
   return (
     <SidebarProvider
       style={
@@ -26,7 +27,7 @@ export default function AdminRecords() {
         } as React.CSSProperties
       }
     >
-      <AppSidebar />
+      <AppSidebarTeacher />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
@@ -34,13 +35,13 @@ export default function AdminRecords() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbPage>Attendance Records</BreadcrumbPage>
+                <BreadcrumbPage>Records</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <RecordTable />
+          <TeacherAttendance />
         </div>
       </SidebarInset>
     </SidebarProvider>

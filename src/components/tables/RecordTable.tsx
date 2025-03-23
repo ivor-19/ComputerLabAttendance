@@ -47,6 +47,7 @@ export type Student = {
   status: "Present" | "Absent" | "Late" | "Excused",
   teacher_name: string,
   subject: string,
+  student_name: string,
 }
 
 export const columns: ColumnDef<Student>[] = [
@@ -73,7 +74,7 @@ export const columns: ColumnDef<Student>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "student_id",
+    accessorKey: "student_name",
     header: ({ column }) => {
       return (
         <div className="text-left">
@@ -82,13 +83,31 @@ export const columns: ColumnDef<Student>[] = [
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             className="text-xs pl-0 bg-transparent"
           >
-            Student ID
+            Student
             <ArrowUpDown />
           </Button>
         </div>
       )
     },
-    cell: ({ row }) => <div>{row.getValue("student_id")}</div>,
+    cell: ({ row }) => <div>{row.getValue("student_name")}</div>,
+  },
+  {
+    accessorKey: "teacher_name",
+    header: ({ column }) => {
+      return (
+        <div className="text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="text-xs pl-0 bg-transparent"
+          >
+            Teacher
+            <ArrowUpDown />
+          </Button>
+        </div>
+      )
+    },
+    cell: ({ row }) => <div>{row.getValue("teacher_name")}</div>,
   },
   {
     accessorKey: "subject",
@@ -251,8 +270,8 @@ interface StudentAttendanceRecordProps {
   refreshKey: number;
 }
 
-export function StudentAttendanceRecord() {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+export function RecordTable() {
+  const [sorting, setSorting] = React.useState<SortingState>([{id: "student_name", desc: false}]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
@@ -297,7 +316,6 @@ export function StudentAttendanceRecord() {
   const uniqueCourses = Array.from(new Set(attendanceList.map((attendanceList) => attendanceList.course_section)));
   const uniqueDates = Array.from(new Set(attendanceList.map((attendanceList) => attendanceList.date)));
   const uniqueTeachers = Array.from(new Set(attendanceList.map((attendanceList) => attendanceList.teacher_name)));
-  const uniqueSubjects = Array.from(new Set(attendanceList.map((attendanceList) => attendanceList.subject)));
 
   React.useEffect(() => {
     if (initialRender.current && uniqueDates.length > 0 && !table.getColumn("date")?.getFilterValue()) {
@@ -338,33 +356,33 @@ export function StudentAttendanceRecord() {
           <div className="flex items-center py-4">
             <div className="flex justify-between">
               <Input
-                placeholder="Filter by student id..."
-                value={(table.getColumn("student_id")?.getFilterValue() as string) ?? ""}
-                onChange={(event) => table.getColumn("student_id")?.setFilterValue(event.target.value)}
+                placeholder="Filter by student name..."
+                value={(table.getColumn("student_name")?.getFilterValue() as string) ?? ""}
+                onChange={(event) => table.getColumn("student_name")?.setFilterValue(event.target.value)}
                 className="max-w-sm"
               />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="ml-2 border-dashed bg-transparent">
-                    <PlusCircle className="mr-1" /> Subject
-                    {table.getColumn("subject")?.getFilterValue() ? (
+                    <PlusCircle className="mr-1" /> Teacher
+                    {table.getColumn("teacher_name")?.getFilterValue() ? (
                       <div className="flex gap-2">
                         <span className="font-thin text-gray-500">|</span>
                         <Badge variant={"secondary"}>
-                          {String(table.getColumn("subject")?.getFilterValue())}
+                          {String(table.getColumn("teacher_name")?.getFilterValue())}
                         </Badge>
                       </div>
                     ) : null}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="font-geist w-40">
-                  {uniqueSubjects.map((subject) => (
-                    <DropdownMenuItem key={subject} onClick={() => table.getColumn("subject")?.setFilterValue(subject)}>
-                      {subject}
+                  {uniqueTeachers.map((teacher_name) => (
+                    <DropdownMenuItem key={teacher_name} onClick={() => table.getColumn("teacher_name")?.setFilterValue(teacher_name)}>
+                      {teacher_name}
                     </DropdownMenuItem>
                   ))}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => table.getColumn("subject")?.setFilterValue(undefined)}>
+                  <DropdownMenuItem onClick={() => table.getColumn("teacher_name")?.setFilterValue(undefined)}>
                     <FilterX size={16} /> Clear Filter
                   </DropdownMenuItem>
                 </DropdownMenuContent>

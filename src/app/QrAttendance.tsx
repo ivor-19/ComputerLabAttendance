@@ -36,6 +36,7 @@ export const QrAttendance = () => {
   const [isScanned, setIsScanned] = useState<boolean>(false);
   const [course, setCourse] = useState<string>('')
   const [section, setSection] = useState<string>('')
+  const [subject, setSubject] = useState<string>('')
 
 
   const [teacher, setTeacher] = useState<any>(null);
@@ -46,6 +47,7 @@ export const QrAttendance = () => {
   const [classStarted, setClassStarted] = useState<boolean>(false);
   const [isEndClassEnabled, setIsEndClassEnabled] = useState<boolean>(false);
   const [endClassLoading, setEndClassLoading] = useState(false);
+  const [startClassLoading, setStartClassLoading] = useState(false);
 
   const [refresh, setRefresh] = useState<number>(0);
 
@@ -68,6 +70,14 @@ export const QrAttendance = () => {
 
   const [startTime, setStartTime] = useState<string>(formatTime(new Date()));
   const [endTime, setEndTime] = useState<string>("");
+
+
+  const formatEndTime = (date: Date): string => {
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+  const [teacherOut, setTeacherOut] = useState<string>(formatEndTime(new Date()));
 
   const fetchTeacher = async (result: any) => {
     setLoading(true);
@@ -112,7 +122,7 @@ export const QrAttendance = () => {
       };
       const response = await axios.post('https://comlab-backend.vercel.app/api/student/updateAttendance', data);
       console.log(response);
-      toast.error("Added");
+      toast.error("Attendance recorded");
       setRefresh(prev => prev += 1);
     } catch (error: any) {
       if (error.message.includes("402")) {
@@ -135,9 +145,12 @@ export const QrAttendance = () => {
   };
 
   const handleConfirm = async () => {
-    const newData = {teacher_id: teacherId, course: course, section: section}
+    setStartClassLoading(true);
+    const newData = {teacher_id: teacherId, course: course, section: section, subject: subject}
+    const teacherAttendance = {teacher_id: teacherId, course: course, section: section, subject: subject, time_in: startTime, unique: randomCode}
     try {
       await axios.delete("https://comlab-backend.vercel.app/api/student/deleteAllStudentAttendance")
+      await axios.post("https://comlab-backend.vercel.app/api/teacher/addToAttendance", teacherAttendance)
       toast.success("Class is starting! Scan your QR code to mark attendance.");
 
       await axios.post("https://comlab-backend.vercel.app/api/student/addToClass", newData)
@@ -145,32 +158,37 @@ export const QrAttendance = () => {
       console.log(newData)
     } catch (error) {
       console.error(error)
+      setStartClassLoading(false);
     }
 
     setClassStarted(true);
     setIsStartClick(false);
     setIsPaused(false);
     setIsScanned(false);
+    setStartClassLoading(false);
   };
 
   const handleEndClass = async () => {
     setEndClassLoading(true);
+    const teacherData = {unique: randomCode, time_out: endTime}
     try {
       await axios.post("https://comlab-backend.vercel.app/api/student/transferToRecords")
+      await axios.post("https://comlab-backend.vercel.app/api/teacher/updateAttendance", teacherData)
       await axios.delete("https://comlab-backend.vercel.app/api/student/deleteAllStudentAttendance")
       setEndClassLoading(false);
 
       toast.success("Classes ended successfully. Attendance records have been transferred.")
       setRefresh(prev => prev += 1);
+      setClassStarted(false);
+      setIsEndClassEnabled(false);
+      setIsPaused(true);
+  
+      setIsScanned(false);
+      window.location.reload();
     } catch (error) {
       console.error(error)
+      setEndClassLoading(false);
     }
-
-    setClassStarted(false);
-    setIsEndClassEnabled(false);
-    setIsPaused(true);
-
-    setIsScanned(false);
   };
 
   // Function to check if the current time is past the end time
@@ -199,6 +217,20 @@ export const QrAttendance = () => {
     return () => clearTimeout(timeoutId);
   }, [classStarted, endTime]);
 
+  const [randomCode, setRandomCode] = useState<string>('');
+  const generateUniqueRandomCode = () => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let code = '';
+    for (let i = 0; i < 16; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      code += characters[randomIndex];
+    }
+    return code;
+  };
+  useEffect(() => {
+    setRandomCode(generateUniqueRandomCode());
+  }, []);
+
   return (
     <>
       <Toaster />
@@ -207,10 +239,9 @@ export const QrAttendance = () => {
           <Button className="absolute left-5 top-5" onClick={() => navigate("/login")}>Login</Button>
           <div className="w-[60%] h-full flex justify-center items-center bg-[#18181b] border-r border-gray-200">
             <div className="w-[500px] absolute top-28">
-              <Scanner onScan={handleScan} paused={isPaused} />
+              <Scanner onScan={handleScan} paused={isPaused} allowMultiple={true} scanDelay={1500}/>
             </div>
           </div>
-
           <div className="w-full h-[90%] p-4 flex flex-col items-center">
             <QRAttendanceTable refreshKey={refresh} />
             {!classStarted && (
@@ -230,7 +261,7 @@ export const QrAttendance = () => {
                 <div className='mt-8 w-full'>
                   {classStarted && (
                     <div className='flex flex-col gap-2 items-center'>
-                      <Button onClick={handleEndClass} disabled={!isEndClassEnabled} className='w-[20%] bg-green-600 hover:bg-green-700 text-white'>
+                      <Button onClick={handleEndClass} disabled={!isEndClassEnabled} className='w-[40%] bg-green-600 hover:bg-green-700 text-white'>
                         End Class
                         {endClassLoading &&
                           <Loader2 className='animate-spin mx-2'/>
@@ -249,9 +280,8 @@ export const QrAttendance = () => {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle className='text-center'>Set up class attendance</DialogTitle>
-
                   <div className={`w-full bg-red-200 ${isScanned ? 'hidden' : 'flex'}`}>
-                    <Scanner onScan={(teacherResult) => { setIsScanned(true); fetchTeacher(teacherResult.map((v: any) => v.rawValue).toString()); }} paused={false} />
+                    <Scanner onScan={(teacherResult) => { setIsScanned(true); fetchTeacher(teacherResult.map((v: any) => v.rawValue).toString()); }} paused={false}/>
                   </div>
                   <div className={`w-full ${isScanned ? 'flex' : 'hidden'}`}>
                     {loading ? (
@@ -268,6 +298,22 @@ export const QrAttendance = () => {
                           <div>
                             <Label htmlFor="name">Name</Label>
                             <Input id="name" placeholder="Teacher Name" value={teacherName} disabled />
+                          </div>
+                          <div className='flex flex-col gap-2'>
+                            <Label htmlFor="subject">Subject</Label>
+                            <Select value={subject} onValueChange={setSubject}>
+                              <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Select a course" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectGroup>
+                                  <SelectLabel>Subjects</SelectLabel>
+                                  {teacher?.subjects?.map((subject: string, index: number) => (
+                                    <SelectItem key={index} value={subject}>{subject}</SelectItem>
+                                  ))}
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
                           </div>
                           <div className='flex flex-col gap-2'>
                             <Label htmlFor="course">Course</Label>
@@ -326,7 +372,16 @@ export const QrAttendance = () => {
 
                         <div className="w-full flex justify-end gap-2">
                           <Button type="button" onClick={() => { setIsStartClick(false); setIsScanned(false); }} className='bg-[#022c22] hover:bg-[#064e3b]'>Cancel</Button>
-                          <Button onClick={handleConfirm} className='bg-[#022c22] hover:bg-[#064e3b]'>Start Class</Button>
+                          <Button onClick={handleConfirm} className='bg-[#022c22] hover:bg-[#064e3b]'>
+                            {startClassLoading ? (
+                              <div className='flex gap-2'>
+                                <span>Starting</span>
+                                <Loader2 className='animate-spin'></Loader2>
+                              </div>
+                            ):(
+                              <>Start Class</>
+                            )}
+                          </Button>
                         </div>
                       </div>
                     )}

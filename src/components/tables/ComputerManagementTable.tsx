@@ -13,8 +13,17 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
-
+import { ArrowUpDown, ChevronDown, GanttChart, Loader2, MoreHorizontal, Pencil } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -37,9 +46,13 @@ import {
 } from "@/components/ui/table"
 import DeleteModal from "../DeleteModal"
 import { AddCom } from "../AddCom"
-import { useNavigate } from "react-router-dom"
+import { data, useNavigate } from "react-router-dom"
 import axios from "axios"
 import { Skeleton } from "../ui/skeleton"
+import * as z from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form"
+import { toast } from "sonner"
 
 export type ComLabList = {
   _id: string,
@@ -47,7 +60,20 @@ export type ComLabList = {
   room: string,
 }
 
+const FormSchema = z.object({
+  _id: z.string().optional(), // Added _id to schema
+  name: z.string().min(1, {message: "Name is required"}),
+  room: z.string().min(1, {message: "Room is required"}),
+  computerSets: z.string().optional(),
+})
+
+type FormData = z.infer<typeof FormSchema>;
+
 export function ComputerManagementTable() {
+  const { register, handleSubmit, formState: {errors}, reset, setError, watch } = useForm<FormData>({
+    resolver: zodResolver(FormSchema),
+  })
+
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -55,6 +81,8 @@ export function ComputerManagementTable() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  const [currentLab, setCurrentLab] = React.useState<ComLabList | null>(null);
+  
 
   const columns: ColumnDef<ComLabList>[] = [
     {
@@ -144,7 +172,8 @@ export function ComputerManagementTable() {
                 Copy payment ID
               </DropdownMenuItem> */}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleRowClick(row.original)}>View & Edit Details</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleRowClick(row.original)}><GanttChart className="mr-2 h-4 w-4" />View & Manage</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleEditClick(row.original)}><Pencil className="mr-2 h-4 w-4" />Edit Details</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )
@@ -158,6 +187,7 @@ export function ComputerManagementTable() {
   const [loading, setLoading] = React.useState(false);
   const [list, setList] = React.useState<ComLabList[]>([])
   const [loadingTable, setLoadingTable] = React.useState(true);
+  const [editMode, setEditMode] = React.useState(false);
 
   const fetchList = async () => {
     try {
@@ -172,10 +202,62 @@ export function ComputerManagementTable() {
 
   React.useEffect(() => {
     fetchList();
-  }, [])
+  }, []);
 
-  const deleteCom = () => {
+  const handleEditClick = (lab: ComLabList) => {
+    setCurrentLab(lab);
+    setEditMode(true);
+    // Pre-fill the form with the lab's current values, including _id
+    reset({
+      _id: lab._id,
+      name: lab.name,
+      room: lab.room
+    });
+    setOpen(true); // Open the dialog
+  };
+
+  const onSubmit = async (data: FormData) => {
+    setLoading(true);
+    try {
+      if (currentLab && editMode) {
+        // Update existing lab
+        await axios.post(`https://comlab-backend.vercel.app/api/computer/editCom/${data._id}`, {
+          name: data.name,
+          room: data.room
+        });
+        
+        fetchList(); // Refresh the list
+        setOpen(false); // Close dialog
+        setEditMode(false);
+      }
+    } catch (error) {
+      console.error("Error updating lab", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteCom = async () => {
     setOpenDelete(true);
+    setLoading(true);
+    try {
+      const selectedRows = table.getSelectedRowModel().rows;
+      for (const row of selectedRows) {
+        const comId = row.original._id; // Access the user's _id
+        await axios.delete(`https://comlab-backend.vercel.app/api/computer/deleteCom/${comId}`);
+        console.log(`Deleted com with ID: ${comId}`);
+      }
+      toast.info(`${selectedRows.length} Data/s has been deleted.`);
+
+      fetchList();
+      setRowSelection({});
+      setLoading(false);
+      setOpenDelete(false);
+    } catch (error) {
+      console.error("Error deleting a data", error);
+      setOpenDelete(false);
+      toast.error("Unknown error has occured");   
+    }
   }
 
   const handleRowClick = (row: ComLabList): void => {
@@ -186,6 +268,20 @@ export function ComputerManagementTable() {
         id: row._id
       }
     });
+  };
+
+  // Handler for when the dialog closes
+  const handleDialogChange = (open: boolean) => {
+    setOpen(open);
+    if (!open) {
+      setEditMode(false);
+      setCurrentLab(null);
+      reset({
+        _id: '',
+        name: '',
+        room: ''
+      });
+    }
   };
 
   const table = useReactTable({
@@ -338,6 +434,67 @@ export function ComputerManagementTable() {
               </Button>
             </div>
           </div>
+          <Dialog open={open} onOpenChange={handleDialogChange}>
+            <DialogContent className="sm:max-w-[425px] font-geist">
+              <DialogHeader>
+                <DialogTitle>{editMode ? "Edit Computer Lab" : "Add Computer Lab"}</DialogTitle>
+                <DialogDescription>
+                  {editMode ? "Make changes to the computer lab details." : "Add a new computer lab."} Click submit when you're done.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                {/* Hidden _id field for tracking during updates */}
+                <Input 
+                  type="hidden"
+                  {...register("_id")}
+                />
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="name" className="text-right">
+                    Name
+                  </Label>
+                  <div className="col-span-3 relative">
+                    <Input 
+                      id="name" 
+                      className="col-span-3" 
+                      type="text"
+                      {...register("name")}
+                      placeholder="Name"
+                    />
+                    {errors.name && <span className="text-red-500 text-xs font-geist">{errors.name.message}</span>}
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="room" className="text-right">
+                    Room
+                  </Label>
+                  <div className="col-span-3 relative">
+                    <Input 
+                      id="room" 
+                      className="col-span-3" 
+                      type="text"
+                      {...register("room")}
+                      placeholder="Room"
+                    />
+                    {errors.room && <span className="text-red-500 text-xs font-geist">{errors.room.message}</span>}
+                  </div>
+                </div>
+              </div>
+              <DialogFooter className="flex items-center">
+                <Button onClick={handleSubmit(onSubmit)}> 
+                  {loading ? ( 
+                    <>
+                      Submitting
+                      <Loader2 className="ml-2 animate-spin"/>
+                    </>
+                  ):(
+                    <>
+                      Submit
+                    </>
+                  )} 
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       )}
     </>
