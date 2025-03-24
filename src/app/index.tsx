@@ -18,22 +18,22 @@ function App() {
   return (
     <BrowserRouter>
      <Toaster />
-      <Routes>
-        <Route path={'/'} element={<QrAttendance />}/>
-        <Route path={'/login'} element={<Login />}/>
-        <Route path={'/admin/course&section'} element={<CourseAndSection />}/>
-        <Route path={'/admin/subjectsLists'} element={<Subjects />}/>
-        <Route path={'/admin/faculty'} element={<Faculty />}/>
-        <Route path={'/admin/computermanagement'} element={<ComputerManagement />}/>
-        <Route path={'/admin/computermanagement/:name'} element={<CMDetails />}/>
-        <Route path={'/admin/attendanceRecord/studentsRecord'} element={<AdminRecords />}/>
-        <Route path={'/admin/dashboard'} element={<Dashboard />}/>
-        <Route path={'/admin/attendanceRecord/teachersRecord'} element={<AdminTeacherRecords />}/>
-        <Route path={'/admin/schedule'} element={<AdminSched />}/>
-        <Route path={'/teacher/Record'} element={<Record />}/>
-        <Route path={'/teacher/schedule'} element={<Schedule />}/>
-        {/* <Route path={'/admin/accounts'} element={<Users />}/> */}
-      </Routes>
+        <Routes>
+          <Route path={'/'} element={<QrAttendance />}/>
+          <Route path={'/login'} element={<Login />}/>
+          <Route path={'/admin/course&section'} element={<CourseAndSection />}/>
+          <Route path={'/admin/subjectsLists'} element={<Subjects />}/>
+          <Route path={'/admin/faculty'} element={<Faculty />}/>
+          <Route path={'/admin/computermanagement'} element={<ComputerManagement />}/>
+          <Route path={'/admin/computermanagement/:name'} element={<CMDetails />}/>
+          <Route path={'/admin/attendanceRecord/studentsRecord'} element={<AdminRecords />}/>
+          <Route path={'/admin/dashboard'} element={<Dashboard />}/>
+          <Route path={'/admin/attendanceRecord/teachersRecord'} element={<AdminTeacherRecords />}/>
+          <Route path={'/admin/schedule'} element={<AdminSched />}/>
+          <Route path={'/teacher/Record'} element={<Record />}/>
+          <Route path={'/teacher/schedule'} element={<Schedule />}/>
+          {/* <Route path={'/admin/accounts'} element={<Users />}/> */}
+        </Routes>
     </BrowserRouter>
   )
 }

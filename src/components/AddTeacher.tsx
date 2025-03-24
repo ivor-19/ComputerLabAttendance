@@ -78,7 +78,7 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
       subjects: data.subjects,
       teacher_email: data.teacher_email
     };
-    const teacherEmail = {teacher_id: data.teacher_id, teacher_email: data.teacher_email}
+    const teacherEmail = {teacher_id: data.teacher_id, teacher_email: data.teacher_email, firstname: data.firstname, lastname: data.lastname}
     try {
       const response = await axios.post('https://comlab-backend.vercel.app/api/teacher/addTeacher', newTeacher);
       console.log(response.data);

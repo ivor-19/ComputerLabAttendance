@@ -45,7 +45,7 @@ export default function Schedule() {
          <TeacherScheduler />
         </div>
       </SidebarInset>
-      <SidebarRight />
+      {/* <SidebarRight /> */}
     </SidebarProvider>
   )
 }

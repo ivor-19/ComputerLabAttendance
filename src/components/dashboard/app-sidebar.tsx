@@ -9,6 +9,7 @@ import {
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarMenu,
@@ -24,6 +25,11 @@ import { NavUser } from "./nav-user";
 
 // This is sample data.
 const data = {
+  user: {
+    name: "shadcn",
+    email: "m@example.com",
+    avatar: "/avatars/shadcn.jpg",
+  },
   navMain: [
     {
       title: "Overview",
@@ -73,17 +79,6 @@ const data = {
           title: "Set Schedule",
           url: "/admin/schedule",
           isActive: false,
-        },
-      ],
-    },
-    {
-      title: "Account Settings",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Logout",
-          url: "/",
         },
       ],
     },
@@ -187,6 +182,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <NavUser />
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   )

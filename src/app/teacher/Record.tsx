@@ -16,8 +16,10 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { useTeacher } from "@/Context"
 
 export default function Record() {
+  const {teacherName} = useTeacher();
   return (
     <SidebarProvider
       style={

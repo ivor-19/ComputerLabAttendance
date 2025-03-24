@@ -9,6 +9,7 @@ import {
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarMenu,
@@ -20,6 +21,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { useLocation } from "react-router-dom";
+import { NavUser } from "./nav-user";
 
 // This is sample data.
 const data = {
@@ -37,18 +39,6 @@ const data = {
         {
           title: "Schedule",
           url: "/teacher/schedule",
-          isActive: false,
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: SquareTerminal,
-      items: [
-        {
-          title: "Logout",
-          url: "/",
           isActive: false,
         },
       ],
@@ -153,6 +143,9 @@ export function AppSidebarTeacher({ ...props }: React.ComponentProps<typeof Side
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <NavUser />
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   )

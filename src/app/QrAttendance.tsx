@@ -61,16 +61,16 @@ export const QrAttendance = () => {
   };
 
   // Handler for start time
-  const handleStartTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setStartTime(event.target.value);
-  };
+  // const handleStartTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   setStartTime(event.target.value);
+  // };
 
   // Handler for end time
   const handleEndTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEndTime(event.target.value);
   };
 
-  const [startTime, setStartTime] = useState<string>(formatTime(new Date()));
+  const [startTime, setStartTime] = useState<string>("");
   const [endTime, setEndTime] = useState<string>("");
 
 
@@ -250,7 +250,7 @@ export const QrAttendance = () => {
           <div className="w-full h-[90%] p-4 flex flex-col items-center">
             <QRAttendanceTable refreshKey={refresh} />
             {!classStarted && (
-              <Button onClick={() => { setIsScanned(false); setIsStartClick(true); }} className='w-[20%] bg-[#022c22] hover:bg-[#064e3b]'>Create New Class</Button>
+              <Button onClick={() => { setIsScanned(false); setIsStartClick(true); setStartTime(formatTime(new Date()));}} className='w-[20%] bg-[#022c22] hover:bg-[#064e3b]'>Create New Class</Button>
             )}
 
             {classStarted && (
@@ -377,7 +377,6 @@ export const QrAttendance = () => {
                                 type="time"
                                 id="startTime"
                                 value={startTime}
-                                onChange={handleStartTimeChange}
                                 className="border p-2 rounded-md bg-white"
                                 disabled
                               />

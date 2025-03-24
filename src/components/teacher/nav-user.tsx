@@ -1,10 +1,6 @@
 import {
-  BadgeCheck,
-  Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
-  Sparkles,
 } from "lucide-react"
 
 import {
@@ -27,12 +23,13 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { useTeacher } from "@/Context"
 import { useNavigate } from "react-router-dom"
+import { useTeacher } from "@/Context"
+
 
 export function NavUser() {
   const navigate = useNavigate();
-  const {setTeacherId} = useTeacher();
+  const {teacherId, teacherName, setTeacherId} = useTeacher();
   const { isMobile } = useSidebar();
 
   const handleClick = () => {
@@ -55,8 +52,8 @@ export function NavUser() {
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">Admin</span>
-                <span className="truncate text-xs"></span>
+                <span className="truncate font-semibold">{teacherName}</span>
+                <span className="truncate text-xs">{teacherId}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -74,8 +71,8 @@ export function NavUser() {
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold"></span>
-                  <span className="truncate text-xs"></span>
+                  <span className="truncate font-semibold">{teacherName}</span>
+                  <span className="truncate text-xs">{teacherId}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
