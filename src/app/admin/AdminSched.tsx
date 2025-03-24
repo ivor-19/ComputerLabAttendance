@@ -1,14 +1,10 @@
 import { AppSidebar } from "@/components/dashboard/app-sidebar"
-import { FacultyTable } from "@/components/tables/FacultyTable"
-import { RecordTable } from "@/components/tables/RecordTable"
-import { StudentAttendanceRecord } from "@/components/tables/StudentAttendanceRecord"
+import { SchedulerComponent } from "@/components/SchedulerComponent"
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -17,15 +13,9 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
-export default function AdminRecords() {
+export default function AdminSched() {
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "19rem",
-        } as React.CSSProperties
-      }
-    >
+    <SidebarProvider style={{"--sidebar-width": "19rem",} as React.CSSProperties}>
       <AppSidebar />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 px-4">
@@ -33,21 +23,16 @@ export default function AdminRecords() {
           <Separator orientation="vertical" className="mr-2 h-4" />
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem className="hidden md:block">
-                Attendance Record
-              </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Students Attendance</BreadcrumbPage>
+                <BreadcrumbPage>Schedules</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <RecordTable />
+         <SchedulerComponent />
         </div>
       </SidebarInset>
-
     </SidebarProvider>
   )
 }

@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, MoreHorizontal, SquarePen } from "lucide-react"
+import { ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "../ui/badge"
 import axios from "axios"
+import * as XLSX from 'xlsx'; 
 
 export type Student = {
   student_id: string,
@@ -217,7 +218,7 @@ interface QRAttendanceTableProps {
 }
 
 export function QRAttendanceTable({ refreshKey }: QRAttendanceTableProps) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [sorting, setSorting] = React.useState<SortingState>([{id: "student_name", desc: false}])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   )
@@ -232,8 +233,8 @@ export function QRAttendanceTable({ refreshKey }: QRAttendanceTableProps) {
       try {
         const response = await axios.get("https://comlab-backend.vercel.app/api/student/getAttendance")
         // Filter the data to show only rows where time_in is not null
-        const filteredData = response.data.filter((student: Student) => student.time_in !== null);
-        setAttendanceList(filteredData);
+        // const filteredData = response.data.filter((student: Student) => student.time_in !== null);
+        setAttendanceList(response.data);
       } catch (error) {
         console.log(error)
       }
@@ -261,6 +262,23 @@ export function QRAttendanceTable({ refreshKey }: QRAttendanceTableProps) {
     },
   })
 
+  const exportToExcel = () => {
+    const exportData = table.getRowModel().rows.map((row) => {
+      return row.getVisibleCells().reduce((acc, cell) => {
+        acc[cell.column.id] = cell.getValue();
+        return acc;
+      }, {} as Record<string, any>); // Use Record type to ensure proper typing
+    });
+
+    // Create a new workbook
+    const ws = XLSX.utils.json_to_sheet(exportData);  // Convert the rows into an Excel sheet
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Attendance Data');  // Append the sheet to the workbook
+
+    // Export the Excel file
+    XLSX.writeFile(wb, 'attendance_data.xlsx');
+  };
+
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
@@ -272,6 +290,11 @@ export function QRAttendanceTable({ refreshKey }: QRAttendanceTableProps) {
           }
           className="max-w-sm text-xs"
         />
+           <div className="flex justify-end py-4">
+        <Button onClick={exportToExcel} variant="outline" size="sm">
+          Export to Excel
+        </Button>
+      </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto text-xs">
@@ -321,22 +344,24 @@ export function QRAttendanceTable({ refreshKey }: QRAttendanceTableProps) {
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="text-xs"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows
+                .filter((row) => row.original.status !== "Absent") // Filter rows with status "Absent"
+                .map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="text-xs"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
             ) : (
               <TableRow>
                 <TableCell

@@ -10,6 +10,9 @@ import AdminRecords from './admin/AdminRecords'
 import Record from './teacher/Record'
 import Schedule from './teacher/Schedule'
 import { Toaster } from '@/components/ui/sonner'
+import AdminSched from './admin/AdminSched'
+import AdminTeacherRecords from './admin/AdminTeacherRecord'
+import Dashboard from './admin/Dashboard'
 
 function App() {
   return (
@@ -23,7 +26,10 @@ function App() {
         <Route path={'/admin/faculty'} element={<Faculty />}/>
         <Route path={'/admin/computermanagement'} element={<ComputerManagement />}/>
         <Route path={'/admin/computermanagement/:name'} element={<CMDetails />}/>
-        <Route path={'/admin/attendanceRecord'} element={<AdminRecords />}/>
+        <Route path={'/admin/attendanceRecord/studentsRecord'} element={<AdminRecords />}/>
+        <Route path={'/admin/dashboard'} element={<Dashboard />}/>
+        <Route path={'/admin/attendanceRecord/teachersRecord'} element={<AdminTeacherRecords />}/>
+        <Route path={'/admin/schedule'} element={<AdminSched />}/>
         <Route path={'/teacher/Record'} element={<Record />}/>
         <Route path={'/teacher/schedule'} element={<Schedule />}/>
         {/* <Route path={'/admin/accounts'} element={<Users />}/> */}

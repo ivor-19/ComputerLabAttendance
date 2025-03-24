@@ -33,7 +33,7 @@ interface Teacher {
   value: string;
 }
 
-export const SchedulerComponent = () => {
+export const TeacherScheduler = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [teacherOptions, setTeacherOptions] = useState<Teacher[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -89,66 +89,6 @@ export const SchedulerComponent = () => {
     initializeData();
   }, []);
 
-  const handleConfirm = async (event: Event, action: "create" | "edit") => {
-    if (action === "create") {
-      const newEvent = {
-        event_id: Date.now().toString(), // Generate a unique ID using Date.now()
-        title: event.title,
-        start: event.start.toISOString(), // Convert to ISO string
-        end: event.end.toISOString(),     // Convert to ISO string
-        teacher_name: event.teacher_name,  
-        subject: event.subject,
-        course: event.course,
-        section: event.section,
-        subtitle: event.subtitle,
-      };
-
-      try {
-        const response = await axios.post("https://comlab-backend.vercel.app/api/schedule/addSchedule", newEvent);
-        if (response.data) {
-          console.log("Event added successfully:", response.data);
-          // Refresh the events after adding
-          fetchSchedules();
-        }
-      } catch (error) {
-        console.error("Error adding new event:", error);
-      }
-    } else if (action === "edit") {
-      try {
-        const updatedEvent = {
-          event_id: event.event_id,
-          title: event.title,
-          start: event.start.toISOString(),
-          end: event.end.toISOString(),
-          teacher_name: event.teacher_name,
-          subject: event.subject,
-          course: event.course,
-          section: event.section,
-          subtitle: event.subtitle,
-        };
-        
-        await axios.put(`https://comlab-backend.vercel.app/api/schedule/updateSched`, updatedEvent);
-        
-        fetchSchedules();
-      } catch (error) {
-        console.error("Error updating event:", error);
-      }
-    }
-    return event;
-  };
-
-  const handleDelete = async (event_id: string) => {
-    try {
-      // Send a DELETE request to remove the event
-      await axios.delete(`https://comlab-backend.vercel.app/api/schedule/deleteSched/${event_id}`);
-      console.log("Deleted event id:", event_id);
-      // Refresh the events after deletion
-      setEvents(events.filter(event => event.event_id !== event_id));
-    } catch (error) {
-      console.error("Error deleting event:", error);
-    }
-    return Promise.resolve(event_id);
-  };
 
   if (isLoading) {
     return <Skeleton className="flex justify-center items-center h-full"></Skeleton>;
@@ -161,6 +101,8 @@ export const SchedulerComponent = () => {
           height={600} 
           draggable={false}
           events={events}
+          deletable={false}
+          editable={false}
           fields={[
             {
               name: "teacher_name",
@@ -198,21 +140,7 @@ export const SchedulerComponent = () => {
               ],
               config: { label: "Section", required: true, errMsg: "Please select a section" },
             },
-            {
-              name: "comlab",
-              type: "select",
-              options: [
-                { id: 1, text: "1", value: "1" },
-                { id: 2, text: "2", value: "2" },
-                { id: 3, text: "3", value: "3" },
-                { id: 3, text: "4", value: "4" },
-                { id: 3, text: "5", value: "5" },
-              ],
-              config: { label: "Com Lab", required: true, errMsg: "Please select a comlab" },
-            },
           ]}
-          onConfirm={handleConfirm}
-          onDelete={handleDelete}
         />
       </div>
     </div>

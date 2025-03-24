@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { ExportToExcel } from '@/components/ExportToExcel';
 
 
 export const QrAttendance = () => {
@@ -37,6 +38,7 @@ export const QrAttendance = () => {
   const [course, setCourse] = useState<string>('')
   const [section, setSection] = useState<string>('')
   const [subject, setSubject] = useState<string>('')
+  const [comlab, setComLab] = useState<string>('')
 
 
   const [teacher, setTeacher] = useState<any>(null);
@@ -137,7 +139,10 @@ export const QrAttendance = () => {
       } else if (error.message.includes("405")) {
         toast.error("Failed to update in-time.");
         setLoading(false);
-      } else {
+      } else if (error.message.includes("406")) {
+          toast.error("Cannot time in now.");
+          setLoading(false);
+      }else {
         toast.error("An unknown error has occurred.");
         setLoading(false);
       }
@@ -147,7 +152,7 @@ export const QrAttendance = () => {
   const handleConfirm = async () => {
     setStartClassLoading(true);
     const newData = {teacher_id: teacherId, course: course, section: section, subject: subject}
-    const teacherAttendance = {teacher_id: teacherId, course: course, section: section, subject: subject, time_in: startTime, unique: randomCode}
+    const teacherAttendance = {teacher_id: teacherId, course: course, section: section, subject: subject, time_in: startTime, unique: randomCode, comlab: comlab}
     try {
       await axios.delete("https://comlab-backend.vercel.app/api/student/deleteAllStudentAttendance")
       await axios.post("https://comlab-backend.vercel.app/api/teacher/addToAttendance", teacherAttendance)
@@ -347,6 +352,24 @@ export const QrAttendance = () => {
                               </SelectContent>
                             </Select>
                           </div>
+                          <div className='flex flex-col gap-2'>
+                            <Label htmlFor="section">Com Lab</Label>
+                            <Select value={comlab} onValueChange={setComLab}>
+                              <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Select a lab" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectGroup>
+                                  <SelectLabel>Com Lab</SelectLabel>
+                                  <SelectItem value='1'>1</SelectItem>
+                                  <SelectItem value='2'>2</SelectItem>
+                                  <SelectItem value='3'>3</SelectItem>
+                                  <SelectItem value='4'>4</SelectItem>
+                                  <SelectItem value='5'>5</SelectItem>
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
+                          </div>
                           <div className="flex flex-col">
                             <label htmlFor="time" className="text-sm font-medium mb-2">Select Time:</label>
                             <div className="flex items-center gap-2">
@@ -385,7 +408,7 @@ export const QrAttendance = () => {
                         </div>
                       </div>
                     )}
-
+    
                   </div>
                 </DialogHeader>
               </DialogContent>

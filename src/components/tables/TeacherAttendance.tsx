@@ -36,6 +36,7 @@ import {
 import { Badge } from "../ui/badge"
 import axios from "axios"
 import { Skeleton } from "../ui/skeleton"
+import { useNavigate } from "react-router-dom"
 
 export type Teacher = {
   teacher_id: string,
@@ -236,6 +237,7 @@ interface TeacherAttendanceRecordProps {
 }
 
 export function TeacherAttendance() {
+  const navigate = useNavigate();
   const [sorting, setSorting] = React.useState<SortingState>([{id: "teacher_name", desc: false}]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -456,6 +458,7 @@ export function TeacherAttendance() {
               </Button>
             </div>
           </div>
+          <Button className="float-end" variant={"ghost"} onClick={() => navigate("/admin/attendanceRecord/studentsRecord")}>See Students Attendance</Button> 
         </div>
       )}
     </>

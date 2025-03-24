@@ -44,6 +44,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "../ui/select"
 import { toast } from "sonner"
+import { useNavigate } from "react-router-dom"
 
 export type Student = {
   _id: string,
@@ -286,6 +287,7 @@ interface StudentAttendanceRecordProps {
 }
 
 export function RecordTable() {
+  const navigate = useNavigate();
   const [sorting, setSorting] = React.useState<SortingState>([{id: "student_name", desc: false}]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -423,7 +425,7 @@ export function RecordTable() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="ml-2 border-dashed bg-transparent">
-                    <PlusCircle className="mr-1" /> Teacher
+                    <PlusCircle className="mr-1" /> Sort by Teacher
                     {table.getColumn("teacher_name")?.getFilterValue() ? (
                       <div className="flex gap-2">
                         <span className="font-thin text-gray-500">|</span>
@@ -575,7 +577,9 @@ export function RecordTable() {
                 <ChevronRight />
               </Button>
             </div>
+           
           </div>
+          <Button className="float-end" variant={"ghost"} onClick={() => navigate("/admin/attendanceRecord/teachersRecord")}>See Teachers Attendance</Button> 
           <Dialog open={openEditModal} onOpenChange={setOpenEditModal}>
             <DialogContent className="sm:max-w-[425px] font-geist">
               <DialogHeader>

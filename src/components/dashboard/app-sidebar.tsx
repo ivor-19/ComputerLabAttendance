@@ -32,7 +32,7 @@ const data = {
       items: [
         {
           title: "Dashboard",
-          url: "",
+          url: "/admin/dashboard",
           isActive: false,
         },
       ],
@@ -66,7 +66,12 @@ const data = {
         },
         {
           title: "Attendance Record",
-          url: "/admin/attendanceRecord",
+          url: "/admin/attendanceRecord/studentsRecord",
+          isActive: false,
+        },
+        {
+          title: "Set Schedule",
+          url: "/admin/schedule",
           isActive: false,
         },
       ],

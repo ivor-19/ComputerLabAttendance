@@ -2,6 +2,7 @@ import { AppSidebar } from "@/components/dashboard/app-sidebar"
 import { FacultyTable } from "@/components/tables/FacultyTable"
 import { RecordTable } from "@/components/tables/RecordTable"
 import { StudentAttendanceRecord } from "@/components/tables/StudentAttendanceRecord"
+import { TeacherAttendance } from "@/components/tables/TeacherAttendance"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -17,7 +18,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
-export default function AdminRecords() {
+export default function AdminTeacherRecords() {
   return (
     <SidebarProvider
       style={
@@ -38,13 +39,13 @@ export default function AdminRecords() {
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Students Attendance</BreadcrumbPage>
+                <BreadcrumbPage>Teachers Attendance</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <RecordTable />
+          <TeacherAttendance />
         </div>
       </SidebarInset>
 

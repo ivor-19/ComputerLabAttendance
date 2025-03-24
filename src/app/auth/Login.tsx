@@ -41,7 +41,7 @@ const Login = () => {
                 </div>
                 <Input id="password" type="password" required />
               </div>
-              <Button type="submit" className="w-full bg-[#022c22] hover:bg-[#064e3b]" onClick={() => navigate('/admin/course&section', {replace: true})}>Login</Button>
+              <Button type="submit" className="w-full bg-[#022c22] hover:bg-[#064e3b]" onClick={() => navigate('/admin/dashboard', {replace: true})}>Login</Button>
             </div>
           </form>
         </CardContent>
