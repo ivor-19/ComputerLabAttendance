@@ -47,6 +47,7 @@ export type Teacher = {
   teacher_name: string,
   subject: string,
   unique: string,
+  comlab: string,
 }
 
 export const columns: ColumnDef<Teacher>[] = [
@@ -161,6 +162,24 @@ export const columns: ColumnDef<Teacher>[] = [
       )
     },
     cell: ({ row }) => <div>{row.getValue("date")}</div>,
+  },
+  {
+    accessorKey: "comlab",
+    header: ({ column }) => {
+      return (
+        <div className="text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="text-xs pl-0 bg-transparent"
+          >
+            Com Lab
+            <ArrowUpDown />
+          </Button>
+        </div>
+      )
+    },
+    cell: ({ row }) => <div>{row.getValue("comlab")}</div>,
   },
   {
     accessorKey: "time_in",

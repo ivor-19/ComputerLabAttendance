@@ -19,6 +19,7 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 import Subjects from '@/app/admin/Subjects';
 import MultiSelectDropdown from './MultiSelectDropdown';
+import MultiSelectAddTeacher from './MultiSelectAddTeacher';
  // Import the MultiSelectDropdown component
 
 interface AddTeacherProps {
@@ -77,13 +78,16 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
       subjects: data.subjects,
       teacher_email: data.teacher_email
     };
-
+    const teacherEmail = {teacher_id: data.teacher_id, teacher_email: data.teacher_email}
     try {
       const response = await axios.post('https://comlab-backend.vercel.app/api/teacher/addTeacher', newTeacher);
       console.log(response.data);
 
+      const sendQr = await axios.post("https://comlab-backend.vercel.app/api/teacher/teacherQR",teacherEmail)
+      console.log("Sent successfully", sendQr.data);
+
       setOpen(false);
-      toast.success('User has been created.');
+      toast.success('Teacher has been created.');
       setLoading(false);
       fetch();
       reset({
@@ -160,7 +164,7 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="subjects" className="text-right">Subjects</Label>
             <div className="col-span-3 relative">
-              <MultiSelectDropdown
+              <MultiSelectAddTeacher
                 options={['Programming', 'Database Management', 'Web Development']}
                 onChange={(selectedOptions) => setValue('subjects', selectedOptions)}
               />
@@ -172,7 +176,7 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="courses" className="text-right">Courses</Label>
             <div className="col-span-3 relative">
-              <MultiSelectDropdown
+              <MultiSelectAddTeacher
                 options={['BSIS', 'BSAIS', 'BSOM']}
                 onChange={(selectedOptions) => setValue('courses', selectedOptions)}
               />
@@ -184,7 +188,7 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="sections" className="text-right">Sections</Label>
             <div className="col-span-3 relative">
-              <MultiSelectDropdown
+              <MultiSelectAddTeacher
                 options={allSections}
                 onChange={(selectedOptions) => setValue('sections', selectedOptions)}
               />

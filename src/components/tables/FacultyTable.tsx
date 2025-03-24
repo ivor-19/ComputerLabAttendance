@@ -449,7 +449,7 @@ export function FacultyTable() {
               {Object.keys(rowSelection).length !== 0 && (
                 <DeleteModal
                   title={`Delete (${Object.keys(rowSelection).length})`}
-                  description={`Are you sure you want to delete ${Object.keys(rowSelection).length} student(s)?`}
+                  description={`Are you sure you want to delete ${Object.keys(rowSelection).length} teacher(s)?`}
                   open={openDelete}
                   setOpen={setOpenDelete}
                   onClick={deleteUser}

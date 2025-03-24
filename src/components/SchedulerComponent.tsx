@@ -13,6 +13,7 @@ interface Event {
   course: string;
   section: string;
   subtitle: string;
+  comlab: string;
 }
 
 interface ApiResponse {
@@ -25,6 +26,7 @@ interface ApiResponse {
   course: string;
   section: string;
   subtitle: string;
+  comlab: string;
 }
 
 interface Teacher {
@@ -33,9 +35,16 @@ interface Teacher {
   value: string;
 }
 
+interface ComLab {
+  id: number;
+  text: string;
+  value: string,
+}
+
 export const SchedulerComponent = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [teacherOptions, setTeacherOptions] = useState<Teacher[]>([]);
+  const [comlabOptions, setComlabOptions] = useState<ComLab[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchTeachers = async () => {
@@ -56,6 +65,24 @@ export const SchedulerComponent = () => {
     }
   };
 
+  const fetchComlabs = async () => {
+    try {
+      const response = await axios.get("https://comlab-backend.vercel.app/api/computer/getList");
+      // console.log(response.data.com)
+      const comlabs = response.data.com.map((comlab: any, index: number) => ({
+        id: index + 1, // Increment id starting from 1
+        text: `${comlab.name}`,
+        value: `${comlab.name}`,
+      }));
+      
+      setComlabOptions(comlabs);
+      return comlabs; // Return the teacher names for synchronization
+    } catch (error) {
+      console.error("Error fetching comlabs:", error);
+      return [];
+    }
+  };
+
   const fetchSchedules = async () => {
     try {
       const response = await axios.get<ApiResponse[]>("https://comlab-backend.vercel.app/api/schedule/getSched");
@@ -70,6 +97,7 @@ export const SchedulerComponent = () => {
         course: event.course,
         section: event.section,
         subtitle: event.subtitle,
+        comlab: event.comlab,
       }));
 
       setEvents(parsedEvents);
@@ -83,6 +111,7 @@ export const SchedulerComponent = () => {
       setIsLoading(true);
       await fetchTeachers();
       await fetchSchedules();
+      await fetchComlabs();
       setIsLoading(false);
     };
 
@@ -101,6 +130,7 @@ export const SchedulerComponent = () => {
         course: event.course,
         section: event.section,
         subtitle: event.subtitle,
+        comlab: event.comlab
       };
 
       try {
@@ -125,6 +155,7 @@ export const SchedulerComponent = () => {
           course: event.course,
           section: event.section,
           subtitle: event.subtitle,
+          comlab: event.comlab,
         };
         
         await axios.put(`https://comlab-backend.vercel.app/api/schedule/updateSched`, updatedEvent);
@@ -201,13 +232,7 @@ export const SchedulerComponent = () => {
             {
               name: "comlab",
               type: "select",
-              options: [
-                { id: 1, text: "1", value: "1" },
-                { id: 2, text: "2", value: "2" },
-                { id: 3, text: "3", value: "3" },
-                { id: 3, text: "4", value: "4" },
-                { id: 3, text: "5", value: "5" },
-              ],
+              options: comlabOptions,
               config: { label: "Com Lab", required: true, errMsg: "Please select a comlab" },
             },
           ]}

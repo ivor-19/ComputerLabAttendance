@@ -281,7 +281,7 @@ export function QRAttendanceTable({ refreshKey }: QRAttendanceTableProps) {
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
+      <div className="flex items-center py-4 gap-2">
         <Input
           placeholder="Filter student..."
           value={(table.getColumn("student_name")?.getFilterValue() as string) ?? ""}
