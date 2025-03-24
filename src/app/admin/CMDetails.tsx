@@ -77,7 +77,7 @@ export default function CMDetails() {
 
   const filteredList = list.filter(item => item.comlabid === id);
   useEffect(() => {
-    setDisable(filteredList.length >= 40);
+    setDisable(filteredList.length >= 60);
   }, [filteredList]);
 
   const deleteComputerSet = async (id: string) => {
@@ -225,7 +225,6 @@ export default function CMDetails() {
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="grid gap-4 py-4">
-              {selectedItem && <span className="text-xs text-gray-500">ID: {selectedItem._id}</span>}
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="pc_id" className="text-right">PC ID</Label>
                 <div className="col-span-3 relative">
@@ -243,7 +242,7 @@ export default function CMDetails() {
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="condition" className="text-right">Condition</Label>
                 <div className="col-span-3 font-geist text-[14px]">
-                  <select id="condition" {...register("condition")} className="w-full p-2 border rounded-md font-geist">
+                  <select id="condition" {...register("condition")} className="w-full p-2 border rounded-md font-geist bg-white">
                     <option value="Good">Good</option>
                     <option value="Fair">Fair</option>
                     <option value="Bad">Bad</option>
@@ -254,7 +253,7 @@ export default function CMDetails() {
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="status" className="text-right">Status</Label>
                 <div className="col-span-3 font-geist text-[14px]">
-                  <select id="status" {...register("status")} className="w-full p-2 border rounded-md font-geist">
+                  <select id="status" {...register("status")} className="w-full p-2 border rounded-md font-geist bg-white">
                     <option value="Active">Active</option>
                     <option value="Inactive">Inactive</option>
                   </select>

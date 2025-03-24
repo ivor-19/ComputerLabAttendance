@@ -378,7 +378,7 @@ export const QrAttendance = () => {
                                 id="startTime"
                                 value={startTime}
                                 onChange={handleStartTimeChange}
-                                className="border p-2 rounded-md"
+                                className="border p-2 rounded-md bg-white"
                                 disabled
                               />
                               to
@@ -387,7 +387,7 @@ export const QrAttendance = () => {
                                 id="endTime"
                                 value={endTime}
                                 onChange={handleEndTimeChange}
-                                className="border p-2 rounded-md"
+                                className="border p-2 rounded-md bg-white"
                               />
                             </div>
                           </div>

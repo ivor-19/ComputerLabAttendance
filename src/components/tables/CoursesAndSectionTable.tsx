@@ -266,16 +266,24 @@ export function CoursesAndSectionTable() {
 
   // Handle edit action
   const handleEdit = (student: Student) => {
+    
+    const year = student.section ? student.section.charAt(0) : '1'; // Default to '1' if empty
+    const sectionLetter = student.section ? student.section.slice(1) : 'A'; // Default to 'A' if empty
+    
     setStudentData(student);
     setOpenEditModal(true);
-    reset(student); 
+    reset({
+      ...student,
+      yearlevel: year,  // Temporary field for the form
+      section: sectionLetter // Only the letter part
+    });
   };
 
   // Handle form submission
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: FormData & { yearlevel?: string }) => {
     setLoading(true);
-  
-    const newData = {student_id: data.student_id, firstname: data.firstname, lastname: data.lastname, course: data.course, section: combinedSection}; 
+    const combinedSection2 = `${data.yearlevel || '1'}${data.section || 'A'}`;
+    const newData = {student_id: data.student_id, firstname: data.firstname, lastname: data.lastname, course: data.course, section: combinedSection2}; 
     try{
       const response = await axios.post("https://comlab-backend.vercel.app/api/student/editStudent", newData)
       if (response.status === 200) {
@@ -526,6 +534,7 @@ export function CoursesAndSectionTable() {
                         id="student_id"
                         className="col-span-3"
                         {...register("student_id")}
+                        disabled
                       />
                       {errors.student_id && <span className="text-red-500 text-xs">{errors.student_id.message}</span>}
                     </div>
@@ -577,7 +586,7 @@ export function CoursesAndSectionTable() {
                       <select
                         id="course"
                         {...register("course")}
-                        className="w-[180px] p-2 border rounded-md font-geist"
+                        className="w-[120px] p-2 border rounded-md font-geist bg-white"
                       >
                         <option value="" disabled>Select course</option>
                         <option value="BSIS">BSIS</option>
@@ -596,23 +605,21 @@ export function CoursesAndSectionTable() {
                         <select
                           id="yearlevel"
                           {...register("yearlevel")}
-                          className="w-[130px] p-2 border rounded-md font-geist"
+                          className="w-[120px] p-2 border rounded-md font-geist bg-white"
                         >
-                          <option value="" disabled>Year Level</option>
                           <option value="1">1</option>
                           <option value="2">2</option>
                           <option value="3">3</option>
                           <option value="4">4</option>
                         </select>
-                        {errors.yearlevel && <p className="text-red-500 text-xs">{errors.yearlevel.message}</p>}
+                        {errors.yearlevel && <span className="text-red-500 text-xs">{errors.yearlevel.message}</span>}
                       </div>
                       <div className="w-full font-geist text-[14px]">
-                        <select
-                          id="section"
-                          {...register("section")}
-                          className="p-2 border rounded-md font-geist"
-                        >
-                          <option value="" disabled>Select section</option>
+                          <select
+                            id="section"
+                            {...register("section")}
+                            className="w-[120px] p-2 border rounded-md font-geist bg-white"
+                          >
                           <option value="A">A</option>
                           <option value="B">B</option>
                           <option value="C">C</option>
@@ -624,7 +631,7 @@ export function CoursesAndSectionTable() {
                           <option value="I">I</option>
                           <option value="J">J</option>
                         </select>
-                        {errors.section && <p className="text-red-500 text-xs">{errors.section.message}</p>}
+                        {errors.section && <span className="text-red-500 text-xs">{errors.section.message}</span>}
                       </div>
                     </div>
                   </div>

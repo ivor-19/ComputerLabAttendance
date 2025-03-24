@@ -168,7 +168,7 @@ export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
               <select 
                 id="course"
                 {...register("course")}
-                className="w-[180px] p-2 border rounded-md font-geist"
+                className="w-[180px] p-2 border rounded-md font-geist bg-white"
               >
                 <option value="" disabled>Select course</option>
                 <option value="BSIS">BSIS</option>
@@ -187,7 +187,7 @@ export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
                 <select 
                   id="yearlevel"
                   {...register("yearlevel")}
-                  className="w-[130px] p-2 border rounded-md font-geist"
+                  className="w-[130px] p-2 border rounded-md font-geist bg-white"
                 >
                   <option value="" disabled>Year Level</option>
                   <option value="1">1</option>
@@ -201,7 +201,7 @@ export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
                 <select 
                   id="section"
                   {...register("section")}
-                  className="p-2 border rounded-md font-geist"
+                  className="p-2 border rounded-md font-geist bg-white"
                 >
                   <option value="" disabled>Select section</option>
                   <option value="A">A</option>
