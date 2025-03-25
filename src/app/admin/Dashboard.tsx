@@ -1,6 +1,5 @@
 import { AppSidebar } from "@/components/dashboard/app-sidebar"
 import { SchedulerComponent } from "@/components/SchedulerComponent"
-import { Badge } from "@/components/ui/badge"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,7 +13,6 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { Skeleton } from "@mui/material"
 import axios from "axios"
 import { Boxes, TrendingUpIcon } from "lucide-react"
 import { useEffect, useState } from "react"

@@ -1,23 +1,17 @@
 import { AppSidebar } from "@/components/dashboard/app-sidebar"
 import { ComputerManagementTable } from "@/components/tables/ComputerManagementTable"
-import { CoursesAndSectionTable } from "@/components/tables/CoursesAndSectionTable"
-import { SidebarRight } from "@/components/teacher/sidebar-right"
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { useNavigate } from "react-router-dom"
 
 export default function ComputerManagement() {
 

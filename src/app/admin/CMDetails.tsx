@@ -43,7 +43,7 @@ const FormSchema = z.object({
 type FormData = z.infer<typeof FormSchema>;
 
 export default function CMDetails() {
-  const { register, handleSubmit, formState: {errors}, reset, setError, watch } = useForm<FormData>({
+  const { register, handleSubmit, formState: {errors}, reset } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
   })
   
