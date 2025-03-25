@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, GanttChart, Loader2, MoreHorizontal, Pencil } from "lucide-react"
+import { ArrowUpDown, GanttChart, Loader2, MoreHorizontal, Pencil } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -21,14 +21,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -46,7 +44,7 @@ import {
 } from "@/components/ui/table"
 import DeleteModal from "../DeleteModal"
 import { AddCom } from "../AddCom"
-import { data, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { Skeleton } from "../ui/skeleton"
 import * as z from "zod"
@@ -70,7 +68,7 @@ const FormSchema = z.object({
 type FormData = z.infer<typeof FormSchema>;
 
 export function ComputerManagementTable() {
-  const { register, handleSubmit, formState: {errors}, reset, setError, watch } = useForm<FormData>({
+  const { register, handleSubmit, formState: {errors}, reset } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
   })
 
@@ -154,7 +152,7 @@ export function ComputerManagementTable() {
       id: "actions",
       enableHiding: false,
       cell: ({ row }) => {
-        const payment = row.original
+        // const payment = row.original
   
         return (
           <DropdownMenu>

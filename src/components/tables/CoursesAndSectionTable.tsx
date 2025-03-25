@@ -42,7 +42,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "../ui/label";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 // Define the Student type
 export type Student = {
@@ -232,9 +232,7 @@ export function CoursesAndSectionTable() {
   const {
     register,
     handleSubmit,
-    control,
     reset,
-    watch,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
@@ -260,9 +258,9 @@ export function CoursesAndSectionTable() {
     }
   };
 
-  const yearLevel = watch("yearlevel");
-  const section = watch("section");
-  const combinedSection = yearLevel && section ? `${yearLevel}${section}` : "1A";
+  // const yearLevel = watch("yearlevel");
+  // const section = watch("section");
+  // const combinedSection = yearLevel && section ? `${yearLevel}${section}` : "1A";
 
   // Handle edit action
   const handleEdit = (student: Student) => {

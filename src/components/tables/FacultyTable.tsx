@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, FilterX, Loader2, MoreHorizontal, Pencil, Plus, PlusCircle, QrCode, SquarePen } from "lucide-react";
+import { ArrowUpDown, Loader2, MoreHorizontal, Pencil, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -25,7 +25,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "../ui/badge";
-import { AddStudent } from "../AddStudent";
 import DeleteModal from "../DeleteModal";
 import axios from "axios";
 import {
@@ -35,7 +34,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { QRCodeSVG } from 'qrcode.react';
@@ -406,8 +404,8 @@ export function FacultyTable() {
   });
 
   // Generate unique values for course and section
-  const uniqueCourses = Array.from(new Set(teachers.map((teacher) => teacher.courses)));
-  const uniqueSections = Array.from(new Set(teachers.map((teacher) => teacher.sections)));
+  // const uniqueCourses = Array.from(new Set(teachers.map((teacher) => teacher.courses)));
+  // const uniqueSections = Array.from(new Set(teachers.map((teacher) => teacher.sections)));
 
   return (
     <>

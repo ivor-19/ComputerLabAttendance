@@ -296,7 +296,7 @@ export function RecordTable() {
   const [rowData, setRowData] = React.useState<Student | null>(null);
   const [openEditModal, setOpenEditModal] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const [status, setStatus] = React.useState("")
+  // const [status, setStatus] = React.useState("")
 
   const initialRender = React.useRef(true);
 
@@ -346,11 +346,11 @@ export function RecordTable() {
     }
   }
 
-  React.useEffect(() => {
-    if (rowData) {
-      setStatus(rowData.status);
-    }
-  }, [rowData]);
+  // React.useEffect(() => {
+  //   if (rowData) {
+  //     setStatus(rowData.status);
+  //   }
+  // }, [rowData]);
 
   const table = useReactTable({
     data: attendanceList,
