@@ -1,12 +1,8 @@
 import { AppSidebar } from "@/components/dashboard/app-sidebar"
-import { FacultyTable } from "@/components/tables/FacultyTable"
-import { RecordTable } from "@/components/tables/RecordTable"
-import { StudentAttendanceRecord } from "@/components/tables/StudentAttendanceRecord"
 import { TeacherAttendance } from "@/components/tables/TeacherAttendance"
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,

@@ -25,7 +25,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { ExportToExcel } from '@/components/ExportToExcel';
 
 
 export const QrAttendance = () => {
@@ -74,12 +73,11 @@ export const QrAttendance = () => {
   const [endTime, setEndTime] = useState<string>("");
   const [loginDisabled, setLoginDisabled] = useState(false);
 
-  const formatEndTime = (date: Date): string => {
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
-  };
-  const [teacherOut, setTeacherOut] = useState<string>(formatEndTime(new Date()));
+  // const formatEndTime = (date: Date): string => {
+  //   const hours = date.getHours().toString().padStart(2, '0');
+  //   const minutes = date.getMinutes().toString().padStart(2, '0');
+  //   return `${hours}:${minutes}`;
+  // };
 
   const fetchTeacher = async (result: any) => {
     setLoading(true);

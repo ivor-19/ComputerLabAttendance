@@ -11,13 +11,12 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, FilterX, Loader2, MoreHorizontal, Pencil, PlusCircle, SquarePen } from "lucide-react"
+import { ArrowUpDown, ChevronLeft, ChevronRight, FilterX, Loader2, MoreHorizontal, Pencil, PlusCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -262,12 +261,12 @@ export const columns = ( handleEdit: (student: Student) => void): ColumnDef<Stud
   },
 ]
 
-interface StudentAttendanceRecordProps {
-  refreshKey: number;
-}
+// interface StudentAttendanceRecordProps {
+//   refreshKey: number;
+// }
 
 export function StudentAttendanceRecord() {
-  const {teacherId, teacherName} = useTeacher();
+  const {teacherId} = useTeacher();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -281,11 +280,9 @@ export function StudentAttendanceRecord() {
   const initialRender = React.useRef(true);
 
   const {
-    register,
     handleSubmit,
     control,
     reset,
-    formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -321,7 +318,7 @@ export function StudentAttendanceRecord() {
   const onSubmit = async (data: FormData) => {
     setLoading(true)
     try {
-      const response = await axios.post(`https://comlab-backend.vercel.app/api/student/editStatus/${rowData?._id}`, {status: data.status})
+      await axios.post(`https://comlab-backend.vercel.app/api/student/editStatus/${rowData?._id}`, {status: data.status})
       fetchAttendance();
       setOpenEditModal(false)
       setLoading(false)
@@ -353,7 +350,6 @@ export function StudentAttendanceRecord() {
 
   const uniqueCourses = Array.from(new Set(attendanceList.map((attendanceList) => attendanceList.course_section)));
   const uniqueDates = Array.from(new Set(attendanceList.map((attendanceList) => attendanceList.date)));
-  const uniqueTeachers = Array.from(new Set(attendanceList.map((attendanceList) => attendanceList.teacher_name)));
   const uniqueSubjects = Array.from(new Set(attendanceList.map((attendanceList) => attendanceList.subject)));
 
   React.useEffect(() => {

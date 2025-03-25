@@ -11,13 +11,12 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, FilterX, Loader2, MoreHorizontal, Pencil, PlusCircle, SquarePen } from "lucide-react"
+import { ArrowUpDown, ChevronLeft, ChevronRight, FilterX, Loader2, MoreHorizontal, Pencil, PlusCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -42,7 +41,7 @@ import { Label } from "../ui/label"
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "../ui/select"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
 import { toast } from "sonner"
 import { useNavigate } from "react-router-dom"
 
@@ -282,9 +281,9 @@ export const columns = ( handleEdit: (student: Student) => void) : ColumnDef<Stu
   },
 ]
 
-interface StudentAttendanceRecordProps {
-  refreshKey: number;
-}
+// interface StudentAttendanceRecordProps {
+//   refreshKey: number;
+// }
 
 export function RecordTable() {
   const navigate = useNavigate();
@@ -302,11 +301,9 @@ export function RecordTable() {
   const initialRender = React.useRef(true);
 
   const {
-    register,
     handleSubmit,
     control,
     reset,
-    formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -338,7 +335,7 @@ export function RecordTable() {
   const onSubmit = async(data: FormData) => {
     setLoading(true)
     try {
-      const response = await axios.post(`https://comlab-backend.vercel.app/api/student/editStatus/${rowData?._id}`, {status: data.status})
+      await axios.post(`https://comlab-backend.vercel.app/api/student/editStatus/${rowData?._id}`, {status: data.status})
       fetchAttendance();
       setOpenEditModal(false)
       setLoading(false)

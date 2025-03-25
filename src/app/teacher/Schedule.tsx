@@ -1,16 +1,11 @@
-import { SchedulerComponent } from "@/components/SchedulerComponent"
-import { RecordTable } from "@/components/tables/RecordTable"
-import { StudentAttendanceRecord } from "@/components/tables/StudentAttendanceRecord"
+
 import { AppSidebarTeacher } from "@/components/teacher/app-sidebar"
-import { SidebarRight } from "@/components/teacher/sidebar-right"
 import { TeacherScheduler } from "@/components/TeacherScheduler"
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import {

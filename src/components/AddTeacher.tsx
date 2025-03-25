@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -17,8 +17,6 @@ import { toast } from 'sonner';
 import { Loader2, Plus } from 'lucide-react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import Subjects from '@/app/admin/Subjects';
-import MultiSelectDropdown from './MultiSelectDropdown';
 import MultiSelectAddTeacher from './MultiSelectAddTeacher';
  // Import the MultiSelectDropdown component
 
@@ -47,7 +45,6 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
     formState: { errors },
     reset,
     setValue,
-    watch,
   } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -64,8 +61,8 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
     Array.from({ length: 10 }, (_, section) => `${year + 1}${String.fromCharCode(65 + section)}`)
   ).flat();
 
-  const course = watch('courses');
-  const section = watch('sections');
+  // const course = watch('courses');
+  // const section = watch('sections');
 
   const addNewTeacher = async (data: FormData) => {
     setLoading(true);

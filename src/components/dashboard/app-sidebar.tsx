@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Bot, ChevronDown, ChevronUp, GalleryVerticalEnd, Minus, Plus, SquareTerminal } from "lucide-react"
+import { Bot, ChevronDown, ChevronUp, SquareTerminal } from "lucide-react"
 
 import {
   Collapsible,
@@ -146,7 +146,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent className="p-2">
         <SidebarGroup>
           <SidebarMenu>
-            {updatedNav.map((item, index) => (
+            {updatedNav.map((item) => (
               <Collapsible
                 key={item.title}
                 defaultOpen

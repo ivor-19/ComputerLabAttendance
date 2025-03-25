@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Scheduler } from "@aldabil/react-scheduler";
 import axios from "axios";
 import { Skeleton } from "./ui/skeleton";

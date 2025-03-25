@@ -1,4 +1,3 @@
-import React from 'react'
 import {
   Dialog,
   DialogContent,
@@ -9,13 +8,13 @@ import {
   DialogTrigger,
   } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { CSSProperties, useEffect, useState } from "react"
+import { useState } from "react"
 import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form"
 import axios from 'axios'
 import { toast } from 'sonner'
-import { CirclePlus, Loader2, Plus } from 'lucide-react'
+import { Loader2, Plus } from 'lucide-react'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
 import {
@@ -46,10 +45,9 @@ const FormSchema = z.object({
 type FormData = z.infer<typeof FormSchema>;
 
 export const AddComputerStat = ({open, setOpen, fetch, id, disabled} : AddComputerStatProps) => {
-  const { register, handleSubmit, formState: {errors}, reset, setError, control } = useForm<FormData>({
+  const { register, handleSubmit, formState: {errors}, reset, control } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
   })
-  const [userExists, setUserExists] = useState(false);
   const [loading, setLoading] = useState(false);
 
 
@@ -167,7 +165,6 @@ export const AddComputerStat = ({open, setOpen, fetch, id, disabled} : AddComput
           </div>
         </div>
         <DialogFooter className="flex items-center">
-          {userExists && <span className="text-red-500 text-xs font-geist">Already Exists.</span>}
           <Button onClick={handleSubmit(addNewComputerSet)}> 
             {loading ? ( 
               <>

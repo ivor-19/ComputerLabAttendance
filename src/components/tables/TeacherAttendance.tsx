@@ -11,13 +11,12 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, FilterX, MoreHorizontal, PlusCircle, SquarePen } from "lucide-react"
+import { ArrowUpDown, ChevronLeft, ChevronRight, FilterX, MoreHorizontal, PlusCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -251,9 +250,9 @@ export const columns: ColumnDef<Teacher>[] = [
   },
 ]
 
-interface TeacherAttendanceRecordProps {
-  refreshKey: number;
-}
+// interface TeacherAttendanceRecordProps {
+//   refreshKey: number;
+// }
 
 export function TeacherAttendance() {
   const navigate = useNavigate();
