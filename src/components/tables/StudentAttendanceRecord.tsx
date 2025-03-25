@@ -43,6 +43,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "../ui/label"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
 import { toast } from "sonner"
+import { useTeacher } from "@/Context"
 
 export type Student = {
   _id: string,
@@ -266,6 +267,7 @@ interface StudentAttendanceRecordProps {
 }
 
 export function StudentAttendanceRecord() {
+  const {teacherId, teacherName} = useTeacher();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -294,7 +296,10 @@ export function StudentAttendanceRecord() {
   const fetchAttendance = async () => {
     try {
       const response = await axios.get("https://comlab-backend.vercel.app/api/student/getTotalAttendance");
-      setAttendanceList(response.data);
+      const filteredData = response.data.filter((student: Student) => 
+        student.teacher_id === teacherId
+      );
+      setAttendanceList(filteredData);
       setLoadingTable(false);
     } catch (error) {
       console.log(error);
@@ -304,6 +309,7 @@ export function StudentAttendanceRecord() {
   React.useEffect(() => {
     fetchAttendance();
   }, []);
+  
 
   const handleEdit = (student: Student) => {
     console.log(student.status)

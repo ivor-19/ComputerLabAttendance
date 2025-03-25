@@ -280,7 +280,7 @@ export function QRAttendanceTable({ refreshKey }: QRAttendanceTableProps) {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full z-50">
       <div className="flex items-center py-4 gap-2">
         <Input
           placeholder="Filter student..."

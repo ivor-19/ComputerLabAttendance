@@ -44,13 +44,16 @@ const Login = () => {
   }
 
   return (
-    <div className='h-screen flex items-center justify-center'>
-      <Card>
+    <div className='h-screen flex items-center justify-center relative'>
+      <div className='absolute z-0 flex items-center justify-center opacity-10 top-0 h-full'>
+        <img src='/images/clm-logo.png' className='object-contain h-[900px] w-[900px]'></img>
+      </div>
+      <Card  className='bg-white z-10'>
         <CardHeader>
           <CardTitle className="text-xl font-bold text-center">Welcome</CardTitle>
           <CardDescription>Enter your ID and password to log in to your account</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className='bg-white'>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="flex flex-col gap-6">
               <div className="relative">
