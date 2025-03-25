@@ -72,7 +72,7 @@ export const QrAttendance = () => {
 
   const [startTime, setStartTime] = useState<string>("");
   const [endTime, setEndTime] = useState<string>("");
-
+  const [loginDisabled, setLoginDisabled] = useState(false);
 
   const formatEndTime = (date: Date): string => {
     const hours = date.getHours().toString().padStart(2, '0');
@@ -166,6 +166,7 @@ export const QrAttendance = () => {
       setStartClassLoading(false);
     }
 
+    setLoginDisabled(true);
     setClassStarted(true);
     setIsStartClick(false);
     setIsPaused(false);
@@ -187,7 +188,7 @@ export const QrAttendance = () => {
       setClassStarted(false);
       setIsEndClassEnabled(false);
       setIsPaused(true);
-  
+      setLoginDisabled(false);
       setIsScanned(false);
       window.location.reload();
     } catch (error) {
@@ -241,7 +242,7 @@ export const QrAttendance = () => {
       <Toaster />
       <div className="h-screen">
         <div className="h-full flex justify-center">
-          <Button className="absolute left-5 top-5" onClick={() => navigate("/login")}>Login</Button>
+          <Button className="absolute left-5 top-5" onClick={() => navigate("/login")} disabled={loginDisabled}>Login</Button>
           <div className="w-[60%] h-full flex justify-center items-center bg-[#18181b] border-r border-gray-200">
             <div className="w-[500px] absolute top-28">
               <Scanner onScan={handleScan} paused={isPaused} allowMultiple={true} scanDelay={1500}/>
