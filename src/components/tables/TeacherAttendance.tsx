@@ -36,6 +36,7 @@ import { Badge } from "../ui/badge"
 import axios from "axios"
 import { Skeleton } from "../ui/skeleton"
 import { useNavigate } from "react-router-dom"
+import * as XLSX from 'xlsx'; 
 
 export type Teacher = {
   teacher_id: string,
@@ -50,28 +51,28 @@ export type Teacher = {
 }
 
 export const columns: ColumnDef<Teacher>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
+  // {
+  //   id: "select",
+  //   header: ({ table }) => (
+  //     <Checkbox
+  //       checked={
+  //         table.getIsAllPageRowsSelected() ||
+  //         (table.getIsSomePageRowsSelected() && "indeterminate")
+  //       }
+  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+  //       aria-label="Select all"
+  //     />
+  //   ),
+  //   cell: ({ row }) => (
+  //     <Checkbox
+  //       checked={row.getIsSelected()}
+  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
+  //       aria-label="Select row"
+  //     />
+  //   ),
+  //   enableSorting: false,
+  //   enableHiding: false,
+  // },
   {
     accessorKey: "teacher_id",
     header: ({ column }) => {
@@ -309,6 +310,23 @@ export function TeacherAttendance() {
     }
   }, [uniqueDates, table]);
 
+   const exportToExcel = () => {
+        const exportData = table.getRowModel().rows.map((row) => {
+          return row.getVisibleCells().reduce((acc, cell) => {
+            acc[cell.column.id] = cell.getValue();
+            return acc;
+          }, {} as Record<string, any>); // Use Record type to ensure proper typing
+        });
+    
+        // Create a new workbook
+        const ws = XLSX.utils.json_to_sheet(exportData);  // Convert the rows into an Excel sheet
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Attendance Data');  // Append the sheet to the workbook
+    
+        // Export the Excel file
+        XLSX.writeFile(wb, 'attendance_data.xlsx');
+      };
+
   return (
     <>
       {loadingTable ? (
@@ -398,7 +416,9 @@ export function TeacherAttendance() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              
+              <Button onClick={exportToExcel} variant="outline" size="sm">
+                Export to Excel
+              </Button>
             </div>
           </div>
           <div className="rounded-md border">

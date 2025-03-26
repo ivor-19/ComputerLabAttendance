@@ -11,8 +11,8 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronLeft, ChevronRight, FilterX, Loader2, MoreHorizontal, Pencil, PlusCircle } from "lucide-react"
-
+import { ArrowUpDown, ChevronLeft, ChevronRight, Filter, FilterX, ListFilter, Loader2, MoreHorizontal, Pencil, PlusCircle } from "lucide-react"
+import * as XLSX from 'xlsx'; 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -66,28 +66,28 @@ const FormSchema = z.object({
 type FormData = z.infer<typeof FormSchema>;
 
 export const columns = ( handleEdit: (student: Student) => void) : ColumnDef<Student>[] => [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
+  // {
+  //   id: "select",
+  //   header: ({ table }) => (
+  //     <Checkbox
+  //       checked={
+  //         table.getIsAllPageRowsSelected() ||
+  //         (table.getIsSomePageRowsSelected() && "indeterminate")
+  //       }
+  //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+  //       aria-label="Select all"
+  //     />
+  //   ),
+  //   cell: ({ row }) => (
+  //     <Checkbox
+  //       checked={row.getIsSelected()}
+  //       onCheckedChange={(value) => row.toggleSelected(!!value)}
+  //       aria-label="Select row"
+  //     />
+  //   ),
+  //   enableSorting: false,
+  //   enableHiding: false,
+  // },
   {
     accessorKey: "student_name",
     header: ({ column }) => {
@@ -382,6 +382,23 @@ export function RecordTable() {
     }
   }, [uniqueDates, table]);
 
+   const exportToExcel = () => {
+      const exportData = table.getRowModel().rows.map((row) => {
+        return row.getVisibleCells().reduce((acc, cell) => {
+          acc[cell.column.id] = cell.getValue();
+          return acc;
+        }, {} as Record<string, any>); // Use Record type to ensure proper typing
+      });
+  
+      // Create a new workbook
+      const ws = XLSX.utils.json_to_sheet(exportData);  // Convert the rows into an Excel sheet
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Attendance Data');  // Append the sheet to the workbook
+  
+      // Export the Excel file
+      XLSX.writeFile(wb, 'attendance_data.xlsx');
+    };
+
   return (
     <>
       {loadingTable ? (
@@ -422,7 +439,7 @@ export function RecordTable() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="ml-2 border-dashed bg-transparent">
-                    <PlusCircle className="mr-1" /> Sort by Teacher
+                    <ListFilter className="mr-1" /> Sort by Teacher
                     {table.getColumn("teacher_name")?.getFilterValue() ? (
                       <div className="flex gap-2">
                         <span className="font-thin text-gray-500">|</span>
@@ -448,7 +465,7 @@ export function RecordTable() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="ml-2 border-dashed bg-transparent">
-                    <PlusCircle className="mr-1" /> Course & Section
+                    <ListFilter className="mr-1" /> Course & Section
                     {table.getColumn("course_section")?.getFilterValue() ? (
                       <div className="flex gap-2">
                         <span className="font-thin text-gray-500">|</span>
@@ -474,7 +491,7 @@ export function RecordTable() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="ml-2 border-dashed bg-transparent">
-                    <PlusCircle className="mr-1" /> Date
+                    <ListFilter className="mr-1" /> Date
                     {table.getColumn("date")?.getFilterValue() ? (
                       <div className="flex gap-2">
                         <span className="font-thin text-gray-500">|</span>
@@ -497,7 +514,9 @@ export function RecordTable() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              
+              <Button onClick={exportToExcel} variant="outline" size="sm">
+                Export to Excel
+              </Button>
             </div>
           </div>
           <div className="rounded-md border">

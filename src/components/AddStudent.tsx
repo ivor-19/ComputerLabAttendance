@@ -9,7 +9,7 @@ import {
   DialogTrigger,
   } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form"
@@ -47,6 +47,19 @@ export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
   const yearLevel = watch("yearlevel");
   const section = watch("section");
   const combinedSection = yearLevel && section ? `${yearLevel}${section}` : "1A";
+  const [courses, setCourses] = useState<{ _id: string, course: string; course_code: string }[]>([])
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await axios.get("https://comlab-backend.vercel.app/api/acads/getCourses");
+        setCourses(response.data)
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetchCourses();
+  },[])
 
   const addNewStudent = async (data: FormData) => {
     setLoading(true);
@@ -170,10 +183,11 @@ export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
                 {...register("course")}
                 className="w-[180px] p-2 border rounded-md font-geist bg-white"
               >
-                <option value="" disabled>Select course</option>
-                <option value="BSIS">BSIS</option>
-                <option value="BSAIS">BSAIS</option>
-                <option value="BSOM">BSOM</option>
+                {courses.map((course) => (
+                  <option key={course._id} value={course.course}>
+                    {course.course}
+                  </option>
+                ))}
               </select>
               {errors.course && <p className="text-red-500 text-xs">{errors.course.message}</p>}
             </div>

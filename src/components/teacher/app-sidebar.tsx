@@ -96,7 +96,7 @@ export function AppSidebarTeacher({ ...props }: React.ComponentProps<typeof Side
                   <img src="/images/clm-logo.png" sizes="4"></img>
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold text-white">Computer Lab Management</span>
+                  <span className="font-semibold text-white">Computer Lab Monitoring and Attendance System</span>
                   <span className="text-white">v1.0.0</span>
                 </div>
               </a>

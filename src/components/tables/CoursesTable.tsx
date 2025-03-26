@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, GanttChart, Loader2, MoreHorizontal, Pencil, Plus } from "lucide-react"
+import { ArrowUpDown, Loader2, MoreHorizontal, Pencil, Plus } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -52,24 +51,22 @@ import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
-import { AddComputerLab } from "../AddComputerLab"
+import { AddCourse } from "../AddCourse"
 
-export type ComLabList = {
+export type CoursesList = {
   _id: string,
-  name: string,
-  room: string,
+  course_code: string,
+  course: string,
 }
 
 const FormSchema = z.object({
-  _id: z.string().optional(), // Added _id to schema
-  name: z.string().min(1, {message: "Name is required"}),
-  room: z.string().min(1, {message: "Room is required"}),
-  computerSets: z.string().optional(),
+  course_code: z.string().min(1, {message: "Course code is required"}),
+  course: z.string().min(1, {message: "Course is required"}),
 })
 
 type FormData = z.infer<typeof FormSchema>;
 
-export function ComputerManagementTable() {
+export function CoursesTable() {
   const { register, handleSubmit, formState: {errors}, reset } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
   })
@@ -81,10 +78,10 @@ export function ComputerManagementTable() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
-  const [currentLab, setCurrentLab] = React.useState<ComLabList | null>(null);
+  const [currentLab, setCurrentLab] = React.useState<CoursesList | null>(null);
   
 
-  const columns: ColumnDef<ComLabList>[] = [
+  const columns: ColumnDef<CoursesList>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -108,14 +105,7 @@ export function ComputerManagementTable() {
       enableHiding: false,
     },
     {
-      accessorKey: "_id",
-      header: "ID",
-      cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("_id")}</div>
-      ),
-    },
-    {
-       accessorKey: "name",
+       accessorKey: "course_code",
        header: ({ column }) => {
          return (
            <div className="text-left">
@@ -124,16 +114,16 @@ export function ComputerManagementTable() {
                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                className="text-xs pl-0 bg-transparent"
              >
-               Name
+               Couse Code
                <ArrowUpDown />
              </Button>
            </div>
          )
        },
-       cell: ({ row }) => <div>{row.getValue("name")}</div>,
+       cell: ({ row }) => <div>{row.getValue("course_code")}</div>,
      },
      {
-        accessorKey: "room",
+        accessorKey: "course",
         header: ({ column }) => {
           return (
             <div className="text-left">
@@ -142,13 +132,13 @@ export function ComputerManagementTable() {
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 className="text-xs pl-0 bg-transparent"
               >
-                Room
+                Name
                 <ArrowUpDown />
               </Button>
             </div>
           )
         },
-        cell: ({ row }) => <div>{row.getValue("room")}</div>,
+        cell: ({ row }) => <div>{row.getValue("course")}</div>,
       },
     {
       id: "actions",
@@ -172,7 +162,7 @@ export function ComputerManagementTable() {
                 Copy payment ID
               </DropdownMenuItem> */}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleRowClick(row.original)}><GanttChart className="mr-2 h-4 w-4" />View & Manage</DropdownMenuItem>
+              {/* <DropdownMenuItem onClick={() => handleRowClick(row.original)}><GanttChart className="mr-2 h-4 w-4" />View & Manage</DropdownMenuItem> */}
               <DropdownMenuItem onClick={() => handleEditClick(row.original)}><Pencil className="mr-2 h-4 w-4" />Edit Details</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -185,16 +175,16 @@ export function ComputerManagementTable() {
   const [open, setOpen] = React.useState(false);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const [list, setList] = React.useState<ComLabList[]>([])
+  const [list, setList] = React.useState<CoursesList[]>([])
   const [loadingTable, setLoadingTable] = React.useState(true);
   const [editMode, setEditMode] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState(false);
 
   const fetchList = async () => {
     try {
-      const response = await axios.get("https://comlab-backend.vercel.app/api/computer/getList");
-      setList(response.data.com);
-      console.log(response.data.com);
+      const response = await axios.get("https://comlab-backend.vercel.app/api/acads/getCourses");
+      setList(response.data);
+      console.log(response.data);
       setLoadingTable(false);
     } catch (error) {
       console.error("Error fetching users", error);
@@ -205,14 +195,13 @@ export function ComputerManagementTable() {
     fetchList();
   }, []);
 
-  const handleEditClick = (lab: ComLabList) => {
+  const handleEditClick = (lab: CoursesList) => {
     setCurrentLab(lab);
     setEditMode(true);
     // Pre-fill the form with the lab's current values, including _id
     reset({
-      _id: lab._id,
-      name: lab.name,
-      room: lab.room
+      course_code: lab.course_code,
+      course: lab.course
     });
     setOpenEdit(true); // Open the dialog
   };
@@ -222,15 +211,15 @@ export function ComputerManagementTable() {
     try {
       if (currentLab && editMode) {
         // Update existing lab
-        await axios.post(`https://comlab-backend.vercel.app/api/computer/editCom/${data._id}`, {
-          name: data.name,
-          room: data.room
+        await axios.post(`https://comlab-backend.vercel.app/api/acads/editCourse/${currentLab._id}`, {
+          course_code: data.course_code,
+          course: data.course
         });
         
         fetchList(); // Refresh the list
         setOpenEdit(false); // Close dialog
         setEditMode(false);
-        toast.success("Edited successfully")
+        toast.success("Course updated successfully")
       }
     } catch (error) {
       console.error("Error updating lab", error);
@@ -239,15 +228,15 @@ export function ComputerManagementTable() {
     }
   };
 
-  const deleteCom = async () => {
+  const deleteCourse = async () => {
     setOpenDelete(true);
     setLoading(true);
     try {
       const selectedRows = table.getSelectedRowModel().rows;
       for (const row of selectedRows) {
-        const comId = row.original._id; // Access the user's _id
-        await axios.delete(`https://comlab-backend.vercel.app/api/computer/deleteCom/${comId}`);
-        console.log(`Deleted com with ID: ${comId}`);
+        const courseId = row.original._id; // Access the user's _id
+        await axios.delete(`https://comlab-backend.vercel.app/api/acads/deleteCourse/${courseId}`);
+        console.log(`Deleted com with ID: ${courseId}`);
       }
       toast.info(`${selectedRows.length} Data/s has been deleted.`);
 
@@ -262,29 +251,6 @@ export function ComputerManagementTable() {
     }
   }
 
-  const handleRowClick = (row: ComLabList): void => {
-    navigate(`/admin/computermanagement/${encodeURIComponent(row.name)}`, {
-      state: { 
-        name: row.name,
-        room: row.room,
-        id: row._id
-      }
-    });
-  };
-
-  // Handler for when the dialog closes
-  const handleDialogChange = (open: boolean) => {
-    setOpen(open);
-    if (!open) {
-      setEditMode(false);
-      setCurrentLab(null);
-      reset({
-        _id: '',
-        name: '',
-        room: ''
-      });
-    }
-  };
 
   const table = useReactTable({
     data: list,
@@ -335,10 +301,10 @@ export function ComputerManagementTable() {
           <div className="flex items-center justify-between py-4">
             <div>
               <Input
-                placeholder="Search by name"
-                value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+                placeholder="Search by course"
+                value={(table.getColumn("course")?.getFilterValue() as string) ?? ""}
                 onChange={(event) =>
-                  table.getColumn("name")?.setFilterValue(event.target.value)
+                  table.getColumn("course")?.setFilterValue(event.target.value)
                 }
                 className="max-w-sm"
               />
@@ -351,11 +317,11 @@ export function ComputerManagementTable() {
                     description={`Are you sure you want to delete ${Object.keys(rowSelection).length} data(s)?`}
                     open={openDelete}
                     setOpen={setOpenDelete}
-                    onClick={deleteCom}
+                    onClick={deleteCourse}
                     loading={loading}
                   />
                 )}
-              <AddCom open={open} setOpen={setOpen} fetch={fetchList} />
+              <AddCourse open={open} setOpen={setOpen} fetch={fetchList} />
               </div>
               
             </div>
@@ -445,39 +411,34 @@ export function ComputerManagementTable() {
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
-                {/* Hidden _id field for tracking during updates */}
-                <Input 
-                  type="hidden"
-                  {...register("_id")}
-                />
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="name" className="text-right">
+                    Course code
+                  </Label>
+                  <div className="col-span-3 relative">
+                    <Input 
+                      id="course_code" 
+                      className="col-span-3" 
+                      type="text"
+                      {...register("course_code")}
+                      placeholder="Code"
+                    />
+                    {errors.course_code && <span className="text-red-500 text-xs font-geist">{errors.course_code.message}</span>}
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="course" className="text-right">
                     Name
                   </Label>
                   <div className="col-span-3 relative">
                     <Input 
-                      id="name" 
+                      id="course" 
                       className="col-span-3" 
                       type="text"
-                      {...register("name")}
+                      {...register("course")}
                       placeholder="Name"
                     />
-                    {errors.name && <span className="text-red-500 text-xs font-geist">{errors.name.message}</span>}
-                  </div>
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="room" className="text-right">
-                    Room
-                  </Label>
-                  <div className="col-span-3 relative">
-                    <Input 
-                      id="room" 
-                      className="col-span-3" 
-                      type="text"
-                      {...register("room")}
-                      placeholder="Room"
-                    />
-                    {errors.room && <span className="text-red-500 text-xs font-geist">{errors.room.message}</span>}
+                    {errors.course && <span className="text-red-500 text-xs font-geist">{errors.course.message}</span>}
                   </div>
                 </div>
               </div>

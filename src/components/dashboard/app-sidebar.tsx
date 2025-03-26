@@ -82,6 +82,23 @@ const data = {
         },
       ],
     },
+    {
+      title: "Academics",
+      url: "#",
+      icon: Bot,
+      items: [
+        {
+          title: "Courses",
+          url: "/admin/courses",
+          isActive: false,
+        },
+        {
+          title: "Subjects",
+          url: "/admin/subjects",
+          isActive: false,
+        },
+      ],
+    },
   ],
   navFaculty: [
     {
@@ -135,8 +152,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <img src="/images/clm-logo.png" sizes="4"></img>
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold text-white">Computer Lab Management</span>
-                  <span className="text-white">v1.0.0</span>
+                  <span className="font-semibold text-white">Computer Lab Monitoring and Attendance System</span>
+                
                 </div>
               </a>
             </SidebarMenuButton>

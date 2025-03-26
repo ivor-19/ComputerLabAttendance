@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, FilterX, Loader2, MoreHorizontal, Pencil, PlusCircle, QrCode } from "lucide-react";
+import { ArrowUpDown, FilterX, ListFilter, Loader2, MoreHorizontal, Pencil, PlusCircle, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -258,6 +258,19 @@ export function CoursesAndSectionTable() {
     }
   };
 
+  const [courses, setCourses] = React.useState<{ _id: string, course: string; course_code: string }[]>([])
+  React.useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await axios.get("https://comlab-backend.vercel.app/api/acads/getCourses");
+        setCourses(response.data)
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetchCourses();
+  },[])
+
   // const yearLevel = watch("yearlevel");
   // const section = watch("section");
   // const combinedSection = yearLevel && section ? `${yearLevel}${section}` : "1A";
@@ -388,7 +401,7 @@ export function CoursesAndSectionTable() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="ml-2 border-dashed bg-transparent">
-                    <PlusCircle className="mr-1" /> Course
+                    <ListFilter className="mr-1" /> Course
                     {table.getColumn("course")?.getFilterValue() ? (
                       <div className="flex gap-2">
                         <span className="font-thin text-gray-500">|</span>
@@ -414,7 +427,7 @@ export function CoursesAndSectionTable() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="ml-2 border-dashed bg-transparent">
-                    <PlusCircle className="mr-1" /> Section
+                    <ListFilter className="mr-1" /> Section
                     {table.getColumn("section")?.getFilterValue() ? (
                       <div className="flex gap-2">
                         <span className="font-thin text-gray-500">|</span>
@@ -586,10 +599,11 @@ export function CoursesAndSectionTable() {
                         {...register("course")}
                         className="w-[120px] p-2 border rounded-md font-geist bg-white"
                       >
-                        <option value="" disabled>Select course</option>
-                        <option value="BSIS">BSIS</option>
-                        <option value="BSAIS">BSAIS</option>
-                        <option value="BSOM">BSOM</option>
+                        {courses.map((course) => (
+                          <option key={course._id} value={course.course}>
+                            {course.course}
+                          </option>
+                        ))}
                       </select>
                       {errors.course && <p className="text-red-500 text-xs">{errors.course.message}</p>}
                     </div>

@@ -13,6 +13,7 @@ import { Toaster } from '@/components/ui/sonner'
 import AdminSched from './admin/AdminSched'
 import AdminTeacherRecords from './admin/AdminTeacherRecord'
 import Dashboard from './admin/Dashboard'
+import Courses from './admin/Courses'
 
 function App() {
   return (
@@ -22,7 +23,8 @@ function App() {
           <Route path={'/'} element={<QrAttendance />}/>
           <Route path={'/login'} element={<Login />}/>
           <Route path={'/admin/course&section'} element={<CourseAndSection />}/>
-          <Route path={'/admin/subjectsLists'} element={<Subjects />}/>
+          <Route path={'/admin/subjects'} element={<Subjects />}/>
+          <Route path={'/admin/courses'} element={<Courses />}/>
           <Route path={'/admin/faculty'} element={<Faculty />}/>
           <Route path={'/admin/computermanagement'} element={<ComputerManagement />}/>
           <Route path={'/admin/computermanagement/:name'} element={<CMDetails />}/>

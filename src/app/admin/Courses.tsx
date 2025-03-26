@@ -1,5 +1,5 @@
 import { AppSidebar } from "@/components/dashboard/app-sidebar"
-import { SubjectsTable } from "@/components/tables/SubjectsTable"
+import { CoursesTable } from "@/components/tables/CoursesTable"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,7 +13,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
-export default function Subjects() {
+export default function Courses() {
   return (
     <SidebarProvider
       style={
@@ -30,13 +30,13 @@ export default function Subjects() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbPage>Subjects</BreadcrumbPage>
+                <BreadcrumbPage>Courses</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <SubjectsTable />
+          <CoursesTable />
         </div>
       </SidebarInset>
     </SidebarProvider>

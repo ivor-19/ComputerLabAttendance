@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,6 @@ import { Loader2, Plus } from 'lucide-react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import MultiSelectAddTeacher from './MultiSelectAddTeacher';
- // Import the MultiSelectDropdown component
 
 interface AddTeacherProps {
   fetch: () => void;
@@ -50,6 +49,7 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
     defaultValues: {
       courses: [],
       sections: [],
+      subjects: [],
     },
   });
 
@@ -61,8 +61,35 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
     Array.from({ length: 10 }, (_, section) => `${year + 1}${String.fromCharCode(65 + section)}`)
   ).flat();
 
-  // const course = watch('courses');
-  // const section = watch('sections');
+  const [courses, setCourses] = useState<string[]>([]);
+  const [subjects, setSubjects] = useState<string[]>([]);
+ 
+  const fetchCourses = async () => {
+    try {
+      const response = await axios.get("https://comlab-backend.vercel.app/api/acads/getCourses");
+      const courseNames = response.data.map((course: { course: string }) => course.course);
+      setCourses(courseNames);
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+      toast.error("Failed to load courses");
+    }
+  }
+
+  const fetchSubjects = async () => {
+    try {
+      const response = await axios.get("https://comlab-backend.vercel.app/api/acads/getSubjects");
+      const subjectNames = response.data.map((subject: { subject: string }) => subject.subject);
+      setSubjects(subjectNames);
+    } catch (error) {
+      console.error("Error fetching subjects:", error);
+      toast.error("Failed to load subjects");
+    }
+  }
+
+  useEffect(() => {
+    fetchCourses();
+    fetchSubjects();
+  }, []);
 
   const addNewTeacher = async (data: FormData) => {
     setLoading(true);
@@ -131,7 +158,7 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
             </div>
           </div>
 
-           {/* Teacher Email */}
+          {/* Teacher Email */}
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="teacher_email" className="text-right">Email</Label>
             <div className="col-span-3 relative">
@@ -158,11 +185,12 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
             </div>
           </div>
 
+          {/* Subjects */}
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="subjects" className="text-right">Subjects</Label>
             <div className="col-span-3 relative">
               <MultiSelectAddTeacher
-                options={['Programming', 'Database Management', 'Web Development']}
+                options={subjects}
                 onChange={(selectedOptions) => setValue('subjects', selectedOptions)}
               />
               {errors.subjects && <p className="text-red-500 text-xs">{errors.subjects.message}</p>}
@@ -174,7 +202,7 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
             <Label htmlFor="courses" className="text-right">Courses</Label>
             <div className="col-span-3 relative">
               <MultiSelectAddTeacher
-                options={['BSIS', 'BSAIS', 'BSOM']}
+                options={courses}
                 onChange={(selectedOptions) => setValue('courses', selectedOptions)}
               />
               {errors.courses && <p className="text-red-500 text-xs">{errors.courses.message}</p>}
