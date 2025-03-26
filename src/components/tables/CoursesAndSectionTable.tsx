@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, FilterX, ListFilter, Loader2, MoreHorizontal, Pencil, PlusCircle, QrCode } from "lucide-react";
+import { ArrowUpDown, FilterX, ListFilter, Loader2, MoreHorizontal, Pencil, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {

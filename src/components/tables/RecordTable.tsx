@@ -11,10 +11,9 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronLeft, ChevronRight, Filter, FilterX, ListFilter, Loader2, MoreHorizontal, Pencil, PlusCircle } from "lucide-react"
+import { ArrowUpDown, ChevronLeft, ChevronRight, FilterX, ListFilter, Loader2, MoreHorizontal, Pencil } from "lucide-react"
 import * as XLSX from 'xlsx'; 
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
   DropdownMenuContent,

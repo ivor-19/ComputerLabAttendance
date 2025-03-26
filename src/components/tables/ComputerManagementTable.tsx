@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, GanttChart, Loader2, MoreHorizontal, Pencil, Plus } from "lucide-react"
+import { ArrowUpDown, GanttChart, Loader2, MoreHorizontal, Pencil } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -52,7 +51,6 @@ import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
-import { AddComputerLab } from "../AddComputerLab"
 
 export type ComLabList = {
   _id: string,
@@ -273,18 +271,6 @@ export function ComputerManagementTable() {
   };
 
   // Handler for when the dialog closes
-  const handleDialogChange = (open: boolean) => {
-    setOpen(open);
-    if (!open) {
-      setEditMode(false);
-      setCurrentLab(null);
-      reset({
-        _id: '',
-        name: '',
-        room: ''
-      });
-    }
-  };
 
   const table = useReactTable({
     data: list,

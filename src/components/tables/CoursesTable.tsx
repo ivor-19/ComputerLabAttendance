@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, Loader2, MoreHorizontal, Pencil, Plus } from "lucide-react"
+import { ArrowUpDown, Loader2, MoreHorizontal, Pencil } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -43,8 +43,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import DeleteModal from "../DeleteModal"
-import { AddCom } from "../AddCom"
-import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { Skeleton } from "../ui/skeleton"
 import * as z from "zod"
@@ -171,7 +169,6 @@ export function CoursesTable() {
     },
   ]
 
-  const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
