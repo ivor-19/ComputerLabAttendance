@@ -41,10 +41,24 @@ interface ComLab {
   value: string,
 }
 
+interface Courses {
+  id: number;
+  text: string;
+  value: string,
+}
+
+interface Subjects {
+  id: number;
+  text: string;
+  value: string,
+}
+
 export const SchedulerComponent = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [teacherOptions, setTeacherOptions] = useState<Teacher[]>([]);
   const [comlabOptions, setComlabOptions] = useState<ComLab[]>([]);
+  const [coursesOptions, setCoursesOptions] = useState<Courses[]>([]);
+  const [subjectsOptions, setSubjectsOptions] = useState<Subjects[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchTeachers = async () => {
@@ -83,6 +97,42 @@ export const SchedulerComponent = () => {
     }
   };
 
+  const fetchCourses = async () => {
+    try {
+      const response = await axios.get("https://comlab-backend.vercel.app/api/acads/getCourses");
+      // console.log(response.data.com)
+      const courses = response.data.map((course: any, index: number) => ({
+        id: index + 1, // Increment id starting from 1
+        text: `${course.course}`,
+        value: `${course.course}`,
+      }));
+      
+      setCoursesOptions(courses);
+      return courses; // Return the teacher names for synchronization
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+      return [];
+    }
+  };
+
+  const fetchSubjects = async () => {
+    try {
+      const response = await axios.get("https://comlab-backend.vercel.app/api/acads/getSubjects");
+      // console.log(response.data.com)
+      const subjects = response.data.map((subject: any, index: number) => ({
+        id: index + 1, // Increment id starting from 1
+        text: `${subject.subject}`,
+        value: `${subject.subject}`,
+      }));
+      
+      setSubjectsOptions(subjects);
+      return subjects; // Return the teacher names for synchronization
+    } catch (error) {
+      console.error("Error fetching subjects:", error);
+      return [];
+    }
+  };
+
   const fetchSchedules = async () => {
     try {
       const response = await axios.get<ApiResponse[]>("https://comlab-backend.vercel.app/api/schedule/getSched");
@@ -112,6 +162,8 @@ export const SchedulerComponent = () => {
       await fetchTeachers();
       await fetchSchedules();
       await fetchComlabs();
+      await fetchCourses();
+      await fetchSubjects();
       setIsLoading(false);
     };
 
@@ -192,6 +244,18 @@ export const SchedulerComponent = () => {
           height={600} 
           draggable={false}
           events={events}
+          week={{
+            weekDays: [0, 1, 2, 3, 4, 5], 
+            weekStartOn: 6, 
+            startHour: 6, 
+            endHour: 22,
+            step: 60,
+          }}
+          day={{
+            startHour: 6, 
+            endHour: 22, 
+            step: 60,
+          }}
           fields={[
             {
               name: "teacher_name",
@@ -202,21 +266,13 @@ export const SchedulerComponent = () => {
             {
               name: "subject",
               type: "select",
-              options: [
-                { id: 1, text: "Programming", value: "Programming" },
-                { id: 2, text: "Database Management", value: "Database Management" },
-                { id: 3, text: "Web Development", value: "Web Development" },
-              ],
+              options: subjectsOptions,
               config: { label: "Subject", required: true, errMsg: "Please select a subject" },
             },
             {
               name: "course",
               type: "select",
-              options: [
-                { id: 8, text: "BSIS", value: "BSIS" },
-                { id: 7, text: "BSAIS", value: "BSAIS" },
-                { id: 9, text: "BSOM", value: "BSOM" },
-              ],
+              options: coursesOptions,
               config: { label: "Course", required: true, errMsg: "Please select a course" },
             },
             {

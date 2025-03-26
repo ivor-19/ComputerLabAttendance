@@ -238,10 +238,6 @@ export const columns: ColumnDef<Teacher>[] = [
               Copy teacher ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              
-              Edit
-            </DropdownMenuItem>
           
           </DropdownMenuContent>
         </DropdownMenu>

@@ -103,6 +103,18 @@ export const TeacherScheduler = () => {
           events={events}
           deletable={false}
           editable={false}
+          week={{
+            weekDays: [0, 1, 2, 3, 4, 5], 
+            weekStartOn: 6, 
+            startHour: 6, 
+            endHour: 22,
+            step: 60,
+          }}
+          day={{
+            startHour: 6, 
+            endHour: 22, 
+            step: 60,
+          }}
           fields={[
             {
               name: "teacher_name",
