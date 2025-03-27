@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Scheduler } from "@aldabil/react-scheduler";
 import axios from "axios";
 import { Skeleton } from "./ui/skeleton";
+import { toast } from "sonner";
 
 interface Event {
   event_id: string;
@@ -206,13 +207,22 @@ export const SchedulerComponent = () => {
 
       try {
         const response = await axios.post("https://comlab-backend.vercel.app/api/schedule/addSchedule", newEvent);
-        if (response.data) {
-          console.log("Event added successfully:", response.data);
-          // Refresh the events after adding
-          fetchSchedules();
-        }
-      } catch (error) {
+          if (response.data && response.status === 200) {
+            console.log("Event added successfully:", response.data);
+            // Refresh the events after adding
+            fetchSchedules();
+          }
+      } catch (error: any) {
         console.error("Error adding new event:", error);
+        toast.error("Conflict on schedule detected!");
+        if (axios.isAxiosError(error)) {
+          if (error.response && error.response.status === 400) {
+            return Promise.reject(error.response.data); 
+          
+          }
+        } else {
+          console.error("Unexpected error:", error);
+        }
       }
     } else if (action === "edit") {
       try {

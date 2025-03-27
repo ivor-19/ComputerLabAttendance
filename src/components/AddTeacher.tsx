@@ -26,7 +26,7 @@ interface AddTeacherProps {
 }
 
 const FormSchema = z.object({
-  teacher_id: z.string().min(10, { message: 'ID must have at least 10 characters' }),
+  teacher_id: z.string().min(4, { message: "ID must have at least 4 characters" }).max(10, { message: "ID must have no more than 10 characters" }),
   teacher_email: z.string().email({ message: "Invalid email address" }).min(1, { message: "Email is required" }),
   lastname: z.string().min(1, { message: 'Last Name is required' }),
   firstname: z.string().min(1, { message: 'First Name is required' }),
@@ -107,6 +107,8 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
 
   const addNewTeacher = async (data: FormData) => {
     setLoading(true);
+    const password = Math.floor(1000 + Math.random() * 9000);
+
     const newTeacher = {
       teacher_id: data.teacher_id,
       lastname: data.lastname,
@@ -114,9 +116,10 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
       courses: data.courses,
       sections: data.sections,
       subjects: data.subjects,
+      password: password.toString(),
       teacher_email: data.teacher_email
     };
-    const teacherEmail = { teacher_id: data.teacher_id, teacher_email: data.teacher_email, firstname: data.firstname, lastname: data.lastname }
+    const teacherEmail = { teacher_id: data.teacher_id, teacher_email: data.teacher_email, firstname: data.firstname, lastname: data.lastname, password: password.toString() }
     try {
       const response = await axios.post('https://comlab-backend.vercel.app/api/teacher/addTeacher', newTeacher);
       console.log(response.data);

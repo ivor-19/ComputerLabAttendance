@@ -15,6 +15,7 @@ import AdminTeacherRecords from './admin/AdminTeacherRecord'
 import Dashboard from './admin/Dashboard'
 import Courses from './admin/Courses'
 import Sections from './admin/Sections'
+import SetAdmin from './admin/SetAdmin'
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
         <Route path={'/admin/dashboard'} element={<Dashboard />} />
         <Route path={'/admin/attendanceRecord/teachersRecord'} element={<AdminTeacherRecords />} />
         <Route path={'/admin/schedule'} element={<AdminSched />} />
+        <Route path={'/admin/setAdmin'} element={<SetAdmin />} />
         <Route path={'/teacher/Record'} element={<Record />} />
         <Route path={'/teacher/schedule'} element={<Schedule />} />
         {/* <Route path={'/admin/accounts'} element={<Users />}/> */}

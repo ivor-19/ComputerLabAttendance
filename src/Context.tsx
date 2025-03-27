@@ -18,7 +18,6 @@ interface ContextProviderProps {
   children: ReactNode;
 }
 
-// Create a separate axios instance with defaults
 const teacherApi = axios.create({
   baseURL: "https://comlab-backend.vercel.app/api",
   timeout: 5000
@@ -27,25 +26,34 @@ const teacherApi = axios.create({
 const TeacherContext = createContext<ContextType | undefined>(undefined);
 
 export const ContextProvider: React.FC<ContextProviderProps> = ({ children }) => {
+  // Safely get initial teacherId from localStorage
   const [teacherId, setTeacherIdState] = useState<string>(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window === "undefined") return "";
+    
+    try {
       const storage = localStorage.getItem("teacherID");
+      // If storage exists, parse it, otherwise return empty string
       return storage ? JSON.parse(storage) : "";
+    } catch (error) {
+      console.error("Error parsing teacherID from localStorage:", error);
+      return "";
     }
-    return "";
   });
+
   const [teacherName, setTeacherName] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Memoize the setTeacherId function
   const setTeacherId = useCallback((id: string) => {
     setTeacherIdState(id);
     if (typeof window !== "undefined") {
-      localStorage.setItem("teacherID", JSON.stringify(id));
+      try {
+        localStorage.setItem("teacherID", JSON.stringify(id));
+      } catch (error) {
+        console.error("Error saving teacherID to localStorage:", error);
+      }
     }
   }, []);
 
-  // Use AbortController to cancel pending requests
   useEffect(() => {
     const controller = new AbortController();
     
@@ -59,14 +67,12 @@ export const ContextProvider: React.FC<ContextProviderProps> = ({ children }) =>
           { signal: controller.signal }
         );
         
-        if (response && response.status === 200) {
+        if (response?.status === 200) {
           const { firstname, lastname } = response.data.teacher;
           setTeacherName(`${firstname} ${lastname}`);
         }
       } catch (error) {
-        if (axios.isCancel(error)) {
-          console.log('Request cancelled');
-        } else {
+        if (!axios.isCancel(error)) {
           console.error('Failed to fetch teacher info:', error);
         }
       } finally {
@@ -81,7 +87,6 @@ export const ContextProvider: React.FC<ContextProviderProps> = ({ children }) =>
     };
   }, [teacherId]);
 
-  // Memoize the context value
   const contextValue = useMemo(() => ({
     teacherId,
     setTeacherId,

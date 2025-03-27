@@ -26,6 +26,7 @@ interface AddSectionProps {
 }
 
 const FormSchema = z.object({
+    yearlevel: z.string().min(1, { message: "Year level is required" }),
     section: z.string().min(1, { message: "Subject name is required" }),
 })
 
@@ -40,7 +41,8 @@ export const AddSection = ({ open, setOpen, fetch }: AddSectionProps) => {
 
     const addNewSection = async (data: FormData) => {
         setLoading(true);
-        const newSection = { section: data.section }
+        const combinedSection = data.yearlevel + '' + data.section
+        const newSection = { section: combinedSection }
         try {
             const response = await axios.post("https://comlab-backend.vercel.app/api/acads/addSection", newSection);
             console.log(response.data)
@@ -68,24 +70,24 @@ export const AddSection = ({ open, setOpen, fetch }: AddSectionProps) => {
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
-                    {/* <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="subject_code" className="text-right">
-                            Subject Code
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="yearlevel" className="text-right">
+                            Year Level
                         </Label>
                         <div className="col-span-3 relative">
                             <Input
-                                id="subject_code"
+                                id="yearlevel"
                                 className="col-span-3"
                                 type="text"
-                                {...register("subject_code")}
-                                placeholder="Code"
+                                {...register("yearlevel")}
+                                placeholder="Year Level"
                             />
-                            {errors.subject_code && <span className="text-red-500 text-xs font-geist">{errors.subject_code.message}</span>}
+                            {errors.yearlevel && <span className="text-red-500 text-xs font-geist">{errors.yearlevel.message}</span>}
                         </div>
-                    </div> */}
+                    </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="section" className="text-right">
-                            Name
+                            Section
                         </Label>
                         <div className="col-span-3 relative">
                             <Input
@@ -93,7 +95,7 @@ export const AddSection = ({ open, setOpen, fetch }: AddSectionProps) => {
                                 className="col-span-3"
                                 type="text"
                                 {...register("section")}
-                                placeholder="Name"
+                                placeholder="Section"
                             />
                             {errors.section && <span className="text-red-500 text-xs font-geist">{errors.section.message}</span>}
                         </div>

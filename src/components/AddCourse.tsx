@@ -86,7 +86,7 @@ export const AddCourse = ({open, setOpen, fetch} : AddCourseProps) => {
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="course" className="text-right">
-              Name
+              Course Title
             </Label>
             <div className="col-span-3 relative">
               <Input 
@@ -94,7 +94,7 @@ export const AddCourse = ({open, setOpen, fetch} : AddCourseProps) => {
                 className="col-span-3" 
                 type="text"
                 {...register("course")}
-                placeholder="Name"
+                placeholder="Course Title"
               />
               {errors.course && <span className="text-red-500 text-xs font-geist">{errors.course.message}</span>}
             </div>

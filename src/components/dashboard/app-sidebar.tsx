@@ -80,6 +80,11 @@ const data = {
           url: "/admin/schedule",
           isActive: false,
         },
+        {
+          title: "Admins",
+          url: "/admin/setAdmin",
+          isActive: false,
+        },
       ],
     },
     {

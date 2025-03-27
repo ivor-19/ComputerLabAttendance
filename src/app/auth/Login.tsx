@@ -19,27 +19,50 @@ const FormSchema = z.object({
 type FormData = z.infer<typeof FormSchema>
 
 const Login = () => {
-  const { register, handleSubmit, formState: { errors }, setError } = useForm<FormData>({ resolver: zodResolver(FormSchema) })
+  const { register, handleSubmit, formState: { errors }, setError } = useForm<FormData>({ 
+    resolver: zodResolver(FormSchema) 
+  })
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const { setTeacherId } = useTeacher();
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
-    if(data.id === "admin123" && data.password === "admin123"){
-      navigate("/admin/dashboard", {replace: true})
-    }
-    else{
+    try {
+      // Try teacher login first
       try {
-        const response = await axios.post("https://comlab-backend.vercel.app/api/teacher/teacher-login", {teacher_id: data.id, password: data.password})
-        if (response.status === 200){
-          setTeacherId(response.data[0].teacher_id);
-          navigate("/teacher/Record", {replace: true})
+        const teacherResponse = await axios.post(
+          "https://comlab-backend.vercel.app/api/teacher/teacher-login", 
+          { teacher_id: data.id, password: data.password }
+        );
+        
+        if (teacherResponse.status === 200) {
+          setTeacherId(teacherResponse.data[0].teacher_id);
+          navigate("/teacher/Record", { replace: true });
+          return;
         }
-      } catch (error) {
-        setError("id", { type: "manual", message: "Invalid credentials, please try again." })
-        setLoading(false);
+      } catch (teacherError) {
+        // If teacher login fails, try admin login
+        try {
+          const adminResponse = await axios.post(
+            "https://comlab-backend.vercel.app/api/admin/admin-log", 
+            { id: data.id, password: data.password }
+          );
+          
+          if (adminResponse.status === 200) {
+            navigate("/admin/dashboard", { replace: true });
+            return;
+          }
+        } catch (adminError) {
+          // Both logins failed
+          setError("root", { 
+            type: "manual", 
+            message: "Invalid credentials, please try again." 
+          });
+        }
       }
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -48,7 +71,7 @@ const Login = () => {
       <div className='absolute z-0 flex items-center justify-center opacity-10 top-0 h-full'>
         <img src='/images/clm-logo.png' className='object-contain h-[900px] w-[900px]'></img>
       </div>
-      <Card  className='bg-white z-10'>
+      <Card className='bg-white z-10'>
         <CardHeader>
           <CardTitle className="text-xl font-bold text-center">Welcome</CardTitle>
           <CardDescription>Enter your ID and password to log in to your account</CardDescription>
@@ -58,18 +81,47 @@ const Login = () => {
             <div className="flex flex-col gap-6">
               <div className="relative">
                 <Label htmlFor="id" className="text-right">ID</Label>
-                <Input id="id" className="w-full" type="text" {...register("id")} placeholder="ID" />
-                {errors.id && <span className="text-red-500 text-xs font-geist">{errors.id.message}</span>}
+                <Input 
+                  id="id" 
+                  className="w-full" 
+                  type="text" 
+                  {...register("id")} 
+                  placeholder="ID" 
+                />
+                {errors.id && (
+                  <span className="text-red-500 text-xs font-geist">
+                    {errors.id.message}
+                  </span>
+                )}
               </div>
               <div className="relative">
                 <Label htmlFor="password" className="text-right">Password</Label>
-                <Input id="password" className="w-full" type="password" {...register("password")} placeholder="Password" />
-                {errors.password && <span className="text-red-500 text-xs font-geist">{errors.password.message}</span>}
+                <Input 
+                  id="password" 
+                  className="w-full" 
+                  type="password" 
+                  {...register("password")} 
+                  placeholder="Password" 
+                />
+                {errors.password && (
+                  <span className="text-red-500 text-xs font-geist">
+                    {errors.password.message}
+                  </span>
+                )}
               </div>
-              <Button type="submit" className="w-full bg-[#022c22] hover:bg-[#064e3b]">
+              {errors.root && (
+                <span className="text-red-500 text-xs font-geist text-center">
+                  {errors.root.message}
+                </span>
+              )}
+              <Button 
+                type="submit" 
+                className="w-full bg-[#022c22] hover:bg-[#064e3b]"
+                disabled={loading}
+              >
                 {loading ? (
                   <Loader2 className='animate-spin'/>
-                ):(
+                ) : (
                   <>Login</>
                 )}
               </Button>

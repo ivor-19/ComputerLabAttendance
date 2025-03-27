@@ -130,7 +130,7 @@ export function SubjectsTable() {
               onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
               className="text-xs pl-0 bg-transparent"
             >
-              Name
+              Subject Title
               <ArrowUpDown />
             </Button>
           </div>

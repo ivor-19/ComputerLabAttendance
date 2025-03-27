@@ -113,8 +113,6 @@ html, body {
     --sidebar-primary-foreground: 240, 10%, 85%; /* Light text on primary elements */
     --sidebar-accent: 165.7 91.3% 9%; /* Darker accent color */
     --sidebar-accent-foreground: 240, 10%, 90%; /* Light accent text */
-    --sidebar-border: 240, 5%, 20%; /* Dark border to match the background */
-    --sidebar-ring: 240, 10%, 30%; /* Subtle ring effect with medium brightness */
     
   }
   .dark {
@@ -148,8 +146,6 @@ html, body {
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 

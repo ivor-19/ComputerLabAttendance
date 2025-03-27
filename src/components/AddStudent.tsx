@@ -31,23 +31,23 @@ const FormSchema = z.object({
   lastname: z.string().min(1, {message: "Last Name is required"}),
   firstname: z.string().min(1, {message: "First Name is required"}),
   course: z.string().optional(),
-  yearlevel: z.string().optional(),
   section: z.string().optional()
 })
 
 type FormData = z.infer<typeof FormSchema>;
 
 export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
-  const { register, handleSubmit, formState: {errors}, reset, watch } = useForm<FormData>({
+  const { register, handleSubmit, formState: {errors}, reset } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
   })
   const [userExists, setUserExists] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const yearLevel = watch("yearlevel");
-  const section = watch("section");
-  const combinedSection = yearLevel && section ? `${yearLevel}${section}` : "1A";
+  // const yearLevel = watch("yearlevel");
+  // const section = watch("section");
+  // const combinedSection = yearLevel && section ? `${yearLevel}${section}` : "1A";
   const [courses, setCourses] = useState<{ _id: string, course: string; course_code: string }[]>([])
+  const [sections, setSections] = useState<{ _id: string, section: string; }[]>([])
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -58,12 +58,21 @@ export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
         console.error(error);
       }
     }
+    const fetchSections = async () => {
+      try {
+        const response = await axios.get("https://comlab-backend.vercel.app/api/acads/getSections");
+        setSections(response.data)
+      } catch (error) {
+        console.error(error);
+      }
+    }
     fetchCourses();
+    fetchSections();
   },[])
 
   const addNewStudent = async (data: FormData) => {
     setLoading(true);
-    const newStudent = {student_id: data.student_id, email: data.email, lastname: data.lastname, firstname: data.firstname, course: data.course, section: combinedSection}
+    const newStudent = {student_id: data.student_id, email: data.email, lastname: data.lastname, firstname: data.firstname, course: data.course, section: data.section}
     const studentEmail = {student_id: data.student_id, student_email: data.email}
     try {
       const response = await axios.post("https://comlab-backend.vercel.app/api/student/addStudent", newStudent);
@@ -95,6 +104,7 @@ export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
 
         toast.error("Failed to add data");
         setOpen(false);
+        setLoading(false);
       }
     }
     
@@ -197,37 +207,17 @@ export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
               Section
             </Label>
             <div className='flex gap-4'>
-              <div className="font-geist text-[14px]">
-                <select 
-                  id="yearlevel"
-                  {...register("yearlevel")}
-                  className="w-[130px] p-2 border rounded-md font-geist bg-white"
-                >
-                  <option value="" disabled>Year Level</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                </select>
-                {errors.yearlevel && <p className="text-red-500 text-xs">{errors.yearlevel.message}</p>}
-              </div>
               <div className="w-full font-geist text-[14px]">
                 <select 
                   id="section"
                   {...register("section")}
                   className="p-2 border rounded-md font-geist bg-white"
                 >
-                  <option value="" disabled>Select section</option>
-                  <option value="A">A</option>
-                  <option value="B">B</option>
-                  <option value="C">C</option>
-                  <option value="D">D</option>
-                  <option value="E">E</option>
-                  <option value="F">F</option>
-                  <option value="G">G</option>
-                  <option value="H">H</option>
-                  <option value="I">I</option>
-                  <option value="J">J</option>
+                  {sections.map((section) => (
+                    <option key={section._id} value={section.section}>
+                      {section.section}
+                    </option>
+                  ))}
                 </select>
                 {errors.section && <p className="text-red-500 text-xs">{errors.section.message}</p>}
               </div>

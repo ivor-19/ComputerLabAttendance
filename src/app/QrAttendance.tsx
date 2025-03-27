@@ -235,6 +235,20 @@ export const QrAttendance = () => {
     setRandomCode(generateUniqueRandomCode());
   }, []);
 
+  const [labs, setLabs] = useState<{ _id: string, name: string; }[]>([])
+  useEffect(() => {
+    const fetchLabs = async () => {
+      try {
+        const response = await axios.get("https://comlab-backend.vercel.app/api/computer/getList");
+        setLabs(response.data.com)
+        console.log("lab", response.data)
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetchLabs();
+  },[])
+
   return (
     <>
       <Toaster />
@@ -360,11 +374,11 @@ export const QrAttendance = () => {
                               <SelectContent>
                                 <SelectGroup>
                                   <SelectLabel>Com Lab</SelectLabel>
-                                  <SelectItem value='1'>1</SelectItem>
-                                  <SelectItem value='2'>2</SelectItem>
-                                  <SelectItem value='3'>3</SelectItem>
-                                  <SelectItem value='4'>4</SelectItem>
-                                  <SelectItem value='5'>5</SelectItem>
+                                  {labs.map((lab) => (
+                                    <SelectItem key={lab._id} value={lab.name}>
+                                      {lab.name}
+                                    </SelectItem>
+                                  ))}
                                 </SelectGroup>
                               </SelectContent>
                             </Select>

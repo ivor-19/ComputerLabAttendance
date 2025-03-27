@@ -57,7 +57,7 @@ export type Teacher = {
 };
 
 const FormSchema = z.object({
-  teacher_id: z.string().min(10, { message: "ID must have at least 10 characters" }),
+  teacher_id: z.string().min(4, { message: "ID must have at least 4 characters" }).max(10, { message: "ID must have no more than 10 characters" }),
   teacher_email: z.string().email({ message: "Invalid email address" }).min(1, { message: "Email is required" }),
   lastname: z.string().min(1, { message: "Last Name is required" }),
   firstname: z.string().min(1, { message: "First Name is required" }),
@@ -183,6 +183,12 @@ export const columns = (
       const a = (rowA.getValue(columnId) as string[]).join(', ');
       const b = (rowB.getValue(columnId) as string[]).join(', ');
       return a.localeCompare(b);
+    },
+    filterFn: (row, columnId, filterValue) => {
+      const rowValue = row.getValue(columnId) as string[];
+      return rowValue.some(subject => 
+        subject.toLowerCase().includes(filterValue.toLowerCase())
+      );
     },
   },
   {
@@ -310,6 +316,7 @@ export function FacultyTable() {
   const [openEditModal, setOpenEditModal] = React.useState(false);
   const [courses, setCourses] = React.useState<string[]>([]);
   const [subjects, setSubjects] = React.useState<string[]>([]);
+  const [sections, setSections] = React.useState<string[]>([]);
 
   const {
     register,
@@ -364,6 +371,17 @@ export function FacultyTable() {
     }
   };
 
+  const fetchSections = async () => {
+    try {
+      const response = await axios.get("https://comlab-backend.vercel.app/api/acads/getSections");
+      const sections = response.data.map((section: { section: string }) => section.section);
+      setSections(sections);
+    } catch (error) {
+      console.error("Error fetching subjects:", error);
+      toast.error("Failed to load subjects");
+    }
+  };
+
   const deleteUser = async () => {
     setLoading(true);
     try {
@@ -389,6 +407,7 @@ export function FacultyTable() {
     fetchTeachers();
     fetchCourses();
     fetchSubjects();
+    fetchSections();
   }, []);
 
   const handleEdit = (teacher: Teacher) => {
@@ -454,6 +473,9 @@ export function FacultyTable() {
   const uniqueCourses = Array.from(
     new Set(teachers.flatMap(teacher => teacher.courses))
   ).sort();
+  const uniqueSubjects = Array.from(
+    new Set(teachers.flatMap(teacher => teacher.subjects))
+  ).sort();
 
   return (
     <>
@@ -515,6 +537,43 @@ export function FacultyTable() {
                   ))}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => table.getColumn("courses")?.setFilterValue(undefined)}>
+                    <FilterX size={16} /> Clear Filter
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="ml-2 border-dashed bg-transparent">
+                    <ListFilter className="mr-1" /> Subjects
+                    {table.getColumn("subjects")?.getFilterValue() ? (
+                      <div className="flex gap-2">
+                        <span className="font-thin text-gray-500">|</span>
+                        <Badge variant={"secondary"}>
+                          {String(table.getColumn("subjects")?.getFilterValue())}
+                        </Badge>
+                      </div>
+                    ) : null}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="font-geist w-40 max-h-60 overflow-y-auto">
+                  <Input
+                    placeholder="Search subjects..."
+                    className="mb-2 mx-2 w-[calc(100%-1rem)]"
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      table.getColumn("subjects")?.setFilterValue(value || undefined);
+                    }}
+                  />
+                  {uniqueSubjects.map((subject) => (
+                    <DropdownMenuItem 
+                      key={subject} 
+                      onClick={() => table.getColumn("subjects")?.setFilterValue(subject)}
+                    >
+                      {subject}
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => table.getColumn("subjects")?.setFilterValue(undefined)}>
                     <FilterX size={16} /> Clear Filter
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -730,12 +789,7 @@ export function FacultyTable() {
                         control={control}
                         render={({ field }) => (
                           <MultiSelectDropdown
-                            options={[
-                              '1A', '1B', '1C', '1D', '1E', '1F', '1G', '1H', '1I', '1J',
-                              '2A', '2B', '2C', '2D', '2E', '2F', '2G', '2H', '2I', '2J',
-                              '3A', '3B', '3C', '3D', '3E', '3F', '3G', '3H', '3I', '3J',
-                              '4A', '4B', '4C', '4D', '4E', '4F', '4G', '4H', '4I', '4J',
-                            ]}
+                            options={sections}
                             onChange={field.onChange}
                             defaultValue={field.value}
                           />

@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, GanttChart, Loader2, MoreHorizontal, Pencil } from "lucide-react"
+import { ArrowUpDown, Loader2, MoreHorizontal, Pencil } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -43,31 +43,37 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import DeleteModal from "../DeleteModal"
-import { AddCom } from "../AddCom"
-import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { Skeleton } from "../ui/skeleton"
 import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
+import { Textarea } from "../ui/textarea"
 
-export type ComLabList = {
-  _id: string,
-  name: string,
-  room: string,
+export type ConditionList = {
+  _id: string;
+  pc_id: string;
+  comlabid: string;
+  name: string;
+  condition: string;
+  status: string;
+  date_added: string;
+  updated_at: string;
+  comment: string;
 }
 
 const FormSchema = z.object({
-  _id: z.string().optional(), // Added _id to schema
+  pc_id: z.string().min(1, {message: "PC ID is required"}),
   name: z.string().min(1, {message: "Name is required"}),
-  room: z.string().min(1, {message: "Room is required"}),
-  computerSets: z.string().optional(),
+  condition: z.string().optional(),
+  status: z.string().optional(),
+  comment: z.string().optional(),
 })
 
 type FormData = z.infer<typeof FormSchema>;
 
-export function ComputerManagementTable() {
+export function BadConditionTable() {
   const { register, handleSubmit, formState: {errors}, reset } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
   })
@@ -79,10 +85,10 @@ export function ComputerManagementTable() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
-  const [currentLab, setCurrentLab] = React.useState<ComLabList | null>(null);
+  const [currentLab, setCurrentLab] = React.useState<ConditionList | null>(null);
   
 
-  const columns: ColumnDef<ComLabList>[] = [
+  const columns: ColumnDef<ConditionList>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -106,7 +112,7 @@ export function ComputerManagementTable() {
       enableHiding: false,
     },
     {
-       accessorKey: "name",
+       accessorKey: "pc_id",
        header: ({ column }) => {
          return (
            <div className="text-left">
@@ -115,32 +121,122 @@ export function ComputerManagementTable() {
                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                className="text-xs pl-0 bg-transparent"
              >
-               Name
+               PC ID
                <ArrowUpDown />
              </Button>
            </div>
          )
        },
-       cell: ({ row }) => <div>{row.getValue("name")}</div>,
+       cell: ({ row }) => <div>{row.getValue("pc_id")}</div>,
      },
-     {
-        accessorKey: "room",
-        header: ({ column }) => {
-          return (
-            <div className="text-left">
-              <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                className="text-xs pl-0 bg-transparent"
-              >
-                Room
-                <ArrowUpDown />
-              </Button>
-            </div>
-          )
-        },
-        cell: ({ row }) => <div>{row.getValue("room")}</div>,
+    {
+      accessorKey: "name",
+      header: ({ column }) => {
+        return (
+          <div className="text-left">
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="text-xs pl-0 bg-transparent"
+            >
+              Name
+              <ArrowUpDown />
+            </Button>
+          </div>
+        )
       },
+      cell: ({ row }) => <div>{row.getValue("name")}</div>,
+    },
+    {
+      accessorKey: "condition",
+      header: ({ column }) => {
+        return (
+          <div className="text-left">
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="text-xs pl-0 bg-transparent"
+            >
+              Condition
+              <ArrowUpDown />
+            </Button>
+          </div>
+        )
+      },
+      cell: ({ row }) => <div>{row.getValue("condition")}</div>,
+    },
+    {
+      accessorKey: "status",
+      header: ({ column }) => {
+        return (
+          <div className="text-left">
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="text-xs pl-0 bg-transparent"
+            >
+              Status
+              <ArrowUpDown />
+            </Button>
+          </div>
+        )
+      },
+      cell: ({ row }) => <div>{row.getValue("status")}</div>,
+    },
+    {
+      accessorKey: "date_added",
+      header: ({ column }) => {
+        return (
+          <div className="text-left">
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="text-xs pl-0 bg-transparent"
+            >
+              Date Added
+              <ArrowUpDown />
+            </Button>
+          </div>
+        )
+      },
+      cell: ({ row }) => <div>{row.getValue("date_added")}</div>,
+    },
+    {
+      accessorKey: "updated_at",
+      header: ({ column }) => {
+        return (
+          <div className="text-left">
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="text-xs pl-0 bg-transparent"
+            >
+              Updated At
+              <ArrowUpDown />
+            </Button>
+          </div>
+        )
+      },
+      cell: ({ row }) => <div>{row.getValue("updated_at")}</div>,
+    },
+    {
+      accessorKey: "comment",
+      header: ({ column }) => {
+        return (
+          <div className="text-left">
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="text-xs pl-0 bg-transparent"
+            >
+              Comments
+              <ArrowUpDown />
+            </Button>
+          </div>
+        )
+      },
+      cell: ({ row }) => <div>{row.getValue("comment")}</div>,
+    },
     {
       id: "actions",
       enableHiding: false,
@@ -163,7 +259,6 @@ export function ComputerManagementTable() {
                 Copy payment ID
               </DropdownMenuItem> */}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleRowClick(row.original)}><GanttChart className="mr-2 h-4 w-4" />View & Manage</DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleEditClick(row.original)}><Pencil className="mr-2 h-4 w-4" />Edit Details</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -172,20 +267,21 @@ export function ComputerManagementTable() {
     },
   ]
 
-  const navigate = useNavigate();
-  const [open, setOpen] = React.useState(false);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const [list, setList] = React.useState<ComLabList[]>([])
+  const [list, setList] = React.useState<ConditionList[]>([])
   const [loadingTable, setLoadingTable] = React.useState(true);
   const [editMode, setEditMode] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState(false);
 
   const fetchList = async () => {
     try {
-      const response = await axios.get("https://comlab-backend.vercel.app/api/computer/getList");
-      setList(response.data.com);
-      console.log(response.data.com);
+      const response = await axios.get("https://comlab-backend.vercel.app/api/computerStat/getList");
+      const badComputers = response.data.com.filter(
+        (computer: any) => computer.condition === "Bad"
+      );
+      setList(badComputers);
+      console.log(badComputers);
       setLoadingTable(false);
     } catch (error) {
       console.error("Error fetching users", error);
@@ -196,14 +292,16 @@ export function ComputerManagementTable() {
     fetchList();
   }, []);
 
-  const handleEditClick = (lab: ComLabList) => {
+  const handleEditClick = (lab: ConditionList) => {
     setCurrentLab(lab);
     setEditMode(true);
     // Pre-fill the form with the lab's current values, including _id
     reset({
-      _id: lab._id,
+      pc_id: lab.pc_id,
       name: lab.name,
-      room: lab.room
+      condition: lab.condition,
+      status: lab.status,
+      comment: lab.comment,
     });
     setOpenEdit(true); // Open the dialog
   };
@@ -213,9 +311,12 @@ export function ComputerManagementTable() {
     try {
       if (currentLab && editMode) {
         // Update existing lab
-        await axios.post(`https://comlab-backend.vercel.app/api/computer/editCom/${data._id}`, {
+        await axios.post(`https://comlab-backend.vercel.app/api/computerStat/editComputerSet/${currentLab._id}`, {
+          pc_id: data.pc_id,
           name: data.name,
-          room: data.room
+          condition: data.condition,
+          status: data.status,
+          comment: data.comment,
         });
         
         fetchList(); // Refresh the list
@@ -237,7 +338,7 @@ export function ComputerManagementTable() {
       const selectedRows = table.getSelectedRowModel().rows;
       for (const row of selectedRows) {
         const comId = row.original._id; // Access the user's _id
-        await axios.delete(`https://comlab-backend.vercel.app/api/computer/deleteCom/${comId}`);
+        await axios.delete(`https://comlab-backend.vercel.app/api/computerStat/deleteComputerSet/${comId}`);
         console.log(`Deleted com with ID: ${comId}`);
       }
       toast.info(`${selectedRows.length} Data/s has been deleted.`);
@@ -252,18 +353,6 @@ export function ComputerManagementTable() {
       toast.error("Unknown error has occured");   
     }
   }
-
-  const handleRowClick = (row: ComLabList): void => {
-    navigate(`/admin/computermanagement/${encodeURIComponent(row.name)}`, {
-      state: { 
-        name: row.name,
-        room: row.room,
-        id: row._id
-      }
-    });
-  };
-
-  // Handler for when the dialog closes
 
   const table = useReactTable({
     data: list,
@@ -334,7 +423,6 @@ export function ComputerManagementTable() {
                     loading={loading}
                   />
                 )}
-              <AddCom open={open} setOpen={setOpen} fetch={fetchList} />
               </div>
               
             </div>
@@ -425,10 +513,22 @@ export function ComputerManagementTable() {
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 {/* Hidden _id field for tracking during updates */}
-                <Input 
-                  type="hidden"
-                  {...register("_id")}
-                />
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="name" className="text-right">
+                    PC ID
+                  </Label>
+                  <div className="col-span-3 relative">
+                    <Input 
+                      id="pc_id" 
+                      className="col-span-3" 
+                      type="text"
+                      {...register("pc_id")}
+                      placeholder="PC ID"
+                      disabled
+                    />
+                    {errors.pc_id && <span className="text-red-500 text-xs font-geist">{errors.pc_id.message}</span>}
+                  </div>
+                </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="name" className="text-right">
                     Name
@@ -445,18 +545,29 @@ export function ComputerManagementTable() {
                   </div>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="room" className="text-right">
-                    Room
-                  </Label>
-                  <div className="col-span-3 relative">
-                    <Input 
-                      id="room" 
-                      className="col-span-3" 
-                      type="text"
-                      {...register("room")}
-                      placeholder="Room"
-                    />
-                    {errors.room && <span className="text-red-500 text-xs font-geist">{errors.room.message}</span>}
+                  <Label htmlFor="condition" className="text-right">Condition</Label>
+                  <div className="col-span-3 font-geist text-[14px]">
+                    <select id="condition" {...register("condition")} className="w-full p-2 border rounded-md font-geist bg-white">
+                      <option value="Good">Good</option>
+                      <option value="Bad">Bad</option>
+                    </select>
+                    {errors.condition && <p className="text-red-500 text-xs">{errors.condition.message}</p>}
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="status" className="text-right">Status</Label>
+                  <div className="col-span-3 font-geist text-[14px]">
+                    <select id="status" {...register("status")} className="w-full p-2 border rounded-md font-geist bg-white">
+                      <option value="Active">Active</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
+                    {errors.status && <p className="text-red-500 text-xs">{errors.status.message}</p>}
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="comment" className="text-right">Comment</Label>
+                  <div className="col-span-3 font-geist text-[14px]">
+                    <Textarea id="comment" {...register('comment')} placeholder="Add a comment..." />
                   </div>
                 </div>
               </div>

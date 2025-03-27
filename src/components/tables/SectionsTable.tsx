@@ -110,7 +110,7 @@ export function SectionsTable() {
                             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                             className="text-xs pl-0 bg-transparent"
                         >
-                            Name
+                            Section
                             <ArrowUpDown />
                         </Button>
                     </div>

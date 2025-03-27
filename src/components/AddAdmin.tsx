@@ -19,39 +19,42 @@ import { Loader2, Plus } from 'lucide-react'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
 
-interface AddSubjectProps {
+interface AddAdminProps {
   fetch: () => void;
   open: boolean;
   setOpen: (open: boolean) => void; // Corrected type for setOpen
 }
 
 const FormSchema = z.object({
-  subject_code: z.string().min(1, {message: "Subject Code is required"}),
-  subject: z.string().min(1, {message: "Subject name is required"}),
+  id: z.string().min(1, { message: "ID is required" }),
+  name: z.string().min(1, { message: "Admin name is required" }),
+  password: z.string().min(1, { message: "Password is required" }),
 })
 
 type FormData = z.infer<typeof FormSchema>;
 
-export const AddSubject = ({open, setOpen, fetch} : AddSubjectProps) => {
+export const AddAdmin = ({open, setOpen, fetch} : AddAdminProps) => {
   const { register, handleSubmit, formState: {errors} } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
   })
   const [loading, setLoading] = useState(false);
 
 
-  const addNewSubject = async (data: FormData) => {
+  const addNewAdmin = async (data: FormData) => {
     setLoading(true);
-    const newSubject = {subject_code: data.subject_code, subject: data.subject}
+    const newAdmin = {id: data.id, name: data.name, pass: data.password}
     try {
-      const response = await axios.post("https://comlab-backend.vercel.app/api/acads/addSubject", newSubject);
+      const response = await axios.post("https://comlab-backend.vercel.app/api/admin/addAdmin", newAdmin);
       console.log(response.data)
       setOpen(false);
-      toast.success("New Data has been created.")
+      toast.success("New admin has been created.")
       setLoading(false);
       fetch();
     } catch (error) {
       console.error("Error adding data", error)
+      toast.error("Unknown error occured.")
       setOpen(false);
+      setLoading(false);
     }
     
   }
@@ -70,38 +73,53 @@ export const AddSubject = ({open, setOpen, fetch} : AddSubjectProps) => {
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="subject_code" className="text-right">
-              Subject Code
+            <Label htmlFor="id" className="text-right">
+             ID
             </Label>
             <div className="col-span-3 relative">
               <Input 
-                id="subject_code" 
+                id="id" 
                 className="col-span-3" 
                 type="text"
-                {...register("subject_code")}
-                placeholder="Code"
+                {...register("id")}
+                placeholder="ID"
               />
-              {errors.subject_code && <span className="text-red-500 text-xs font-geist">{errors.subject_code.message}</span>}
+              {errors.id && <span className="text-red-500 text-xs font-geist">{errors.id.message}</span>}
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="subject" className="text-right">
-              Subject Title
+            <Label htmlFor="name" className="text-right">
+              Name
             </Label>
             <div className="col-span-3 relative">
               <Input 
-                id="subject" 
+                id="name" 
                 className="col-span-3" 
                 type="text"
-                {...register("subject")}
-                placeholder="Subject Title"
+                {...register("name")}
+                placeholder="Name"
               />
-              {errors.subject && <span className="text-red-500 text-xs font-geist">{errors.subject.message}</span>}
+              {errors.name && <span className="text-red-500 text-xs font-geist">{errors.name.message}</span>}
+            </div>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="password" className="text-right">
+              Password
+            </Label>
+            <div className="col-span-3 relative">
+              <Input 
+                id="password" 
+                className="col-span-3" 
+                type="password"
+                {...register("password")}
+                
+              />
+              {errors.password && <span className="text-red-500 text-xs font-geist">{errors.password.message}</span>}
             </div>
           </div>
         </div>
         <DialogFooter className="flex items-center">
-          <Button onClick={handleSubmit(addNewSubject)}> 
+          <Button onClick={handleSubmit(addNewAdmin)}> 
             {loading ? ( 
               <>
                 Submitting

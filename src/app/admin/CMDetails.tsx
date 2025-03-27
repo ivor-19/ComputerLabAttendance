@@ -244,7 +244,6 @@ export default function CMDetails() {
                 <div className="col-span-3 font-geist text-[14px]">
                   <select id="condition" {...register("condition")} className="w-full p-2 border rounded-md font-geist bg-white">
                     <option value="Good">Good</option>
-                    <option value="Fair">Fair</option>
                     <option value="Bad">Bad</option>
                   </select>
                   {errors.condition && <p className="text-red-500 text-xs">{errors.condition.message}</p>}
