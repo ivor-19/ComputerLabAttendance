@@ -21,7 +21,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  } from "@/components/ui/dialog"
+} from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -58,14 +58,14 @@ export type SubjectsList = {
 }
 
 const FormSchema = z.object({
-  subject_code: z.string().min(1, {message: "Subject code is required"}),
-  subject: z.string().min(1, {message: "Subject is required"}),
+  subject_code: z.string().min(1, { message: "Subject code is required" }),
+  subject: z.string().min(1, { message: "Subject is required" }),
 })
 
 type FormData = z.infer<typeof FormSchema>;
 
 export function SubjectsTable() {
-  const { register, handleSubmit, formState: {errors}, reset } = useForm<FormData>({
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
   })
 
@@ -77,7 +77,7 @@ export function SubjectsTable() {
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
   const [currentLab, setCurrentLab] = React.useState<SubjectsList | null>(null);
-  
+
 
   const columns: ColumnDef<SubjectsList>[] = [
     {
@@ -103,47 +103,47 @@ export function SubjectsTable() {
       enableHiding: false,
     },
     {
-       accessorKey: "subject_code",
-       header: ({ column }) => {
-         return (
-           <div className="text-left">
-             <Button
-               variant="ghost"
-               onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-               className="text-xs pl-0 bg-transparent"
-             >
-               Subject Code
-               <ArrowUpDown />
-             </Button>
-           </div>
-         )
-       },
-       cell: ({ row }) => <div>{row.getValue("subject_code")}</div>,
-     },
-     {
-        accessorKey: "subject",
-        header: ({ column }) => {
-          return (
-            <div className="text-left">
-              <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                className="text-xs pl-0 bg-transparent"
-              >
-                Name
-                <ArrowUpDown />
-              </Button>
-            </div>
-          )
-        },
-        cell: ({ row }) => <div>{row.getValue("subject")}</div>,
+      accessorKey: "subject_code",
+      header: ({ column }) => {
+        return (
+          <div className="text-left">
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="text-xs pl-0 bg-transparent"
+            >
+              Subject Code
+              <ArrowUpDown />
+            </Button>
+          </div>
+        )
       },
+      cell: ({ row }) => <div>{row.getValue("subject_code")}</div>,
+    },
+    {
+      accessorKey: "subject",
+      header: ({ column }) => {
+        return (
+          <div className="text-left">
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="text-xs pl-0 bg-transparent"
+            >
+              Name
+              <ArrowUpDown />
+            </Button>
+          </div>
+        )
+      },
+      cell: ({ row }) => <div>{row.getValue("subject")}</div>,
+    },
     {
       id: "actions",
       enableHiding: false,
       cell: ({ row }) => {
         // const payment = row.original
-  
+
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -212,7 +212,7 @@ export function SubjectsTable() {
           subject_code: data.subject_code,
           subject: data.subject
         });
-        
+
         fetchList(); // Refresh the list
         setOpenEdit(false); // Close dialog
         setEditMode(false);
@@ -244,7 +244,7 @@ export function SubjectsTable() {
     } catch (error) {
       console.error("Error deleting a data", error);
       setOpenDelete(false);
-      toast.error("Unknown error has occured");   
+      toast.error("Unknown error has occured");
     }
   }
 
@@ -272,28 +272,28 @@ export function SubjectsTable() {
     <>
       {loadingTable ? (
         <div className="w-full">
-         <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min relative ">
-           <div className="flex items-center py-4 font-geist justify-between">
-             <div className="w-1/2 flex gap-2">
-               <Skeleton className="w-[30%] h-10"/>
-             </div>
-             <div className="flex gap-2">
-               <Skeleton className="w-20 h-10"/>
-             </div>
-           </div>
-           <div className="rounded-md border font-geist">
-             <Skeleton className="h-96 w-full"></Skeleton>
-           </div>
-           <div className="flex items-center justify-between space-x-2 py-4 font-geist">
-             <Skeleton className="h-10 w-20"></Skeleton>
-             <div className="space-x-2 flex">
-             <Skeleton className="w-20 h-8"/>
-             <Skeleton className="w-20 h-8"/>
-             </div>
-           </div>
-         </div>
+          <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min relative ">
+            <div className="flex items-center py-4 font-geist justify-between">
+              <div className="w-1/2 flex gap-2">
+                <Skeleton className="w-[30%] h-10" />
+              </div>
+              <div className="flex gap-2">
+                <Skeleton className="w-20 h-10" />
+              </div>
+            </div>
+            <div className="rounded-md border font-geist">
+              <Skeleton className="h-96 w-full"></Skeleton>
+            </div>
+            <div className="flex items-center justify-between space-x-2 py-4 font-geist">
+              <Skeleton className="h-10 w-20"></Skeleton>
+              <div className="space-x-2 flex">
+                <Skeleton className="w-20 h-8" />
+                <Skeleton className="w-20 h-8" />
+              </div>
+            </div>
+          </div>
         </div>
-      ):(
+      ) : (
         <div className="w-full">
           <div className="flex items-center justify-between py-4">
             <div>
@@ -318,11 +318,11 @@ export function SubjectsTable() {
                     loading={loading}
                   />
                 )}
-              <AddSubject open={open} setOpen={setOpen} fetch={fetchList} />
+                <AddSubject open={open} setOpen={setOpen} fetch={fetchList} />
               </div>
-              
+
             </div>
-          
+
           </div>
           <div className="rounded-md border">
             <Table>
@@ -335,9 +335,9 @@ export function SubjectsTable() {
                           {header.isPlaceholder
                             ? null
                             : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
                         </TableHead>
                       )
                     })}
@@ -350,7 +350,7 @@ export function SubjectsTable() {
                     <TableRow
                       key={row.id}
                       data-state={row.getIsSelected() && "selected"}
-                      // onClick={() => handleRowClick(row.getValue("name"))}
+                    // onClick={() => handleRowClick(row.getValue("name"))}
                     >
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>
@@ -402,9 +402,9 @@ export function SubjectsTable() {
           <Dialog open={openEdit} onOpenChange={setOpenEdit}>
             <DialogContent className="sm:max-w-[425px] font-geist">
               <DialogHeader>
-                <DialogTitle>{editMode ? "Edit Computer Lab" : "Add Computer Lab"}</DialogTitle>
+                <DialogTitle>{editMode ? "Edit Subject" : "Add Subject"}</DialogTitle>
                 <DialogDescription>
-                  {editMode ? "Make changes to the computer lab details." : "Add a new computer lab."} Click submit when you're done.
+                  {editMode ? "Make changes to the subject details." : "Add a new subject."} Click submit when you're done.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
@@ -413,9 +413,9 @@ export function SubjectsTable() {
                     Subject Code
                   </Label>
                   <div className="col-span-3 relative">
-                    <Input 
-                      id="subject_code" 
-                      className="col-span-3" 
+                    <Input
+                      id="subject_code"
+                      className="col-span-3"
                       type="text"
                       {...register("subject_code")}
                       placeholder="Code"
@@ -428,9 +428,9 @@ export function SubjectsTable() {
                     Name
                   </Label>
                   <div className="col-span-3 relative">
-                    <Input 
-                      id="subject" 
-                      className="col-span-3" 
+                    <Input
+                      id="subject"
+                      className="col-span-3"
                       type="text"
                       {...register("subject")}
                       placeholder="subject"
@@ -440,17 +440,17 @@ export function SubjectsTable() {
                 </div>
               </div>
               <DialogFooter className="flex items-center">
-                <Button onClick={handleSubmit(onSubmit)}> 
-                  {loading ? ( 
+                <Button onClick={handleSubmit(onSubmit)}>
+                  {loading ? (
                     <>
                       Submitting
-                      <Loader2 className="ml-2 animate-spin"/>
+                      <Loader2 className="ml-2 animate-spin" />
                     </>
-                  ):(
+                  ) : (
                     <>
                       Submit
                     </>
-                  )} 
+                  )}
                 </Button>
               </DialogFooter>
             </DialogContent>

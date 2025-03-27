@@ -59,18 +59,19 @@ export const SchedulerComponent = () => {
   const [comlabOptions, setComlabOptions] = useState<ComLab[]>([]);
   const [coursesOptions, setCoursesOptions] = useState<Courses[]>([]);
   const [subjectsOptions, setSubjectsOptions] = useState<Subjects[]>([]);
+  const [sectionsOptions, setSectionsOptions] = useState<Subjects[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchTeachers = async () => {
     try {
       const response = await axios.get("https://comlab-backend.vercel.app/api/teacher/getTeachers");
-      
+
       const names = response.data.map((teacher: any, index: number) => ({
         id: index + 1, // Increment id starting from 1
         text: `${teacher.firstname} ${teacher.lastname}`,
         value: `${teacher.firstname} ${teacher.lastname}`,
       }));
-      
+
       setTeacherOptions(names);
       return names; // Return the teacher names for synchronization
     } catch (error) {
@@ -88,11 +89,28 @@ export const SchedulerComponent = () => {
         text: `${comlab.name}`,
         value: `${comlab.name}`,
       }));
-      
+
       setComlabOptions(comlabs);
       return comlabs; // Return the teacher names for synchronization
     } catch (error) {
       console.error("Error fetching comlabs:", error);
+      return [];
+    }
+  };
+
+  const fetchSections = async () => {
+    try {
+      const response = await axios.get("https://comlab-backend.vercel.app/api/acads/getSections");
+      const sections = response.data.map((section: any, index: number) => ({
+        id: index + 1, // Increment id starting from 1
+        text: `${section.section}`,
+        value: `${section.section}`,
+      }));
+
+      setSectionsOptions(sections);
+      return sections;
+    } catch (error) {
+      console.error("Error fetching sections:", error);
       return [];
     }
   };
@@ -106,7 +124,7 @@ export const SchedulerComponent = () => {
         text: `${course.course}`,
         value: `${course.course}`,
       }));
-      
+
       setCoursesOptions(courses);
       return courses; // Return the teacher names for synchronization
     } catch (error) {
@@ -124,7 +142,7 @@ export const SchedulerComponent = () => {
         text: `${subject.subject}`,
         value: `${subject.subject}`,
       }));
-      
+
       setSubjectsOptions(subjects);
       return subjects; // Return the teacher names for synchronization
     } catch (error) {
@@ -164,6 +182,7 @@ export const SchedulerComponent = () => {
       await fetchComlabs();
       await fetchCourses();
       await fetchSubjects();
+      await fetchSections()
       setIsLoading(false);
     };
 
@@ -177,7 +196,7 @@ export const SchedulerComponent = () => {
         title: event.title,
         start: event.start.toISOString(), // Convert to ISO string
         end: event.end.toISOString(),     // Convert to ISO string
-        teacher_name: event.teacher_name,  
+        teacher_name: event.teacher_name,
         subject: event.subject,
         course: event.course,
         section: event.section,
@@ -209,9 +228,9 @@ export const SchedulerComponent = () => {
           subtitle: event.subtitle,
           comlab: event.comlab,
         };
-        
+
         await axios.put(`https://comlab-backend.vercel.app/api/schedule/updateSched`, updatedEvent);
-        
+
         fetchSchedules();
       } catch (error) {
         console.error("Error updating event:", error);
@@ -241,19 +260,19 @@ export const SchedulerComponent = () => {
     <div className="flex justify-center w-full">
       <div className="w-full">
         <Scheduler
-          height={600} 
+          height={600}
           draggable={false}
           events={events}
           week={{
-            weekDays: [0, 1, 2, 3, 4, 5], 
-            weekStartOn: 6, 
-            startHour: 6, 
+            weekDays: [0, 1, 2, 3, 4, 5],
+            weekStartOn: 6,
+            startHour: 6,
             endHour: 22,
             step: 60,
           }}
           day={{
-            startHour: 6, 
-            endHour: 22, 
+            startHour: 6,
+            endHour: 22,
             step: 60,
           }}
           fields={[
@@ -278,48 +297,7 @@ export const SchedulerComponent = () => {
             {
               name: "section",
               type: "select",
-              options: [
-                { id: "1A", text: "1A", value: "1A" },
-                { id: "1B", text: "1B", value: "1B" },
-                { id: "1C", text: "1C", value: "1C" },
-                { id: "1D", text: "1D", value: "1D" },
-                { id: "1E", text: "1E", value: "1E" },
-                { id: "1F", text: "1F", value: "1F" },
-                { id: "1G", text: "1G", value: "1G" },
-                { id: "1H", text: "1H", value: "1H" },
-                { id: "1I", text: "1I", value: "1I" },
-                { id: "1J", text: "1J", value: "1J" },
-                { id: "2A", text: "2A", value: "2A" },
-                { id: "2B", text: "2B", value: "2B" },
-                { id: "2C", text: "2C", value: "2C" },
-                { id: "2D", text: "2D", value: "2D" },
-                { id: "2E", text: "2E", value: "2E" },
-                { id: "2F", text: "2F", value: "2F" },
-                { id: "2G", text: "2G", value: "2G" },
-                { id: "2H", text: "2H", value: "2H" },
-                { id: "2I", text: "2I", value: "2I" },
-                { id: "2J", text: "2J", value: "2J" },
-                { id: "3A", text: "3A", value: "3A" },
-                { id: "3B", text: "3B", value: "3B" },
-                { id: "3C", text: "3C", value: "3C" },
-                { id: "3D", text: "3D", value: "3D" },
-                { id: "3E", text: "3E", value: "3E" },
-                { id: "3F", text: "3F", value: "3F" },
-                { id: "3G", text: "3G", value: "3G" },
-                { id: "3H", text: "3H", value: "3H" },
-                { id: "3I", text: "3I", value: "3I" },
-                { id: "3J", text: "3J", value: "3J" },
-                { id: "4A", text: "4A", value: "4A" },
-                { id: "4B", text: "4B", value: "4B" },
-                { id: "4C", text: "4C", value: "4C" },
-                { id: "4D", text: "4D", value: "4D" },
-                { id: "4E", text: "4E", value: "4E" },
-                { id: "4F", text: "4F", value: "4F" },
-                { id: "4G", text: "4G", value: "4G" },
-                { id: "4H", text: "4H", value: "4H" },
-                { id: "4I", text: "4I", value: "4I" },
-                { id: "4J", text: "4J", value: "4J" },
-              ],
+              options: sectionsOptions,
               config: { label: "Section", required: true, errMsg: "Please select a section" },
             },
             {

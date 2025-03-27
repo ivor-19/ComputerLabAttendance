@@ -57,13 +57,26 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
   const [loading, setLoading] = useState<boolean>(false);
 
   // Generate all possible sections (1A, 1B, ..., 4J)
-  const allSections = Array.from({ length: 4 }, (_, year) =>
-    Array.from({ length: 10 }, (_, section) => `${year + 1}${String.fromCharCode(65 + section)}`)
-  ).flat();
+  // const allSections = Array.from({ length: 4 }, (_, year) =>
+  //   Array.from({ length: 10 }, (_, section) => `${year + 1}${String.fromCharCode(65 + section)}`)
+  // ).flat();
 
   const [courses, setCourses] = useState<string[]>([]);
   const [subjects, setSubjects] = useState<string[]>([]);
- 
+  const [sections, setSections] = useState<string[]>([]);
+
+  const fetchSections = async () => {
+    try {
+      const response = await axios.get("https://comlab-backend.vercel.app/api/acads/getSections");
+      const courseNames = response.data.map((section: { section: string }) => section.section);
+      setSections(courseNames);
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+      toast.error("Failed to load courses");
+    }
+  }
+
+
   const fetchCourses = async () => {
     try {
       const response = await axios.get("https://comlab-backend.vercel.app/api/acads/getCourses");
@@ -89,6 +102,7 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
   useEffect(() => {
     fetchCourses();
     fetchSubjects();
+    fetchSections()
   }, []);
 
   const addNewTeacher = async (data: FormData) => {
@@ -102,12 +116,12 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
       subjects: data.subjects,
       teacher_email: data.teacher_email
     };
-    const teacherEmail = {teacher_id: data.teacher_id, teacher_email: data.teacher_email, firstname: data.firstname, lastname: data.lastname}
+    const teacherEmail = { teacher_id: data.teacher_id, teacher_email: data.teacher_email, firstname: data.firstname, lastname: data.lastname }
     try {
       const response = await axios.post('https://comlab-backend.vercel.app/api/teacher/addTeacher', newTeacher);
       console.log(response.data);
 
-      const sendQr = await axios.post("https://comlab-backend.vercel.app/api/teacher/teacherQR",teacherEmail)
+      const sendQr = await axios.post("https://comlab-backend.vercel.app/api/teacher/teacherQR", teacherEmail)
       console.log("Sent successfully", sendQr.data);
 
       setOpen(false);
@@ -214,7 +228,7 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
             <Label htmlFor="sections" className="text-right">Sections</Label>
             <div className="col-span-3 relative">
               <MultiSelectAddTeacher
-                options={allSections}
+                options={sections}
                 onChange={(selectedOptions) => setValue('sections', selectedOptions)}
               />
               {errors.sections && <p className="text-red-500 text-xs">{errors.sections.message}</p>}

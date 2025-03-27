@@ -97,6 +97,11 @@ const data = {
           url: "/admin/subjects",
           isActive: false,
         },
+        {
+          title: "Sections",
+          url: "/admin/sections",
+          isActive: false,
+        },
       ],
     },
   ],
@@ -153,7 +158,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
                   <span className="font-semibold text-white">Computer Lab Monitoring and Attendance System</span>
-                
+
                 </div>
               </a>
             </SidebarMenuButton>
