@@ -16,6 +16,8 @@ import Dashboard from './admin/Dashboard'
 import Courses from './admin/Courses'
 import Sections from './admin/Sections'
 import SetAdmin from './admin/SetAdmin'
+import ComManagement from './teacher/ComManagement'
+import ComDetails from './teacher/ComDetails'
 
 function App() {
   return (
@@ -38,6 +40,8 @@ function App() {
         <Route path={'/admin/setAdmin'} element={<SetAdmin />} />
         <Route path={'/teacher/Record'} element={<Record />} />
         <Route path={'/teacher/schedule'} element={<Schedule />} />
+        <Route path={'/teacher/comManagement'} element={<ComManagement />} />
+        <Route path={'/teacher/comManagement/:name'} element={<ComDetails />} />
         {/* <Route path={'/admin/accounts'} element={<Users />}/> */}
       </Routes>
     </BrowserRouter>

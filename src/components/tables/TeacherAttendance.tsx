@@ -352,7 +352,7 @@ export function TeacherAttendance() {
       ):(
         <div className="w-full">
           <div className="flex items-center py-4">
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <Input
                 placeholder="Filter by teacher name..."
                 value={(table.getColumn("teacher_name")?.getFilterValue() as string) ?? ""}
@@ -411,7 +411,7 @@ export function TeacherAttendance() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button onClick={exportToExcel} variant="outline" size="sm">
+              <Button onClick={exportToExcel} variant="outline" size="sm" className="ml-2">
                 Export to Excel
               </Button>
             </div>

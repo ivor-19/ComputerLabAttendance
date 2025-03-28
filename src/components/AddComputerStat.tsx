@@ -33,6 +33,7 @@ interface AddComputerStatProps {
   disabled: boolean;
   setOpen: (open: boolean) => void; // Corrected type for setOpen
   id: string;
+  name: string;
 }
 
 const FormSchema = z.object({
@@ -44,7 +45,7 @@ const FormSchema = z.object({
 
 type FormData = z.infer<typeof FormSchema>;
 
-export const AddComputerStat = ({open, setOpen, fetch, id, disabled} : AddComputerStatProps) => {
+export const AddComputerStat = ({open, setOpen, fetch, id, name, disabled} : AddComputerStatProps) => {
   const { register, handleSubmit, formState: {errors}, reset, control } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
   })
@@ -52,8 +53,10 @@ export const AddComputerStat = ({open, setOpen, fetch, id, disabled} : AddComput
 
 
   const addNewComputerSet = async (data: FormData) => {
+    console.log('name prop:', name); // Add this to check the value
+    console.log('id prop:', id);     // Add this to check the value
     setLoading(true);
-    const newComputerSet = {pc_id: data.pc_id, comlabid: id, name: data.name, condition: data.condition, status: data.status}
+    const newComputerSet = {pc_id: data.pc_id, comlabid: id, comlabname: name, name: data.name, condition: data.condition, status: data.status}
     try {
       const response = await axios.post("https://comlab-backend.vercel.app/api/computerStat/addComputerSet", newComputerSet);
       console.log(response.data.com)

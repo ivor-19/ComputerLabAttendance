@@ -1,5 +1,4 @@
 import { useParams, useLocation } from "react-router-dom";
-import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
@@ -7,11 +6,9 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { AddComputerStat } from "@/components/AddComputerStat";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { SVGProps } from "react"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Loader2, Pencil } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form"
+import { AppSidebarTeacher } from "@/components/teacher/app-sidebar";
 
 interface ComputerItem {
   _id: string;
@@ -42,7 +40,7 @@ const FormSchema = z.object({
 
 type FormData = z.infer<typeof FormSchema>;
 
-export default function CMDetails() {
+export default function ComDetails() {
   const { register, handleSubmit, formState: {errors}, reset } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
   })
@@ -51,11 +49,8 @@ export default function CMDetails() {
   const location = useLocation();
   const { room, id } = location.state || {};
   
-  const [open, setOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [list, setList] = useState<ComputerItem[]>([]);
-  const [disable, setDisable] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [selectedItem, setSelectedItem] = useState<ComputerItem | null>(null);
   const [editLoading, setEditLoading] = useState(false);
@@ -76,22 +71,6 @@ export default function CMDetails() {
   }, []);
 
   const filteredList = list.filter(item => item.comlabid === id);
-  useEffect(() => {
-    setDisable(filteredList.length >= 60);
-  }, [filteredList]);
-
-  const deleteComputerSet = async (id: string) => {
-    console.log(id);
-    try {
-      setLoading(true);
-      await axios.delete(`https://comlab-backend.vercel.app/api/computerStat/deleteComputerSet/${id}`);
-      fetchList();
-    } catch (error) {
-      console.error("Error deleting computer set", error);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   const handleEditClick = (item: ComputerItem) => {
     setSelectedItem(item);
@@ -130,14 +109,14 @@ export default function CMDetails() {
 
   return (
     <SidebarProvider style={{ "--sidebar-width": "19rem" } as React.CSSProperties}>
-      <AppSidebar />
+      <AppSidebarTeacher />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem><BreadcrumbLink href="/admin/computermanagement">Computer Management</BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbItem><BreadcrumbLink href="/teacher/comManagement">Computer Management</BreadcrumbLink></BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem><BreadcrumbPage>{name}</BreadcrumbPage></BreadcrumbItem>
             </BreadcrumbList>
@@ -179,23 +158,6 @@ export default function CMDetails() {
                           </div>
                         </div>
                         <div className="w-full flex justify-end gap-2">
-                          <Dialog>
-                            <DialogTrigger asChild><Button variant="destructive" className="font-geist">Delete</Button></DialogTrigger>
-                            <DialogContent className="sm:max-w-[425px] font-geist">
-                              <div className="flex flex-col items-center justify-center gap-4 py-8">
-                                <TriangleAlertIcon className="size-12 text-red-500" />
-                                <div className="space-y-2 text-center">
-                                  <DialogTitle>Hold on!</DialogTitle>
-                                  <DialogDescription>This action cannot be undone</DialogDescription>
-                                </div>
-                              </div>
-                              <DialogFooter>
-                                <Button variant="destructive" onClick={() => deleteComputerSet(item._id)}>
-                                  {loading ? <>Deleting<Loader2 className="ml-2 animate-spin"/></> : <>Delete</>}
-                                </Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
                           <Button 
                             className="font-geist bg-[#022c22] hover:bg-[#064e3b]" 
                             onClick={() => handleEditClick(item)}
@@ -211,7 +173,6 @@ export default function CMDetails() {
                 )}
               </Accordion>
             )}
-            <AddComputerStat open={open} setOpen={setOpen} id={String(id)} name={String(name)} fetch={fetchList} disabled={disable}/>
           </div>
         </div>
       </SidebarInset>
@@ -228,14 +189,14 @@ export default function CMDetails() {
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="pc_id" className="text-right">PC ID</Label>
                 <div className="col-span-3 relative">
-                  <Input id="pc_id" className="col-span-3" type="text" {...register("pc_id")} placeholder="PC ID" />
+                  <Input id="pc_id" className="col-span-3" type="text" {...register("pc_id")} placeholder="PC ID" disabled/>
                   {errors.pc_id && <span className="text-red-500 text-xs font-geist">{errors.pc_id.message}</span>}
                 </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="name" className="text-right">Name</Label>
                 <div className="col-span-3 relative">
-                  <Input id="name" className="col-span-3" type="text" {...register("name")} placeholder="Name" />
+                  <Input id="name" className="col-span-3" type="text" {...register("name")} placeholder="Name" disabled/>
                   {errors.name && <span className="text-red-500 text-xs font-geist">{errors.name.message}</span>}
                 </div>
               </div>
@@ -282,14 +243,4 @@ export default function CMDetails() {
       </Dialog>
     </SidebarProvider>
   );
-}
-
-function TriangleAlertIcon(props : SVGProps<SVGSVGElement>) {
-  return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
-      <path d="M12 9v4" />
-      <path d="M12 17h.01" />
-    </svg>
-  )
 }

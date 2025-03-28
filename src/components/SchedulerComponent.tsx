@@ -267,7 +267,7 @@ export const SchedulerComponent = () => {
   }
 
   return (
-    <div className="flex justify-center w-full">
+    <div className="flex justify-center w-full z-0">
       <div className="w-full">
         <Scheduler
           height={600}

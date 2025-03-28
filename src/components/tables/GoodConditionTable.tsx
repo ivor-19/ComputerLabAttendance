@@ -55,6 +55,7 @@ export type ConditionList = {
   _id: string;
   pc_id: string;
   comlabid: string;
+  comlabname: string;
   name: string;
   condition: string;
   status: string;
@@ -110,6 +111,24 @@ export function GoodConditionTable() {
       ),
       enableSorting: false,
       enableHiding: false,
+    },
+    {
+      accessorKey: "comlabname",
+      header: ({ column }) => {
+        return (
+          <div className="text-left">
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="text-xs pl-0 bg-transparent"
+            >
+              Computer Lab
+              <ArrowUpDown />
+            </Button>
+          </div>
+        )
+      },
+      cell: ({ row }) => <div>{row.getValue("comlabname")}</div>,
     },
     {
        accessorKey: "pc_id",

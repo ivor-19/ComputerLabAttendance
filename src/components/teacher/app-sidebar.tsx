@@ -41,34 +41,10 @@ const data = {
           url: "/teacher/schedule",
           isActive: false,
         },
-      ],
-    },
-  ],
-  navFaculty: [
-    {
-      title: "Faculty",
-      url: "/admin/faculty",
-      isActive: false,
-    },
-    {
-      title: "Computer Management",
-      url: "/admin/computermanagement",
-      isActive: false,
-
-    },
-  ],
-  navSettings: [
-    {
-      title: "Settings",
-      url: "#",
-      items: [
         {
-          title: "Profile",
-          url: "/profile",
-        },
-        {
-          title: "Logout",
-          url: "/",
+          title: "Computer Management",
+          url: "/teacher/comManagement",
+          isActive: false,
         },
       ],
     },
@@ -97,7 +73,6 @@ export function AppSidebarTeacher({ ...props }: React.ComponentProps<typeof Side
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
                   <span className="font-semibold text-white">Computer Lab Monitoring and Attendance System</span>
-                  <span className="text-white">v1.0.0</span>
                 </div>
               </a>
             </SidebarMenuButton>

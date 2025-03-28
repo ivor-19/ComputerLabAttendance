@@ -1,7 +1,7 @@
-import { AppSidebar } from "@/components/dashboard/app-sidebar"
 import { BadConditionTable } from "@/components/tables/BadConditionTable"
-import { ComputerManagementTable } from "@/components/tables/ComputerManagementTable"
+import { ComManagementTable } from "@/components/tables/ComManagementTable"
 import { GoodConditionTable } from "@/components/tables/GoodConditionTable"
+import { AppSidebarTeacher } from "@/components/teacher/app-sidebar"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,7 +21,7 @@ import axios from "axios"
 import { ChevronLeft } from "lucide-react"
 import { useEffect, useState } from "react"
 
-export default function ComputerManagement() {
+export default function ComManagement() {
   const [totalGood, setTotalGood] = useState(0);
   const [totalBad, setTotalBad] = useState(0);
   const [show, setShow] = useState("Main")
@@ -56,7 +56,7 @@ export default function ComputerManagement() {
         } as React.CSSProperties
       }
     >
-      <AppSidebar />
+      <AppSidebarTeacher />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
@@ -103,7 +103,7 @@ export default function ComputerManagement() {
                  </CardFooter>
                </Card>
              </div>
-             <ComputerManagementTable />
+             <ComManagementTable />
    
            </div>
           ): show === "Good" ? (
