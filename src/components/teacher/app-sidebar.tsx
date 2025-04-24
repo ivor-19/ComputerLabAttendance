@@ -68,8 +68,8 @@ export function AppSidebarTeacher({ ...props }: React.ComponentProps<typeof Side
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-white">
-                  <img src="/images/clm-logo.png" sizes="4"></img>
+                <div className="flex items-center justify-center rounded-lg bg-white">
+                  <img src="/images/clm-logo.png" height={100} width={100}></img>
                 </div>
                 <div className="flex flex-col gap-0.5 leading-none">
                   <span className="font-semibold text-white">Computer Lab Monitoring and Attendance System</span>

@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import Login from './auth/Login'
+
 import { QrAttendance } from './QrAttendance'
 import Subjects from './admin/Subjects'
 import Faculty from './admin/Faculty'
@@ -18,6 +18,7 @@ import Sections from './admin/Sections'
 import SetAdmin from './admin/SetAdmin'
 import ComManagement from './teacher/ComManagement'
 import ComDetails from './teacher/ComDetails'
+import { Login } from './auth/Login'
 
 function App() {
   return (

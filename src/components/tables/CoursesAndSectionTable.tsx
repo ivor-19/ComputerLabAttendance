@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, FilterX, ListFilter, Loader2, MoreHorizontal, Pencil, QrCode } from "lucide-react";
+import { ArrowUpDown, BadgeCheck, FilterX, Import, ListFilter, Loader, Loader2, MoreHorizontal, Pencil, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -43,6 +43,7 @@ import { Label } from "../ui/label";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 
 // Define the Student type
 export type Student = {
@@ -227,6 +228,11 @@ export function CoursesAndSectionTable() {
   const [openEditModal, setOpenEditModal] = React.useState(false);
   const [studentData, setStudentData] = React.useState<Student | null>(null);
 
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = React.useState(false);
+  const [openUploadExcel, setOpenUploadExcel] = React.useState(false);
+  const [successUpload, setSuccessUpload] = React.useState(false);
+
   // React Hook Form setup
   const {
     register,
@@ -244,6 +250,59 @@ export function CoursesAndSectionTable() {
       section: studentData?.section || "",
     },
   });
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+  
+    if (!file.name.match(/\.(xlsx|xls|csv)$/)) {
+      toast.error('Please upload an Excel file (.xlsx, .xls)');
+      return;
+    }
+  
+    setIsUploading(true);
+    setOpenUploadExcel(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('excelFile', file);
+  
+      await axios.post(
+        'https://comlab-backend.vercel.app/api/excel/uploadExcel', 
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+  
+      // toast.success(response.data.message || 'Excel file imported successfully!');
+      setSuccessUpload(true)
+      setTimeout(() => {
+        setSuccessUpload(false)
+      }, 3000)
+      fetchStudents();
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message || 'Failed to import Excel file');
+      } else {
+        toast.error('Failed to import Excel file');
+      }
+    } finally {
+      setIsUploading(false);
+      setOpenUploadExcel(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
 
   // Fetch students from the backend
   const fetchStudents = async () => {
@@ -466,6 +525,26 @@ export function CoursesAndSectionTable() {
                   loading={loading}
                 />
               )}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept=".xlsx,.xls,.csv"
+                style={{ display: 'none' }}
+              />
+              <Button onClick={handleImportClick} disabled={isUploading}>
+                {isUploading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Import className="mr-2 h-4 w-4" />
+                    Import Excel
+                  </>
+                )}
+              </Button>
               <AddStudent open={open} setOpen={setOpen} fetch={fetchStudents} />
             </div>
           </div>
@@ -647,6 +726,28 @@ export function CoursesAndSectionTable() {
                   </Button>
                 </DialogFooter>
               </form>
+            </DialogContent>
+          </Dialog>
+          <AlertDialog open={openUploadExcel} onOpenChange={setOpenUploadExcel}>
+            <AlertDialogContent className='font-geist flex items-center justify-center'>
+              <AlertDialogHeader className='flex flex-col items-center justify-center'>
+                <Loader className='animate-spin'/>
+                <AlertDialogTitle className="text-sm font-medium">Upload in Progress</AlertDialogTitle>
+                <AlertDialogDescription>Students without complete details will be skipped</AlertDialogDescription>
+              </AlertDialogHeader>
+            </AlertDialogContent>
+          </AlertDialog>
+          <Dialog open={successUpload} onOpenChange={setSuccessUpload}>
+            <DialogContent className='font-geist flex items-center justify-center'>
+              <DialogHeader className='flex flex-col items-center justify-center'>
+                <BadgeCheck className="text-green-900 h-20 w-20" />
+                <DialogTitle className='text-md font-semibold text-center mt-4'>
+                  Excel File Uploaded Successfully!
+                </DialogTitle>
+                <DialogDescription className='text-sm  text-center mt-2'>
+                  Data has been imported.
+                </DialogDescription>
+              </DialogHeader>
             </DialogContent>
           </Dialog>
         </div>

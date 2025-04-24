@@ -16,12 +16,14 @@ import {
 import axios from "axios"
 import { Boxes, TrendingUpIcon } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 export default function Dashboard() {
   const [totalStudents, setTotalStudents] = useState("");
   const [totalTeachers, setTotalTeachers] = useState("");
   const [totalComputerSets, setTotalComputerSets] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setLoading(true);
@@ -76,7 +78,7 @@ export default function Dashboard() {
         ):(
           <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
             <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-              <Card className="@container/card">
+              <Card className="@container/card cursor-pointer" onClick={() => navigate('/admin/course&section')}>
                 <CardHeader className="relative">
                   <CardDescription>Total Students</CardDescription>
                   <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">{totalStudents || "0"}</CardTitle>
@@ -90,7 +92,7 @@ export default function Dashboard() {
                   </div>
                 </CardFooter>
               </Card>
-              <Card className="@container/card">
+              <Card className="@container/card cursor-pointer" onClick={() => navigate('/admin/faculty')}>
                 <CardHeader className="relative">
                   <CardDescription>Total Teachers</CardDescription>
                   <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">{totalTeachers || "0"}</CardTitle>
@@ -104,7 +106,7 @@ export default function Dashboard() {
                   </div>
                 </CardFooter>
               </Card>
-              <Card className="@container/card">
+              <Card className="@container/card cursor-pointer" onClick={() => navigate('/admin/computermanagement')}>
                 <CardHeader className="relative">
                   <CardDescription>Total Computer Sets</CardDescription>
                   <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">{totalComputerSets || "0"}</CardTitle>
