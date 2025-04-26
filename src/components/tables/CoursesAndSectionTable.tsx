@@ -25,7 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "../ui/badge";
-import { AddStudent } from "../AddStudent";
+import { AddStudent } from "../addModals/AddStudent";
 import DeleteModal from "../DeleteModal";
 import axios from "axios";
 import {
@@ -57,7 +57,7 @@ export type Student = {
 
 // Define the Zod schema for form validation
 const FormSchema = z.object({
-  student_id: z.string().min(10, { message: "ID must have at least 10 characters" }),
+  student_id: z.string().min(4, { message: "ID must have at least 4 characters" }),
   email: z.string().email({ message: "Invalid email address" }).min(1, { message: "Email is required" }),
   lastname: z.string().min(1, { message: "Last Name is required" }),
   firstname: z.string().min(1, { message: "First Name is required" }),
@@ -227,6 +227,8 @@ export function CoursesAndSectionTable() {
   const [studentCount, setStudentCount] = React.useState(0);
   const [openEditModal, setOpenEditModal] = React.useState(false);
   const [studentData, setStudentData] = React.useState<Student | null>(null);
+  const [userExists, setUserExists] = React.useState(false);
+  const [emailExists, setEmailExists] = React.useState(false);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = React.useState(false);
@@ -357,7 +359,7 @@ export function CoursesAndSectionTable() {
   // Handle form submission
   const onSubmit = async (data: FormData) => {
     setLoading(true);
-    const newData = {student_id: data.student_id, firstname: data.firstname, lastname: data.lastname, course: data.course, section: data.section}; 
+    const newData = {student_id: data.student_id, email: data.email, firstname: data.firstname, lastname: data.lastname, course: data.course, section: data.section}; 
     try{
       const response = await axios.post("https://comlab-backend.vercel.app/api/student/editStudent", newData)
       if (response.status === 200) {
@@ -365,11 +367,40 @@ export function CoursesAndSectionTable() {
         fetchStudents(); // Refresh the student list
         setOpenEditModal(false);
         setLoading(false)
+        setUserExists(false)
+        setEmailExists(false)
+        reset({
+          student_id: "",
+          email: "",
+          lastname: "",
+          firstname: "",
+          course: "",
+          section: ""
+        })
       }
     }
-    catch(error){
-      console.error(error)
-      setLoading(false)
+    catch (error: any) {
+      console.error("Error adding student", error)
+      if (error.response && error.response.status === 403) {
+        setUserExists(true);
+        // Keep the dialog open to show the error
+        toast.error("Student ID already exists");
+        setLoading(false);
+      } 
+      else if (error.response && error.response.status === 406) {
+        setEmailExists(true);
+        // Keep the dialog open to show the error
+        toast.error("Email already exists");
+        setLoading(false);
+      }
+      else {
+
+        toast.error("Failed to add data");
+        setOpen(false);
+        setLoading(false);
+        setUserExists(false)
+        setEmailExists(false)
+      }
     }
   };
 
@@ -714,6 +745,8 @@ export function CoursesAndSectionTable() {
                   </div>
                 </div>
                 <DialogFooter className="flex items-center">
+                  {userExists && <span className="text-red-500 text-xs font-geist">Student already exists. Please choose a different account ID.</span>}
+                  {emailExists && <span className="text-red-500 text-xs font-geist">Email already exists. Please choose a different email account.</span>}
                   <Button type="submit" disabled={loading}>
                     {loading ? (
                       <>

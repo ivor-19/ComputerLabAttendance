@@ -80,24 +80,24 @@ export default function ComputerManagement() {
           show === "Main" ? (
             <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
              <div className="grid auto-rows-min gap-4 md:grid-cols-2">
-               <Card className="@container/card bg-green-50 cursor-pointer" onClick={() => {setShow("Good")}}>
+               <Card className="@container/card bg-green-600 cursor-pointer" onClick={() => {setShow("Good")}}>
                  <CardHeader className="relative">
-                   <CardDescription>Good Condition</CardDescription>
+                   <CardDescription className="text-white">Good Condition</CardDescription>
                    <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">{totalGood || "0"}</CardTitle>
                  </CardHeader>
                  <CardFooter className="flex-col items-start gap-1 text-sm">
-                   <div className="text-muted-foreground">
+                   <div className="text-white">
                      Current total number of pc in good condition.
                    </div>
                  </CardFooter>
                </Card>
-               <Card className="@container/card bg-red-50 cursor-pointer" onClick={() => {setShow("Bad")}}>
+               <Card className="@container/card bg-red-600 cursor-pointer" onClick={() => {setShow("Bad")}}>
                  <CardHeader className="relative">
-                   <CardDescription>Bad Condition</CardDescription>
+                   <CardDescription className="text-white">Bad Condition</CardDescription>
                    <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">{totalBad || "0"}</CardTitle>
                  </CardHeader>
                  <CardFooter className="flex-col items-start gap-1 text-sm">
-                   <div className="text-muted-foreground">
+                   <div className="text-white">
                      Current total number of pc in bad condition.
                    </div>
                  </CardFooter>

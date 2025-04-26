@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Scheduler } from "@aldabil/react-scheduler";
 import axios from "axios";
 import { Skeleton } from "./ui/skeleton";
+import { useTeacher } from "@/Context";
 
 interface Event {
   event_id: string;
@@ -37,6 +38,7 @@ export const TeacherScheduler = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [teacherOptions, setTeacherOptions] = useState<Teacher[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { teacherName } = useTeacher();
 
   const fetchTeachers = async () => {
     try {
@@ -49,7 +51,7 @@ export const TeacherScheduler = () => {
       }));
       
       setTeacherOptions(names);
-      return names; // Return the teacher names for synchronization
+      return names;
     } catch (error) {
       console.error("Error fetching teachers:", error);
       return [];
@@ -60,17 +62,19 @@ export const TeacherScheduler = () => {
     try {
       const response = await axios.get<ApiResponse[]>("https://comlab-backend.vercel.app/api/schedule/getSched");
 
-      const parsedEvents: Event[] = response.data.map(event => ({
-        event_id: event.event_id,
-        title: event.title,
-        start: new Date(event.start), // Convert start date string to Date
-        end: new Date(event.end),     // Convert end date string to Date
-        teacher_name: event.teacher_name,
-        subject: event.subject,
-        course: event.course,
-        section: event.section,
-        subtitle: event.subtitle,
-      }));
+      const parsedEvents: Event[] = response.data
+        .filter(event => event.teacher_name === teacherName) // Filter events by teacherName
+        .map(event => ({
+          event_id: event.event_id,
+          title: event.title,
+          start: new Date(event.start),
+          end: new Date(event.end),
+          teacher_name: event.teacher_name,
+          subject: event.subject,
+          course: event.course,
+          section: event.section,
+          subtitle: event.subtitle,
+        }));
 
       setEvents(parsedEvents);
     } catch (error) {
@@ -87,7 +91,7 @@ export const TeacherScheduler = () => {
     };
 
     initializeData();
-  }, []);
+  }, [teacherName]); // Add teacherName as dependency to refetch when it changes
 
 
   if (isLoading) {

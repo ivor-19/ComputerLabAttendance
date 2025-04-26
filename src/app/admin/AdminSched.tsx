@@ -1,5 +1,5 @@
+import CLAttendance from "@/components/attendance/CLAttendance"
 import { AppSidebar } from "@/components/dashboard/app-sidebar"
-import { SchedulerComponent } from "@/components/SchedulerComponent"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -30,7 +30,8 @@ export default function AdminSched() {
           </Breadcrumb>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-         <SchedulerComponent />
+         {/* <SchedulerComponent /> */}
+         <CLAttendance />
         </div>
       </SidebarInset>
     </SidebarProvider>

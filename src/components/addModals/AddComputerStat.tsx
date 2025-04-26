@@ -15,8 +15,8 @@ import { Controller, useForm } from "react-hook-form"
 import axios from 'axios'
 import { toast } from 'sonner'
 import { Loader2, Plus } from 'lucide-react'
-import { Input } from './ui/input'
-import { Button } from './ui/button'
+import { Input } from '../ui/input'
+import { Button } from '../ui/button'
 import {
   Select,
   SelectContent,

@@ -19,6 +19,9 @@ import SetAdmin from './admin/SetAdmin'
 import ComManagement from './teacher/ComManagement'
 import ComDetails from './teacher/ComDetails'
 import { Login } from './auth/Login'
+import ScheduleDetails from './admin/ScheduleDetails'
+import TScheduleDetails from './teacher/TScheduleDetails'
+import Semester from './admin/Semester'
 
 function App() {
   return (
@@ -38,9 +41,12 @@ function App() {
         <Route path={'/admin/dashboard'} element={<Dashboard />} />
         <Route path={'/admin/attendanceRecord/teachersRecord'} element={<AdminTeacherRecords />} />
         <Route path={'/admin/schedule'} element={<AdminSched />} />
+        <Route path={'/admin/schedule/:name'} element={<ScheduleDetails />} />
         <Route path={'/admin/setAdmin'} element={<SetAdmin />} />
+        <Route path={'/admin/semester'} element={<Semester />} />
         <Route path={'/teacher/Record'} element={<Record />} />
         <Route path={'/teacher/schedule'} element={<Schedule />} />
+        <Route path={'/teacher/schedule/:name'} element={<TScheduleDetails />} />
         <Route path={'/teacher/comManagement'} element={<ComManagement />} />
         <Route path={'/teacher/comManagement/:name'} element={<ComDetails />} />
         {/* <Route path={'/admin/accounts'} element={<Users />}/> */}

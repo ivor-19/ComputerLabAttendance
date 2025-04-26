@@ -15,9 +15,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Loader2, Plus } from 'lucide-react';
-import { Input } from './ui/input';
-import { Button } from './ui/button';
-import MultiSelectAddTeacher from './MultiSelectAddTeacher';
+import { Input } from '../ui/input';
+import { Button } from '../ui/button';
+import MultiSelectAddTeacher from '../MultiSelectAddTeacher';
 
 interface AddTeacherProps {
   fetch: () => void;
@@ -54,6 +54,7 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
   });
 
   const [userExists, setUserExists] = useState<boolean>(false);
+  const [emailExists, setEmailExists] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
   // Generate all possible sections (1A, 1B, ..., 4J)
@@ -119,18 +120,20 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
       password: password.toString(),
       teacher_email: data.teacher_email
     };
-    const teacherEmail = { teacher_id: data.teacher_id, teacher_email: data.teacher_email, firstname: data.firstname, lastname: data.lastname, password: password.toString() }
+    // const teacherEmail = { teacher_id: data.teacher_id, teacher_email: data.teacher_email, firstname: data.firstname, lastname: data.lastname, password: password.toString() }
     try {
       const response = await axios.post('https://comlab-backend.vercel.app/api/teacher/addTeacher', newTeacher);
       console.log(response.data);
 
-      const sendQr = await axios.post("https://comlab-backend.vercel.app/api/teacher/teacherQR", teacherEmail)
-      console.log("Sent successfully", sendQr.data);
+      // const sendQr = await axios.post("https://comlab-backend.vercel.app/api/teacher/teacherQR", teacherEmail)
+      // console.log("Sent successfully", sendQr.data);
 
       setOpen(false);
       toast.success('Teacher has been created.');
       setLoading(false);
       fetch();
+      setUserExists(false);
+      setEmailExists(false);
       reset({
         teacher_id: '',
         lastname: '',
@@ -140,13 +143,21 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
         subjects: [],
         teacher_email: '',
       });
-    } catch (error: any) {
+    } 
+    catch (error: any) {
       console.error('Error adding teacher', error);
       if (error.response && error.response.status === 403) {
         setUserExists(true);
         toast.error('Teacher ID already exists');
         setLoading(false);
-      } else {
+      } 
+      else if (error.response && error.response.status === 406) {
+        setEmailExists(true);
+        // Keep the dialog open to show the error
+        toast.error("Email already exists");
+        setLoading(false);
+      }
+      else {
         toast.error('Failed to add teacher');
         setOpen(false);
       }
@@ -240,6 +251,7 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
         </div>
         <DialogFooter className="flex items-center">
           {userExists && <span className="text-red-500 text-xs font-geist">Teacher already exists. Please choose a different account ID.</span>}
+          {emailExists && <span className="text-red-500 text-xs font-geist">Email already exists. Please choose a different email account.</span>}
           <Button onClick={handleSubmit(addNewTeacher)}>
             {loading ? (
               <>

@@ -1,7 +1,5 @@
-
-import CLTAttendance from "@/components/attendance/CLTAttendance"
-import { AppSidebarTeacher } from "@/components/teacher/app-sidebar"
-import { TeacherScheduler } from "@/components/TeacherScheduler"
+import { AppSidebar } from "@/components/dashboard/app-sidebar"
+import { SemesterTable } from "@/components/tables/SemesterTable"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,19 +12,11 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { useTeacher } from "@/Context"
 
-export default function Schedule() {
-   const {teacherName} = useTeacher();
+export default function Semester() {
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "19rem",
-        } as React.CSSProperties
-      }
-    >
-      <AppSidebarTeacher />
+    <SidebarProvider style={{"--sidebar-width": "19rem",} as React.CSSProperties}>
+      <AppSidebar />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
@@ -34,18 +24,15 @@ export default function Schedule() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbPage>Schedule</BreadcrumbPage>
+                <BreadcrumbPage>Semester</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-         {/* <TeacherScheduler /> */}
-         <span>{teacherName}</span>
-         <CLTAttendance />
+         <SemesterTable />
         </div>
       </SidebarInset>
-      {/* <SidebarRight /> */}
     </SidebarProvider>
   )
 }

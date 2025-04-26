@@ -16,42 +16,41 @@ import { useForm } from "react-hook-form"
 import axios from 'axios'
 import { toast } from 'sonner'
 import { Loader2, Plus } from 'lucide-react'
-import { Input } from './ui/input'
-import { Button } from './ui/button'
+import { Input } from '../ui/input'
+import { Button } from '../ui/button'
 
-interface AddComProps {
+interface AddSubjectProps {
   fetch: () => void;
   open: boolean;
   setOpen: (open: boolean) => void; // Corrected type for setOpen
 }
 
 const FormSchema = z.object({
-  name: z.string().min(1, {message: "Name is required"}),
-  room: z.string().min(1, {message: "Room is required"}),
-  computerSets: z.string().optional(),
+  subject_code: z.string().min(1, {message: "Subject Code is required"}),
+  subject: z.string().min(1, {message: "Subject name is required"}),
 })
 
 type FormData = z.infer<typeof FormSchema>;
 
-export const AddCom = ({open, setOpen, fetch} : AddComProps) => {
+export const AddSubject = ({open, setOpen, fetch} : AddSubjectProps) => {
   const { register, handleSubmit, formState: {errors} } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
   })
   const [loading, setLoading] = useState(false);
 
 
-  const addNewCom = async (data: FormData) => {
+  const addNewSubject = async (data: FormData) => {
     setLoading(true);
-    const newCom = {name: data.name, room: data.room}
+    const newSubject = {subject_code: data.subject_code, subject: data.subject}
     try {
-      const response = await axios.post("https://comlab-backend.vercel.app/api/computer/add", newCom);
-      console.log(response.data.com)
+      const response = await axios.post("https://comlab-backend.vercel.app/api/acads/addSubject", newSubject);
+      console.log(response.data)
       setOpen(false);
       toast.success("New Data has been created.")
       setLoading(false);
       fetch();
     } catch (error) {
-      console.error("Error adding student", error)
+      console.error("Error adding data", error)
       setOpen(false);
     }
     
@@ -71,38 +70,38 @@ export const AddCom = ({open, setOpen, fetch} : AddComProps) => {
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Name
+            <Label htmlFor="subject_code" className="text-right">
+              Subject Code
             </Label>
             <div className="col-span-3 relative">
               <Input 
-                id="id" 
+                id="subject_code" 
                 className="col-span-3" 
                 type="text"
-                {...register("name")}
-                placeholder="Name"
+                {...register("subject_code")}
+                placeholder="Code"
               />
-              {errors.name && <span className="text-red-500 text-xs font-geist">{errors.name.message}</span>}
+              {errors.subject_code && <span className="text-red-500 text-xs font-geist">{errors.subject_code.message}</span>}
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="lastname" className="text-right">
-              Room
+            <Label htmlFor="subject" className="text-right">
+              Subject Title
             </Label>
             <div className="col-span-3 relative">
               <Input 
-                id="room" 
+                id="subject" 
                 className="col-span-3" 
                 type="text"
-                {...register("room")}
-                placeholder="Room"
+                {...register("subject")}
+                placeholder="Subject Title"
               />
-              {errors.room && <span className="text-red-500 text-xs font-geist">{errors.room.message}</span>}
+              {errors.subject && <span className="text-red-500 text-xs font-geist">{errors.subject.message}</span>}
             </div>
           </div>
         </div>
         <DialogFooter className="flex items-center">
-          <Button onClick={handleSubmit(addNewCom)}> 
+          <Button onClick={handleSubmit(addNewSubject)}> 
             {loading ? ( 
               <>
                 Submitting

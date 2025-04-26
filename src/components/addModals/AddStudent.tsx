@@ -16,8 +16,8 @@ import { useForm } from "react-hook-form"
 import axios from 'axios'
 import { toast } from 'sonner'
 import { Loader2, Plus } from 'lucide-react'
-import { Input } from './ui/input'
-import { Button } from './ui/button'
+import { Input } from '../ui/input'
+import { Button } from '../ui/button'
 
 interface AddStudentProps {
   fetch: () => void;
@@ -41,6 +41,7 @@ export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
     resolver: zodResolver(FormSchema),
   })
   const [userExists, setUserExists] = useState(false);
+  const [emailExists, setEmailExists] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // const yearLevel = watch("yearlevel");
@@ -73,18 +74,20 @@ export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
   const addNewStudent = async (data: FormData) => {
     setLoading(true);
     const newStudent = {student_id: data.student_id, email: data.email, lastname: data.lastname, firstname: data.firstname, course: data.course, section: data.section}
-    const studentEmail = {student_id: data.student_id, student_email: data.email}
+    // const studentEmail = {student_id: data.student_id, student_email: data.email}
     try {
       const response = await axios.post("https://comlab-backend.vercel.app/api/student/addStudent", newStudent);
       console.log(response.data)
 
-      const sendQr = await axios.post("https://comlab-backend.vercel.app/api/student/generateQR", studentEmail)
-      console.log("Sent successfully", sendQr.data);
+      // const sendQr = await axios.post("https://comlab-backend.vercel.app/api/student/generateQR", studentEmail)
+      // console.log("Sent successfully", sendQr.data);
 
       setOpen(false);
       toast.success("User has been created.")
       setLoading(false);
       fetch();
+      setUserExists(false);
+      setEmailExists(false);
       reset({
         student_id: "",
         email: "",
@@ -100,7 +103,14 @@ export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
         // Keep the dialog open to show the error
         toast.error("Student ID already exists");
         setLoading(false);
-      } else {
+      } 
+      else if (error.response && error.response.status === 406) {
+        setEmailExists(true);
+        // Keep the dialog open to show the error
+        toast.error("Email already exists");
+        setLoading(false);
+      }
+      else {
 
         toast.error("Failed to add data");
         setOpen(false);
@@ -226,6 +236,7 @@ export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
         </div>
         <DialogFooter className="flex items-center">
           {userExists && <span className="text-red-500 text-xs font-geist">Student already exists. Please choose a different account ID.</span>}
+          {emailExists && <span className="text-red-500 text-xs font-geist">Email already exists. Please choose a different email account.</span>}
           <Button onClick={handleSubmit(addNewStudent)}> 
             {loading ? ( 
               <>

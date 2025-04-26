@@ -76,6 +76,11 @@ const data = {
           isActive: false,
         },
         {
+          title: "Semester",
+          url: "/admin/semester",
+          isActive: false,
+        },
+        {
           title: "Set Schedule",
           url: "/admin/schedule",
           isActive: false,

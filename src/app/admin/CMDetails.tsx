@@ -7,7 +7,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { AddComputerStat } from "@/components/AddComputerStat";
+import { AddComputerStat } from "@/components/addModals/AddComputerStat";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { SVGProps } from "react"

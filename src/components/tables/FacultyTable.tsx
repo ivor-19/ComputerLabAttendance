@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { QRCodeSVG } from 'qrcode.react';
-import { AddTeacher } from "../AddTeacher";
+import { AddTeacher } from "../addModals/AddTeacher";
 import { Skeleton } from "../ui/skeleton";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -317,6 +317,8 @@ export function FacultyTable() {
   const [courses, setCourses] = React.useState<string[]>([]);
   const [subjects, setSubjects] = React.useState<string[]>([]);
   const [sections, setSections] = React.useState<string[]>([]);
+  const [userExists, setUserExists] = React.useState(false);
+  const [emailExists, setEmailExists] = React.useState(false);
 
   const {
     register,
@@ -442,10 +444,36 @@ export function FacultyTable() {
         toast.success("Teacher updated successfully");
         fetchTeachers();
         setOpenEditModal(false);
+        setUserExists(false);
+        setEmailExists(false);
+        reset({
+          teacher_id: '',
+          lastname: '',
+          firstname: '',
+          courses: [],
+          sections: [],
+          subjects: [],
+          teacher_email: '',
+        });
       }
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to update teacher");
+    } 
+    catch (error: any) {
+      console.error('Error adding teacher', error);
+      if (error.response && error.response.status === 403) {
+        setUserExists(true);
+        toast.error('Teacher ID already exists');
+        setLoading(false);
+      } 
+      else if (error.response && error.response.status === 406) {
+        setEmailExists(true);
+        // Keep the dialog open to show the error
+        toast.error("Email already exists");
+        setLoading(false);
+      }
+      else {
+        toast.error('Failed to add teacher');
+        setOpen(false);
+      }
     } finally {
       setLoading(false);
     }
@@ -804,6 +832,8 @@ export function FacultyTable() {
                   </div>
                 </div>
                 <DialogFooter className="flex items-center">
+                  {userExists && <span className="text-red-500 text-xs font-geist">Teacher already exists. Please choose a different account ID.</span>}
+                  {emailExists && <span className="text-red-500 text-xs font-geist">Email already exists. Please choose a different email account.</span>}
                   <Button type="submit" disabled={loading}>
                     {loading ? (
                       <>
