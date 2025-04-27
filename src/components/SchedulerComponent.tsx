@@ -150,13 +150,14 @@ export const SchedulerComponent = ({ id, comlabname = '' }: SchedulerComponentPr
 
       await fetchSchedules();
       return event;
-    } catch (error:any) {
+    } catch (error: any) {
       if (error.response && error.response.status === 400) {
         toast.error("Conflict on schedule")
       } else {
         toast.error("An unexpected error occurred:", error);
         // Handle other errors here
       }
+      return handleApiError(error, "Error saving event");
     }
   };
 
