@@ -235,25 +235,25 @@ export const columns: ColumnDef<Teacher>[] = [
         )
       },
       cell: ({ row }) => <div>{row.getValue("semester")}</div>,
+  },
+  {
+    accessorKey: "school_year",
+    header: ({ column }) => {
+      return (
+        <div className="text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="text-xs pl-0 bg-transparent"
+          >
+            School Year
+            <ArrowUpDown />
+          </Button>
+        </div>
+      )
     },
-    {
-      accessorKey: "school_year",
-      header: ({ column }) => {
-        return (
-          <div className="text-left">
-            <Button
-              variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-              className="text-xs pl-0 bg-transparent"
-            >
-              School Year
-              <ArrowUpDown />
-            </Button>
-          </div>
-        )
-      },
-      cell: ({ row }) => <div>{row.getValue("school_year")}</div>,
-    },
+    cell: ({ row }) => <div>{row.getValue("school_year")}</div>,
+  },
   {
     id: "actions",
     enableHiding: false,
