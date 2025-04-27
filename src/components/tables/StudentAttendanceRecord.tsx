@@ -55,6 +55,8 @@ export type Student = {
   teacher_name: string,
   subject: string,
   comlab: string,
+  semester: string,
+  school_year: string,
 }
 
 const FormSchema = z.object({
@@ -246,6 +248,42 @@ export const columns = ( handleEdit: (student: Student) => void): ColumnDef<Stud
     )
   },
   {
+        accessorKey: "semester",
+        header: ({ column }) => {
+          return (
+            <div className="text-left">
+              <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                className="text-xs pl-0 bg-transparent"
+              >
+                Semester
+                <ArrowUpDown />
+              </Button>
+            </div>
+          )
+        },
+        cell: ({ row }) => <div>{row.getValue("semester")}</div>,
+    },
+    {
+      accessorKey: "school_year",
+      header: ({ column }) => {
+        return (
+          <div className="text-left">
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              className="text-xs pl-0 bg-transparent"
+            >
+              School Year
+              <ArrowUpDown />
+            </Button>
+          </div>
+        )
+      },
+      cell: ({ row }) => <div>{row.getValue("school_year")}</div>,
+    },
+  {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
@@ -369,6 +407,7 @@ export function StudentAttendanceRecord() {
   const uniqueCourses = Array.from(new Set(attendanceList.map((attendanceList) => attendanceList.course_section)));
   const uniqueDates = Array.from(new Set(attendanceList.map((attendanceList) => attendanceList.date)));
   const uniqueSubjects = Array.from(new Set(attendanceList.map((attendanceList) => attendanceList.subject)));
+  const uniqueSchoolyear = Array.from(new Set(attendanceList.map((attendanceList) => attendanceList.school_year)));
 
   React.useEffect(() => {
     if (initialRender.current && uniqueDates.length > 0 && !table.getColumn("date")?.getFilterValue()) {
@@ -424,94 +463,156 @@ export function StudentAttendanceRecord() {
       ):(
         <div className="w-full">
           <div className="flex items-center py-4">
-            <div className="flex justify-between items-center">
-              <Input
-                placeholder="Filter by student id..."
-                value={(table.getColumn("student_id")?.getFilterValue() as string) ?? ""}
-                onChange={(event) => table.getColumn("student_id")?.setFilterValue(event.target.value)}
-                className="max-w-sm"
-              />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="ml-2 border-dashed bg-transparent">
-                    <ListFilter className="mr-1" /> Subject
-                    {table.getColumn("subject")?.getFilterValue() ? (
-                      <div className="flex gap-2">
-                        <span className="font-thin text-gray-500">|</span>
-                        <Badge variant={"secondary"}>
-                          {String(table.getColumn("subject")?.getFilterValue())}
-                        </Badge>
-                      </div>
-                    ) : null}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="font-geist w-40">
-                  {uniqueSubjects.map((subject) => (
-                    <DropdownMenuItem key={subject} onClick={() => table.getColumn("subject")?.setFilterValue(subject)}>
-                      {subject}
+            <div className="flex justify-between items-center w-full">
+              <div className="flex flex-row gap-2">
+                <Input
+                  placeholder="Filter by student id..."
+                  value={(table.getColumn("student_id")?.getFilterValue() as string) ?? ""}
+                  onChange={(event) => table.getColumn("student_id")?.setFilterValue(event.target.value)}
+                  className="max-w-sm"
+                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="ml-2 border-dashed bg-transparent">
+                      <ListFilter className="mr-1" /> Subject
+                      {table.getColumn("subject")?.getFilterValue() ? (
+                        <div className="flex gap-2">
+                          <span className="font-thin text-gray-500">|</span>
+                          <Badge variant={"secondary"}>
+                            {String(table.getColumn("subject")?.getFilterValue())}
+                          </Badge>
+                        </div>
+                      ) : null}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="font-geist w-40">
+                    {uniqueSubjects.map((subject) => (
+                      <DropdownMenuItem key={subject} onClick={() => table.getColumn("subject")?.setFilterValue(subject)}>
+                        {subject}
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => table.getColumn("subject")?.setFilterValue(undefined)}>
+                      <FilterX size={16} /> Clear Filter
                     </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => table.getColumn("subject")?.setFilterValue(undefined)}>
-                    <FilterX size={16} /> Clear Filter
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="ml-2 border-dashed bg-transparent">
-                    <ListFilter className="mr-1" /> Course & Section
-                    {table.getColumn("course_section")?.getFilterValue() ? (
-                      <div className="flex gap-2">
-                        <span className="font-thin text-gray-500">|</span>
-                        <Badge variant={"secondary"}>
-                          {String(table.getColumn("course_section")?.getFilterValue())}
-                        </Badge>
-                      </div>
-                    ) : null}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="font-geist w-40">
-                  {uniqueCourses.map((course_section) => (
-                    <DropdownMenuItem key={course_section} onClick={() => table.getColumn("course_section")?.setFilterValue(course_section)}>
-                      {course_section}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="ml-2 border-dashed bg-transparent">
+                      <ListFilter className="mr-1" /> Course & Section
+                      {table.getColumn("course_section")?.getFilterValue() ? (
+                        <div className="flex gap-2">
+                          <span className="font-thin text-gray-500">|</span>
+                          <Badge variant={"secondary"}>
+                            {String(table.getColumn("course_section")?.getFilterValue())}
+                          </Badge>
+                        </div>
+                      ) : null}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="font-geist w-40">
+                    {uniqueCourses.map((course_section) => (
+                      <DropdownMenuItem key={course_section} onClick={() => table.getColumn("course_section")?.setFilterValue(course_section)}>
+                        {course_section}
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => table.getColumn("course_section")?.setFilterValue(undefined)}>
+                      <FilterX size={16} /> Clear Filter
                     </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => table.getColumn("course_section")?.setFilterValue(undefined)}>
-                    <FilterX size={16} /> Clear Filter
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="ml-2 border-dashed bg-transparent">
-                    <ListFilter className="mr-1" /> Date
-                    {table.getColumn("date")?.getFilterValue() ? (
-                      <div className="flex gap-2">
-                        <span className="font-thin text-gray-500">|</span>
-                        <Badge variant={"secondary"}>
-                          {String(table.getColumn("date")?.getFilterValue())}
-                        </Badge>
-                      </div>
-                    ) : null}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="font-geist w-40">
-                  {uniqueDates.reverse().map((date) => (
-                    <DropdownMenuItem key={date} onClick={() => table.getColumn("date")?.setFilterValue(date)}>
-                      {date}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="ml-2 border-dashed bg-transparent">
+                      <ListFilter className="mr-1" /> Date
+                      {table.getColumn("date")?.getFilterValue() ? (
+                        <div className="flex gap-2">
+                          <span className="font-thin text-gray-500">|</span>
+                          <Badge variant={"secondary"}>
+                            {String(table.getColumn("date")?.getFilterValue())}
+                          </Badge>
+                        </div>
+                      ) : null}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="font-geist w-40">
+                    {uniqueDates.reverse().map((date) => (
+                      <DropdownMenuItem key={date} onClick={() => table.getColumn("date")?.setFilterValue(date)}>
+                        {date}
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => table.getColumn("date")?.setFilterValue(undefined)}>
+                      <FilterX size={16} /> Clear Filter
                     </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => table.getColumn("date")?.setFilterValue(undefined)}>
-                    <FilterX size={16} /> Clear Filter
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <Button onClick={exportToExcel} variant="outline" size="sm" className="ml-2">
-                Export to Excel
-              </Button>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="ml-2 border-dashed bg-transparent">
+                      <ListFilter className="mr-1" /> Semester
+                      {table.getColumn("semester")?.getFilterValue() ? (
+                        <div className="flex gap-2">
+                          <span className="font-thin text-gray-500">|</span>
+                          <Badge variant={"secondary"}>
+                            {String(table.getColumn("semester")?.getFilterValue())}
+                          </Badge>
+                        </div>
+                      ) : null}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="font-geist w-40">
+                    <DropdownMenuItem key="1st" onClick={() => table.getColumn("semester")?.setFilterValue("1st")}>
+                      1st
+                    </DropdownMenuItem>
+                    <DropdownMenuItem key="2nd" onClick={() => table.getColumn("semester")?.setFilterValue("2nd")}>
+                      2nd
+                    </DropdownMenuItem>
+                    <DropdownMenuItem key="summer" onClick={() => table.getColumn("semester")?.setFilterValue("Summer Class")}>
+                      Summer Class
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => table.getColumn("semester")?.setFilterValue(undefined)}>
+                      <FilterX size={16} /> Clear Filter
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="ml-2 border-dashed bg-transparent">
+                      <ListFilter className="mr-1" /> School Year
+                      {table.getColumn("school_year")?.getFilterValue() ? (
+                        <div className="flex gap-2">
+                          <span className="font-thin text-gray-500">|</span>
+                          <Badge variant={"secondary"}>
+                            {String(table.getColumn("school_year")?.getFilterValue())}
+                          </Badge>
+                        </div>
+                      ) : null}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="font-geist w-40">
+                    {uniqueSchoolyear.reverse().map((school_year) => (
+                      <DropdownMenuItem key={school_year} onClick={() => table.getColumn("school_year")?.setFilterValue(school_year)}>
+                        {school_year}
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => table.getColumn("school_year")?.setFilterValue(undefined)}>
+                      <FilterX size={16} /> Clear Filter
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+             
+              <div>
+                <Button onClick={exportToExcel} variant="outline" size="sm" className="ml-2">
+                  Export to Excel
+                </Button>
+              </div>
+             
             </div>
           </div>
           <div className="rounded-md border">

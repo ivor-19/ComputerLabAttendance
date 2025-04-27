@@ -1,19 +1,7 @@
 "use client"
 
 import * as React from "react"
-import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table"
-import { ArrowUpDown, GanttChart, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown, GanttChart, MoreHorizontal, Search, Monitor } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -24,332 +12,234 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import DeleteModal from "../DeleteModal"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { Skeleton } from "../ui/skeleton"
 import { toast } from "sonner"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
 export type ComLabList = {
-  _id: string,
-  name: string,
-  room: string,
+  _id: string
+  name: string
+  room: string
 }
 
-
 export function ComManagementTable() {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
+  const [searchQuery, setSearchQuery] = React.useState("")
+  const [sortConfig, setSortConfig] = React.useState<{ key: string; direction: "asc" | "desc" }>({
+    key: "name",
+    direction: "asc"
+  })
   
-
-  const columns: ColumnDef<ComLabList>[] = [
-    // {
-    //   id: "select",
-    //   header: ({ table }) => (
-    //     <Checkbox
-    //       checked={
-    //         table.getIsAllPageRowsSelected() ||
-    //         (table.getIsSomePageRowsSelected() && "indeterminate")
-    //       }
-    //       onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-    //       aria-label="Select all"
-    //     />
-    //   ),
-    //   cell: ({ row }) => (
-    //     <Checkbox
-    //       checked={row.getIsSelected()}
-    //       onCheckedChange={(value) => row.toggleSelected(!!value)}
-    //       aria-label="Select row"
-    //     />
-    //   ),
-    //   enableSorting: false,
-    //   enableHiding: false,
-    // },
-    {
-       accessorKey: "name",
-       header: ({ column }) => {
-         return (
-           <div className="text-left">
-             <Button
-               variant="ghost"
-               onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-               className="text-xs pl-0 bg-transparent"
-             >
-               Name
-               <ArrowUpDown />
-             </Button>
-           </div>
-         )
-       },
-       cell: ({ row }) => <div>{row.getValue("name")}</div>,
-     },
-     {
-        accessorKey: "room",
-        header: ({ column }) => {
-          return (
-            <div className="text-left">
-              <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                className="text-xs pl-0 bg-transparent"
-              >
-                Room
-                <ArrowUpDown />
-              </Button>
-            </div>
-          )
-        },
-        cell: ({ row }) => <div>{row.getValue("room")}</div>,
-      },
-    {
-      id: "actions",
-      enableHiding: false,
-      cell: ({ row }) => {
-        // const payment = row.original
-  
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              {/* <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(payment.id)}
-              >
-                Copy payment ID
-              </DropdownMenuItem> */}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleRowClick(row.original)}><GanttChart className="mr-2 h-4 w-4" />View & Manage</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )
-      },
-    },
-  ]
-
-  const navigate = useNavigate();
-  const [openDelete, setOpenDelete] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
+  const navigate = useNavigate()
   const [list, setList] = React.useState<ComLabList[]>([])
-  const [loadingTable, setLoadingTable] = React.useState(true);
+  const [loadingTable, setLoadingTable] = React.useState(true)
 
   const fetchList = async () => {
     try {
-      const response = await axios.get("https://comlab-backend.vercel.app/api/computer/getList");
-      setList(response.data.com);
-      console.log(response.data.com);
-      setLoadingTable(false);
+      const response = await axios.get("https://comlab-backend.vercel.app/api/computer/getList")
+      setList(response.data.com)
+      setLoadingTable(false)
     } catch (error) {
-      console.error("Error fetching users", error);
-    }
-  };
-
-  React.useEffect(() => {
-    fetchList();
-  }, []);
-
-
-  const deleteCom = async () => {
-    setOpenDelete(true);
-    setLoading(true);
-    try {
-      const selectedRows = table.getSelectedRowModel().rows;
-      for (const row of selectedRows) {
-        const comId = row.original._id; // Access the user's _id
-        await axios.delete(`https://comlab-backend.vercel.app/api/computer/deleteCom/${comId}`);
-        console.log(`Deleted com with ID: ${comId}`);
-      }
-      toast.info(`${selectedRows.length} Data/s has been deleted.`);
-
-      fetchList();
-      setRowSelection({});
-      setLoading(false);
-      setOpenDelete(false);
-    } catch (error) {
-      console.error("Error deleting a data", error);
-      setOpenDelete(false);
-      toast.error("Unknown error has occured");   
+      console.error("Error fetching users", error)
+      toast.error("Failed to fetch computer labs")
+      setLoadingTable(false)
     }
   }
 
+  React.useEffect(() => {
+    fetchList()
+  }, [])
+
   const handleRowClick = (row: ComLabList): void => {
     navigate(`/teacher/comManagement/${encodeURIComponent(row.name)}`, {
-      state: { 
+      state: {
         name: row.name,
         room: row.room,
         id: row._id
       }
-    });
-  };
+    })
+  }
 
-  // Handler for when the dialog closes
+  const handleSort = (key: string) => {
+    let direction: "asc" | "desc" = "asc"
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc"
+    }
+    setSortConfig({ key, direction })
+  }
 
-  const table = useReactTable({
-    data: list,
-    columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
-  })
+  const filteredList = React.useMemo(() => {
+    let result = [...list]
+    if (searchQuery) {
+      result = result.filter((item) => 
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.room.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    }
+    result.sort((a, b) => {
+      if (sortConfig.key === "name") {
+        return sortConfig.direction === "asc" 
+          ? a.name.localeCompare(b.name) 
+          : b.name.localeCompare(a.name)
+      } else if (sortConfig.key === "room") {
+        return sortConfig.direction === "asc" 
+          ? a.room.localeCompare(b.room) 
+          : b.room.localeCompare(a.room)
+      }
+      return 0
+    })
+    return result
+  }, [list, searchQuery, sortConfig])
+
+  const [currentPage, setCurrentPage] = React.useState(0)
+  const itemsPerPage = 8
+  const pageCount = Math.ceil(filteredList.length / itemsPerPage)
+  const paginatedList = filteredList.slice(
+    currentPage * itemsPerPage,
+    (currentPage + 1) * itemsPerPage
+  )
 
   return (
     <>
       {loadingTable ? (
         <div className="w-full">
-         <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min relative ">
-           <div className="flex items-center py-4 font-geist justify-between">
-             <div className="w-1/2 flex gap-2">
-               <Skeleton className="w-[30%] h-10"/>
-             </div>
-             <div className="flex gap-2">
-               <Skeleton className="w-20 h-10"/>
-             </div>
-           </div>
-           <div className="rounded-md border font-geist">
-             <Skeleton className="h-96 w-full"></Skeleton>
-           </div>
-           <div className="flex items-center justify-between space-x-2 py-4 font-geist">
-             <Skeleton className="h-10 w-20"></Skeleton>
-             <div className="space-x-2 flex">
-             <Skeleton className="w-20 h-8"/>
-             <Skeleton className="w-20 h-8"/>
-             </div>
-           </div>
-         </div>
+          <div className="min-h-[100vh] flex-1 rounded-xl md:min-h-min relative">
+            <div className="flex items-center py-4 font-geist justify-between">
+              <div className="w-1/2 flex gap-2">
+                <Skeleton className="w-[30%] h-10" />
+              </div>
+              <div className="flex gap-2">
+                <Skeleton className="w-20 h-10" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <Skeleton key={i} className="h-48 w-full rounded-lg" />
+              ))}
+            </div>
+            <div className="flex items-center justify-between space-x-2 py-4 font-geist">
+              <Skeleton className="h-10 w-20"></Skeleton>
+              <div className="space-x-2 flex">
+                <Skeleton className="w-20 h-8" />
+                <Skeleton className="w-20 h-8" />
+              </div>
+            </div>
+          </div>
         </div>
-      ):(
+      ) : (
         <div className="w-full">
-          <div className="flex items-center justify-between py-4">
-            <div>
+          <div className="flex flex-col md:flex-row md:items-center justify-between py-4 gap-4">
+            <div className="relative w-full md:w-auto md:min-w-[300px]">
+              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by name"
-                value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-                onChange={(event) =>
-                  table.getColumn("name")?.setFilterValue(event.target.value)
-                }
-                className="max-w-sm"
+                placeholder="Search by name or room"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value)
+                  setCurrentPage(0)
+                }}
+                className="pl-8"
               />
             </div>
-            <div>
-              <div className="flex gap-2">
-                {Object.keys(rowSelection).length !== 0 && (
-                  <DeleteModal
-                    title={`Delete (${Object.keys(rowSelection).length})`}
-                    description={`Are you sure you want to delete ${Object.keys(rowSelection).length} data(s)?`}
-                    open={openDelete}
-                    setOpen={setOpenDelete}
-                    onClick={deleteCom}
-                    loading={loading}
-                  />
-                )}
+            <div className="flex flex-wrap gap-2 items-center">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSort("name")}
+                  className="flex items-center gap-1"
+                >
+                  Name
+                  <ArrowUpDown className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSort("room")}
+                  className="flex items-center gap-1"
+                >
+                  Room
+                  <ArrowUpDown className="h-3 w-3" />
+                </Button>
               </div>
-              
-            </div>
-          
-          </div>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => {
-                      return (
-                        <TableHead key={header.id}>
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
-                        </TableHead>
-                      )
-                    })}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody>
-                {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      data-state={row.getIsSelected() && "selected"}
-                      // onClick={() => handleRowClick(row.getValue("name"))}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={columns.length}
-                      className="h-24 text-center"
-                    >
-                      No results.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-          <div className="flex items-center justify-end space-x-2 py-4">
-            <div className="flex-1 text-sm text-muted-foreground">
-              {table.getFilteredSelectedRowModel().rows.length} of{" "}
-              {table.getFilteredRowModel().rows.length} row(s) selected.
-            </div>
-            <div className="space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-              >
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-              >
-                Next
-              </Button>
             </div>
           </div>
+
+          {paginatedList.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {paginatedList.map((lab) => (
+                <Card
+                  key={lab._id}
+                  className="h-full transition-all hover:border-primary hover:shadow-md"
+                >
+                  <CardHeader className="pb-2 flex flex-row items-start justify-between space-y-0">
+                    <div>
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <Monitor className="h-5 w-5" />
+                        {lab.name}
+                      </CardTitle>
+                      <CardDescription>Room {lab.room}</CardDescription>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleRowClick(lab)}>
+                          <GanttChart className="mr-2 h-4 w-4" />
+                          View & Manage
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">Click to view details and manage computers</p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button variant="ghost" className="w-full" onClick={() => handleRowClick(lab)}>
+                      View Details
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center p-8 border rounded-lg">
+              <p className="text-muted-foreground">No computer labs found. Try adjusting your search.</p>
+            </div>
+          )}
+
+          {pageCount > 1 && (
+            <div className="flex items-center justify-between space-x-2 py-4">
+              <div className="text-sm text-muted-foreground">
+                Page {currentPage + 1} of {pageCount} • Showing {paginatedList.length} of {filteredList.length} items
+              </div>
+              <div className="space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
+                  disabled={currentPage === 0}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev) => Math.min(pageCount - 1, prev + 1))}
+                  disabled={currentPage >= pageCount - 1}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </>

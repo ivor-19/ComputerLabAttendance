@@ -14,36 +14,78 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import axios from "axios"
-import { Boxes, TrendingUpIcon } from "lucide-react"
+import { Boxes, ChevronLeft, ChevronRight, TrendingUpIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+
+interface ComputerLab {
+  id: string;
+  name: string;
+}
 
 export default function Dashboard() {
   const [totalStudents, setTotalStudents] = useState("");
   const [totalTeachers, setTotalTeachers] = useState("");
   const [totalComputerSets, setTotalComputerSets] = useState("");
   const [loading, setLoading] = useState(false);
+  const [computerLabs, setComputerLabs] = useState<ComputerLab[]>([]);
+  const [currentLabIndex, setCurrentLabIndex] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     setLoading(true);
     const fetchData = async () => {
       try {
+        // Fetch students
         const responseStudents = await axios.get("https://comlab-backend.vercel.app/api/student/getStudents");
-        setTotalStudents(responseStudents.data.length)
+        setTotalStudents(responseStudents.data.length);
 
+        // Fetch teachers
         const responseTeachers = await axios.get("https://comlab-backend.vercel.app/api/teacher/getTeachers");
-        setTotalTeachers(responseTeachers.data.length)
+        setTotalTeachers(responseTeachers.data.length);
 
-        const responseComputer= await axios.get("https://comlab-backend.vercel.app/api/computerStat/getList");
-        setTotalComputerSets(responseComputer.data.com.length)
-        setLoading(false)
+        // Fetch computer sets
+        const responseComputer = await axios.get("https://comlab-backend.vercel.app/api/computerStat/getList");
+        setTotalComputerSets(responseComputer.data.com.length);
+
+        // Fetch schedules to get computer labs
+        const responseSchedules = await axios.get("https://comlab-backend.vercel.app/api/schedule/getSched");
+        const schedules = responseSchedules.data;
+
+        // Extract unique computer labs from schedules
+        const labsMap = new Map<string, ComputerLab>();
+        schedules.forEach((schedule: any) => {
+          if (schedule.comlab_id && schedule.comlab) {
+            labsMap.set(schedule.comlab_id, {
+              id: schedule.comlab_id,
+              name: schedule.comlab
+            });
+          }
+        });
+
+        const uniqueLabs = Array.from(labsMap.values());
+        setComputerLabs(uniqueLabs);
+
+        setLoading(false);
       } catch (error) {
-        console.error("Error fetching students", error)
+        console.error("Error fetching data", error);
+        setLoading(false);
       }
-    }
+    };
     fetchData();
-  }, [])
+  }, []);
+
+  const handleNextLab = () => {
+    setCurrentLabIndex((prevIndex) => 
+      prevIndex === computerLabs.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  const handlePrevLab = () => {
+    setCurrentLabIndex((prevIndex) => 
+      prevIndex === 0 ? computerLabs.length - 1 : prevIndex - 1
+    );
+  };
 
   return (
     <SidebarProvider
@@ -75,7 +117,7 @@ export default function Dashboard() {
             </div>
             <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
           </div>
-        ):(
+        ) : (
           <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
             <div className="grid auto-rows-min gap-4 md:grid-cols-3">
               <Card className="@container/card cursor-pointer" onClick={() => navigate('/admin/course&section')}>
@@ -121,9 +163,43 @@ export default function Dashboard() {
                 </CardFooter>
               </Card>
             </div>
-            <Card className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min z-0">
-              <SchedulerComponent />
-            </Card>
+            
+            {computerLabs.length > 0 ? (
+              <Card className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min z-0">
+                <div className="flex items-center justify-between p-4">
+                  <button 
+                    onClick={handlePrevLab}
+                    className="p-2 rounded-full hover:bg-gray-100"
+                    disabled={computerLabs.length <= 1}
+                  >
+                    <ChevronLeft className="size-5" />
+                  </button>
+                  
+                  <h2 className="text-xl font-semibold">
+                    {computerLabs[currentLabIndex]?.name || "Loading..."}
+                  </h2>
+                  
+                  <button 
+                    onClick={handleNextLab}
+                    className="p-2 rounded-full hover:bg-gray-100"
+                    disabled={computerLabs.length <= 1}
+                  >
+                    <ChevronRight className="size-5" />
+                  </button>
+                </div>
+                
+                <SchedulerComponent 
+                  id={computerLabs[currentLabIndex]?.id} 
+                  comlabname={computerLabs[currentLabIndex]?.name}
+                />
+              </Card>
+            ) : (
+              <Card className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min z-0 p-4">
+                <p className="text-center text-muted-foreground">
+                  No computer labs found. Please add some schedules first.
+                </p>
+              </Card>
+            )}
           </div>
         )}
       </SidebarInset>

@@ -74,13 +74,13 @@ export const AddStudent = ({open, setOpen, fetch} : AddStudentProps) => {
   const addNewStudent = async (data: FormData) => {
     setLoading(true);
     const newStudent = {student_id: data.student_id, email: data.email, lastname: data.lastname, firstname: data.firstname, course: data.course, section: data.section}
-    // const studentEmail = {student_id: data.student_id, student_email: data.email}
+    const studentEmail = {student_id: data.student_id, student_email: data.email}
     try {
       const response = await axios.post("https://comlab-backend.vercel.app/api/student/addStudent", newStudent);
       console.log(response.data)
 
-      // const sendQr = await axios.post("https://comlab-backend.vercel.app/api/student/generateQR", studentEmail)
-      // console.log("Sent successfully", sendQr.data);
+      const sendQr = await axios.post("https://comlab-backend.vercel.app/api/student/generateQR", studentEmail)
+      console.log("Sent successfully", sendQr.data);
 
       setOpen(false);
       toast.success("User has been created.")

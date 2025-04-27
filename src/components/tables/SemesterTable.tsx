@@ -33,7 +33,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
 import {
   Table,
@@ -77,7 +76,7 @@ const FormSchema = z.object({
 type FormData = z.infer<typeof FormSchema>;
 
 export function SemesterTable() {
-  const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<FormData>({
+  const { handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<FormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       semester_type: "1st",

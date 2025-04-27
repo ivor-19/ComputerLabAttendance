@@ -56,7 +56,7 @@ export default function ScheduleDetails() {
               </BreadcrumbList>
             </Breadcrumb>
           </header>
-          <div className="px-4">
+          <div className="px-4 z-0">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold">{decodeURIComponent(name || '')}</h2>
               <p className="text-muted-foreground">Room {room}</p>

@@ -50,6 +50,7 @@ export const SchedulerComponent = ({ id, comlabname = '' }: SchedulerComponentPr
   const [subjectsOptions, setSubjectsOptions] = useState<Option[]>([]);
   const [sectionsOptions, setSectionsOptions] = useState<Option[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isActionLoading, setIsActionLoading] = useState(false); // New state for action loading
 
   const fetchData = async (endpoint: string, transformFn: (item: any, index: number) => Option) => {
     try {
@@ -128,6 +129,7 @@ export const SchedulerComponent = ({ id, comlabname = '' }: SchedulerComponentPr
   };
 
   const handleConfirm = async (event: Event, action: "create" | "edit") => {
+    setIsActionLoading(true); // Start loading
     try {
       const eventPayload = {
         ...event,
@@ -155,13 +157,15 @@ export const SchedulerComponent = ({ id, comlabname = '' }: SchedulerComponentPr
         toast.error("Conflict on schedule")
       } else {
         toast.error("An unexpected error occurred:", error);
-        // Handle other errors here
       }
       return handleApiError(error, "Error saving event");
+    } finally {
+      setIsActionLoading(false); // End loading
     }
   };
 
   const handleDelete = async (event_id: string) => {
+    setIsActionLoading(true); // Start loading
     try {
       await axios.delete(`https://comlab-backend.vercel.app/api/schedule/deleteSched/${event_id}`);
       setEvents(prev => prev.filter(event => event.event_id !== event_id));
@@ -169,6 +173,8 @@ export const SchedulerComponent = ({ id, comlabname = '' }: SchedulerComponentPr
       return event_id;
     } catch (error) {
       return handleApiError(error, "Error deleting event");
+    } finally {
+      setIsActionLoading(false); // End loading
     }
   };
 
@@ -195,8 +201,16 @@ export const SchedulerComponent = ({ id, comlabname = '' }: SchedulerComponentPr
   }
 
   return (
-    <div className="flex justify-center w-full z-0">
-      <div className="w-full">
+    <div className="flex justify-center w-full">
+      <div className="w-full relative">
+        {isActionLoading && (
+          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-4 rounded-lg shadow-lg">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+              <p className="mt-2 text-center">Processing...</p>
+            </div>
+          </div>
+        )}
         <Scheduler
           height={600}
           draggable={false}

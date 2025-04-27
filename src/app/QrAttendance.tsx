@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Loader2, School } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Toaster } from '@/components/ui/sonner';
 import {
@@ -238,7 +238,9 @@ export const QrAttendance = () => {
       subject, 
       time_in: startTime, 
       unique: randomCode, 
-      comlab
+      comlab,
+      semester: ongoingSemester?.semesterType, 
+      school_year: ongoingSemester?.schoolYear
     };
 
     try {
@@ -403,10 +405,9 @@ export const QrAttendance = () => {
               />
             </div>
           </div>
-          
           <div className="w-full h-[90%] p-4 flex flex-col items-center">
             <QRAttendanceTable refreshKey={refresh} />
-            
+           
             {!classStarted ? (
               <Button 
                 onClick={() => { 
@@ -450,7 +451,7 @@ export const QrAttendance = () => {
                 </div>
               </div>
             )}
-            
+            <span className=' text-sm text-gray-500'>{ongoingSemester?.semesterType} Semester - {ongoingSemester?.schoolYear}</span>
             <Dialog open={isStartClick} onOpenChange={() => setIsStartClick(false)}>
               <DialogContent className="max-w-md">
                 <DialogHeader>
