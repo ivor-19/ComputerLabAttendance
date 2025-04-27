@@ -44,7 +44,8 @@ export default function CLTAttendance({ initialData }: { initialData?: ComLab[] 
     navigate(`/teacher/schedule/${encodeURIComponent(lab.name)}`, {
       state: {
         id: lab._id,
-        room: lab.room
+        room: lab.room,
+        name: lab.name
       }
     });
   };
@@ -72,7 +73,6 @@ export default function CLTAttendance({ initialData }: { initialData?: ComLab[] 
 
   return (
     <>
-      <h1 className="font-semibold text-3xl">Set Schedules for...</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {comLabs.map((lab) => (
           <Card 

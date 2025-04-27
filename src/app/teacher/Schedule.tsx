@@ -1,7 +1,6 @@
 
 import CLTAttendance from "@/components/attendance/CLTAttendance"
 import { AppSidebarTeacher } from "@/components/teacher/app-sidebar"
-import { TeacherScheduler } from "@/components/TeacherScheduler"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,10 +13,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { useTeacher } from "@/Context"
 
 export default function Schedule() {
-   const {teacherName} = useTeacher();
   return (
     <SidebarProvider
       style={
@@ -41,7 +38,6 @@ export default function Schedule() {
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
          {/* <TeacherScheduler /> */}
-         <span>{teacherName}</span>
          <CLTAttendance />
         </div>
       </SidebarInset>

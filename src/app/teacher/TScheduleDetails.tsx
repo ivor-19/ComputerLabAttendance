@@ -21,7 +21,7 @@ export default function TScheduleDetails() {
   const navigate = useNavigate();
   const { name } = useParams<{ name: string }>();
   const location = useLocation();
-  const { room } = location.state || {};
+  const { room, id } = location.state || {};
 
 
   return (
@@ -66,7 +66,7 @@ export default function TScheduleDetails() {
               </div>
             </div>
                 
-            <TeacherScheduler />
+            <TeacherScheduler id={id} comlabname={name}/>
           </div>
         </div>
       </SidebarInset>

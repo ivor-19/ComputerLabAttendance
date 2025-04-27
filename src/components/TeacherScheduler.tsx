@@ -14,6 +14,8 @@ interface Event {
   course: string;
   section: string;
   subtitle: string;
+  comlab: string;
+  comlab_id: string;
 }
 
 interface ApiResponse {
@@ -26,6 +28,8 @@ interface ApiResponse {
   course: string;
   section: string;
   subtitle: string;
+  comlab: string;
+  comlab_id: string;
 }
 
 interface Teacher {
@@ -34,7 +38,12 @@ interface Teacher {
   value: string;
 }
 
-export const TeacherScheduler = () => {
+interface TeacherSchedulerProps {
+  id: string;
+  comlabname?: string;
+}
+
+export const TeacherScheduler = ({ id, comlabname = '' }: TeacherSchedulerProps) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [teacherOptions, setTeacherOptions] = useState<Teacher[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -61,9 +70,12 @@ export const TeacherScheduler = () => {
   const fetchSchedules = async () => {
     try {
       const response = await axios.get<ApiResponse[]>("https://comlab-backend.vercel.app/api/schedule/getSched");
-
+  
       const parsedEvents: Event[] = response.data
-        .filter(event => event.teacher_name === teacherName) // Filter events by teacherName
+        .filter(event => 
+          event.teacher_name === teacherName && 
+          event.comlab_id === id // Add this condition to filter by comlab_id
+        )
         .map(event => ({
           event_id: event.event_id,
           title: event.title,
@@ -74,8 +86,10 @@ export const TeacherScheduler = () => {
           course: event.course,
           section: event.section,
           subtitle: event.subtitle,
+          comlab: comlabname,
+          comlab_id: id,
         }));
-
+  
       setEvents(parsedEvents);
     } catch (error) {
       console.error("Error fetching schedules:", error);
@@ -89,9 +103,9 @@ export const TeacherScheduler = () => {
       await fetchSchedules();
       setIsLoading(false);
     };
-
+  
     initializeData();
-  }, [teacherName]); // Add teacherName as dependency to refetch when it changes
+  }, [teacherName, id]); // Add id as dependency
 
 
   if (isLoading) {
@@ -99,7 +113,7 @@ export const TeacherScheduler = () => {
   }
 
   return (
-    <div className="flex justify-center w-full z-0">
+    <div className="flex justify-center w-full z-[-2]">
       <div className="w-full">
         <Scheduler
           height={600} 
