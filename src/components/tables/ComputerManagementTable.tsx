@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import type { SortingState, ColumnFiltersState, VisibilityState } from "@tanstack/react-table"
 import { ArrowUpDown, GanttChart, Loader2, MoreHorizontal, Pencil, Monitor, Search } from "lucide-react"
 import {
   Dialog,
@@ -59,7 +58,6 @@ export function ComputerManagementTable() {
   })
 
   const [selectedItems, setSelectedItems] = React.useState<Record<string, boolean>>({})
-  const [currentLab, setCurrentLab] = React.useState<ComLabList | null>(null)
   const [searchQuery, setSearchQuery] = React.useState("")
 
   const navigate = useNavigate()
@@ -91,7 +89,6 @@ export function ComputerManagementTable() {
   }, [])
 
   const handleEditClick = (lab: ComLabList) => {
-    setCurrentLab(lab)
     reset({
       _id: lab._id,
       name: lab.name,
@@ -120,7 +117,6 @@ export function ComputerManagementTable() {
       setLoading(false)
       setOpenEdit(false)
       reset()
-      setCurrentLab(null)
       window.location.reload()
     }
   }
@@ -400,7 +396,6 @@ export function ComputerManagementTable() {
             onOpenChange={(open) => {
               if (!open) {
                 reset()
-                setCurrentLab(null)
               }
               setOpenEdit(open)
             }}
