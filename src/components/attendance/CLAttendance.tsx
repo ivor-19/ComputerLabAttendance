@@ -44,7 +44,8 @@ export default function CLAttendance({ initialData }: { initialData?: ComLab[] }
     navigate(`/admin/schedule/${encodeURIComponent(lab.name)}`, {
       state: {
         id: lab._id,
-        room: lab.room
+        room: lab.room,
+        name: lab.name
       }
     });
   };

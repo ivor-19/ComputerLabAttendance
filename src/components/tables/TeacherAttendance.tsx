@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronLeft, ChevronRight, FilterX, MoreHorizontal, PlusCircle } from "lucide-react"
+import { ArrowUpDown, ChevronLeft, ChevronRight, Filter, FilterIcon, FilterX, MoreHorizontal, PlusCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -145,24 +145,6 @@ export const columns: ColumnDef<Teacher>[] = [
     cell: ({ row }) => <div>{row.getValue("course_section")}</div>,
   },
   {
-    accessorKey: "date",
-    header: ({ column }) => {
-      return (
-        <div className="text-left">
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            className="text-xs pl-0 bg-transparent"
-          >
-            Date
-            <ArrowUpDown />
-          </Button>
-        </div>
-      )
-    },
-    cell: ({ row }) => <div>{row.getValue("date")}</div>,
-  },
-  {
     accessorKey: "comlab",
     header: ({ column }) => {
       return (
@@ -179,6 +161,24 @@ export const columns: ColumnDef<Teacher>[] = [
       )
     },
     cell: ({ row }) => <div>{row.getValue("comlab")}</div>,
+  },
+  {
+    accessorKey: "date",
+    header: ({ column }) => {
+      return (
+        <div className="text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="text-xs pl-0 bg-transparent"
+          >
+            Date
+            <ArrowUpDown />
+          </Button>
+        </div>
+      )
+    },
+    cell: ({ row }) => <div>{row.getValue("date")}</div>,
   },
   {
     accessorKey: "time_in",
@@ -258,6 +258,10 @@ export function TeacherAttendance() {
   const [rowSelection, setRowSelection] = React.useState({});
   const [attendanceList, setAttendanceList] = React.useState<Teacher[]>([]);
   const [loadingTable, setLoadingTable] = React.useState(true);
+  // const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
+  //   comlab: false, // This hides the column
+  // });
+  
 
   const initialRender = React.useRef(true);
 
@@ -297,6 +301,7 @@ export function TeacherAttendance() {
 
   const uniqueCourses = Array.from(new Set(attendanceList.map((attendanceList) => attendanceList.course_section)));
   const uniqueDates = Array.from(new Set(attendanceList.map((attendanceList) => attendanceList.date)));
+  const uniqueComlab = Array.from(new Set(attendanceList.map((attendanceList) => attendanceList.comlab)));
 
   React.useEffect(() => {
     if (initialRender.current && uniqueDates.length > 0 && !table.getColumn("date")?.getFilterValue()) {
@@ -362,7 +367,7 @@ export function TeacherAttendance() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="ml-2 border-dashed bg-transparent">
-                    <PlusCircle className="mr-1" /> Course & Section
+                    <FilterIcon className="mr-1" /> Course & Section
                     {table.getColumn("course_section")?.getFilterValue() ? (
                       <div className="flex gap-2">
                         <span className="font-thin text-gray-500">|</span>
@@ -388,7 +393,7 @@ export function TeacherAttendance() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="ml-2 border-dashed bg-transparent">
-                    <PlusCircle className="mr-1" /> Date
+                    <FilterIcon className="mr-1" /> Date
                     {table.getColumn("date")?.getFilterValue() ? (
                       <div className="flex gap-2">
                         <span className="font-thin text-gray-500">|</span>
@@ -407,6 +412,32 @@ export function TeacherAttendance() {
                   ))}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => table.getColumn("date")?.setFilterValue(undefined)}>
+                    <FilterX size={16} /> Clear Filter
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="ml-2 border-dashed bg-transparent">
+                    <FilterIcon className="mr-1" /> Com Lab
+                    {table.getColumn("comlab")?.getFilterValue() ? (
+                      <div className="flex gap-2">
+                        <span className="font-thin text-gray-500">|</span>
+                        <Badge variant={"secondary"}>
+                          {String(table.getColumn("comlab")?.getFilterValue())}
+                        </Badge>
+                      </div>
+                    ) : null}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="font-geist w-40">
+                  {uniqueComlab.reverse().map((comlab) => (
+                    <DropdownMenuItem key={comlab} onClick={() => table.getColumn("comlab")?.setFilterValue(comlab)}>
+                      {comlab}
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => table.getColumn("comlab")?.setFilterValue(undefined)}>
                     <FilterX size={16} /> Clear Filter
                   </DropdownMenuItem>
                 </DropdownMenuContent>

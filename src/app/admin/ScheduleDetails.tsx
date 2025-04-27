@@ -21,7 +21,7 @@ export default function ScheduleDetails() {
   const navigate = useNavigate();
   const { name } = useParams<{ name: string }>();
   const location = useLocation();
-  const { room } = location.state || {};
+  const { room, id } = location.state || {};
 
 
 
@@ -67,7 +67,7 @@ export default function ScheduleDetails() {
               </div>
             </div>
                 
-            <SchedulerComponent />
+            <SchedulerComponent id={id} comlabname={name}/>
           </div>
         </div>
       </SidebarInset>

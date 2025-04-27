@@ -51,7 +51,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { AddSemester } from "../addModals/AddSemester"
-import { format } from "date-fns"
+import { format, parse } from "date-fns"
 import { Badge } from "../ui/badge"
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
@@ -105,6 +105,25 @@ export function SemesterTable() {
 
   // Generate years from current year to 2099
   const years = Array.from({ length: 2099 - new Date().getFullYear() + 1 }, (_, i) => new Date().getFullYear() + i)
+
+  // Function to get current date in Philippine time (UTC+8)
+  const getCurrentPhilippineDate = () => {
+    const now = new Date();
+    const phTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+    return phTime;
+  };
+
+  // Function to parse date string with Philippine timezone
+  const parsePhilippineDate = (dateString: string) => {
+    try {
+      // Parse as MM-DD-YYYY in Philippine time (UTC+8)
+      const parsed = parse(dateString, 'MM-dd-yyyy', new Date());
+      return new Date(parsed.getTime() - (8 * 60 * 60 * 1000)); // Convert to UTC
+    } catch (e) {
+      console.error("Error parsing date:", dateString, e);
+      return new Date();
+    }
+  };
 
   const columns: ColumnDef<SemesterList>[] = [
     {
@@ -181,7 +200,12 @@ export function SemesterTable() {
           </div>
         )
       },
-      cell: ({ row }) => <div>{format(new Date(row.getValue("start")), 'MM/dd/yyyy')}</div>,
+      cell: ({ row }) => {
+        const date = typeof row.getValue("start") === 'string' 
+          ? parsePhilippineDate(row.getValue("start"))
+          : new Date(row.getValue("start"));
+        return <div>{format(date, 'MM/dd/yyyy')}</div>;
+      },
     },
     {
       accessorKey: "end",
@@ -199,7 +223,12 @@ export function SemesterTable() {
           </div>
         )
       },
-      cell: ({ row }) => <div>{format(new Date(row.getValue("end")), 'MM/dd/yyyy')}</div>,
+      cell: ({ row }) => {
+        const date = typeof row.getValue("end") === 'string' 
+          ? parsePhilippineDate(row.getValue("end"))
+          : new Date(row.getValue("end"));
+        return <div>{format(date, 'MM/dd/yyyy')}</div>;
+      },
     },
     {
       accessorKey: "status",
@@ -217,26 +246,46 @@ export function SemesterTable() {
           </div>
         )
       },
-      cell: ({ row }) => (
-        <div className="capitalize">
-          {row.getValue("status") === "Ongoing" ? (
-            <Badge className="bg-green-200 text-green-800 hover:bg-green-200 cursor-default gap-1">
-              <Loader className="h-3.5 w-3.5" />
-              {row.getValue("status")}
-            </Badge>
-          ): row.getValue("status") === "Upcoming" ? (
-            <Badge className="bg-yellow-200 text-yellow-800 hover:bg-yellow-200 cursor-default gap-1">
-              <Clock className="h-3.5 w-3.5" />
-              {row.getValue("status")}
-            </Badge>
-          ):(
-            <Badge className="bg-blue-200 text-blue-800 hover:bg-blue-200 cursor-default gap-1">
-              <CheckCircle className="h-3.5 w-3.5" />
-              {row.getValue("status")}
-            </Badge>
-          )}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const status = row.getValue("status");
+        const startDate = typeof row.original.start === 'string' 
+          ? parsePhilippineDate(row.original.start)
+          : new Date(row.original.start);
+        const endDate = typeof row.original.end === 'string' 
+          ? parsePhilippineDate(row.original.end)
+          : new Date(row.original.end);
+        const currentDate = getCurrentPhilippineDate();
+
+        let actualStatus = status;
+        if (currentDate >= startDate && currentDate <= endDate) {
+          actualStatus = "Ongoing";
+        } else if (currentDate > endDate) {
+          actualStatus = "Finished";
+        } else {
+          actualStatus = "Upcoming";
+        }
+
+        return (
+          <div className="capitalize">
+            {actualStatus === "Ongoing" ? (
+              <Badge className="bg-green-200 text-green-800 hover:bg-green-200 cursor-default gap-1">
+                <Loader className="h-3.5 w-3.5" />
+                {actualStatus}
+              </Badge>
+            ) : actualStatus === "Upcoming" ? (
+              <Badge className="bg-yellow-200 text-yellow-800 hover:bg-yellow-200 cursor-default gap-1">
+                <Clock className="h-3.5 w-3.5" />
+                {actualStatus}
+              </Badge>
+            ) : (
+              <Badge className="bg-blue-200 text-blue-800 hover:bg-blue-200 cursor-default gap-1">
+                <CheckCircle className="h-3.5 w-3.5" />
+                {/* {actualStatus} */}
+              </Badge>
+            )}
+          </div>
+        );
+      },
     },
     {
       id: "actions",
@@ -276,9 +325,10 @@ export function SemesterTable() {
   const fetchList = async () => {
     try {
       const response = await axios.get("https://comlab-backend.vercel.app/api/acads/updateStatus");
-      setList(response.data); // no need to refetch again!
+      setList(response.data);
     } catch (error) {
       console.error("Error fetching semesters", error);
+      toast.error("Failed to fetch semesters");
     } finally {
       setLoadingTable(false);
     }
@@ -302,11 +352,19 @@ export function SemesterTable() {
     setStartYear(parseInt(start))
     setEndYear(parseInt(end))
     
+    // Parse dates with Philippine timezone
+    const startDate = typeof sem.start === 'string' 
+      ? parsePhilippineDate(sem.start)
+      : new Date(sem.start);
+    const endDate = typeof sem.end === 'string' 
+      ? parsePhilippineDate(sem.end)
+      : new Date(sem.end);
+
     reset({
       semester_type: sem.semester_type as "1st" | "2nd" | "3rd" | "Summer Class",
       school_year: sem.school_year || '',
-      start: format(new Date(sem.start), 'MM-dd-yyyy'),
-      end: format(new Date(sem.end), 'MM-dd-yyyy'),
+      start: format(startDate, 'MM-dd-yyyy'),
+      end: format(endDate, 'MM-dd-yyyy'),
       status: sem.status as "Upcoming" | "Ongoing" | "Finished"
     })
     setOpenEdit(true)
@@ -329,11 +387,15 @@ export function SemesterTable() {
     setLoading(true)
     try {
       if (sem && editMode) {
+        // Convert dates to Philippine time before sending
+        const startDate = parsePhilippineDate(data.start);
+        const endDate = parsePhilippineDate(data.end);
+
         await axios.post(`https://comlab-backend.vercel.app/api/acads/editSemester/${sem._id}`, {
           semester_type: data.semester_type,
           school_year: data.school_year,
-          start: data.start,
-          end: data.end,
+          start: format(startDate, 'MM-dd-yyyy'),
+          end: format(endDate, 'MM-dd-yyyy'),
           status: data.status
         })
         fetchList()
@@ -593,7 +655,7 @@ export function SemesterTable() {
                   </Label>
                   <div className="col-span-3">
                     <DatePicker
-                      selected={watch("start") ? new Date(watch("start")) : null}
+                      selected={watch("start") ? parsePhilippineDate(watch("start")) : null}
                       onChange={(date: Date | null) => {
                         if (date) {
                           const formatted = format(date, 'MM-dd-yyyy')
@@ -606,8 +668,8 @@ export function SemesterTable() {
                       placeholderText="MM-DD-YYYY"
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       selectsStart
-                      startDate={watch("start") ? new Date(watch("start")) : null}
-                      endDate={watch("end") ? new Date(watch("end")) : null}
+                      startDate={watch("start") ? parsePhilippineDate(watch("start")) : null}
+                      endDate={watch("end") ? parsePhilippineDate(watch("end")) : null}
                       minDate={new Date()} // Disable past dates
                     />
                     {errors.start && (
@@ -624,7 +686,7 @@ export function SemesterTable() {
                   </Label>
                   <div className="col-span-3">
                     <DatePicker
-                      selected={watch("end") ? new Date(watch("end")) : null}
+                      selected={watch("end") ? parsePhilippineDate(watch("end")) : null}
                       onChange={(date: Date | null) => {
                         if (date) {
                           const formatted = format(date, 'MM-dd-yyyy')
@@ -637,9 +699,9 @@ export function SemesterTable() {
                       placeholderText="MM-DD-YYYY"
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       selectsEnd
-                      startDate={watch("start") ? new Date(watch("start")) : null}
-                      endDate={watch("end") ? new Date(watch("end")) : null}
-                      minDate={watch("start") ? new Date(watch("start")) : new Date()} // Can't select date before start date or current date
+                      startDate={watch("start") ? parsePhilippineDate(watch("start")) : null}
+                      endDate={watch("end") ? parsePhilippineDate(watch("end")) : null}
+                      minDate={watch("start") ? parsePhilippineDate(watch("start")) : new Date()} // Can't select date before start date or current date
                     />
                     {errors.end && (
                       <span className="text-sm text-red-500">

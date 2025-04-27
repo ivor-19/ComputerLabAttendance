@@ -126,6 +126,7 @@ export const AddSemester = ({ open, setOpen, fetch }: AddSemesterProps) => {
       setEndDate(null)
       fetch()
       setOpen(false)
+      window.location.reload()
     } catch (error: any) {
       if (error.response && error.response.status === 400) {
         setDateExists(true);

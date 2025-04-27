@@ -15,159 +15,100 @@ interface Event {
   section: string;
   subtitle: string;
   comlab: string;
+  comlab_id: string;
 }
 
 interface ApiResponse {
   event_id: string;
   title: string;
-  start: string;  // The API returns a string date
-  end: string;    // The API returns a string date
+  start: string;
+  end: string;
   teacher_name: string;
   subject: string;
   course: string;
   section: string;
   subtitle: string;
   comlab: string;
+  comlab_id: string;
 }
 
-interface Teacher {
+interface Option {
   id: number;
   text: string;
   value: string;
 }
 
-interface ComLab {
-  id: number;
-  text: string;
-  value: string,
+interface SchedulerComponentProps {
+  id: string;
+  comlabname?: string;
 }
 
-interface Courses {
-  id: number;
-  text: string;
-  value: string,
-}
-
-interface Subjects {
-  id: number;
-  text: string;
-  value: string,
-}
-
-export const SchedulerComponent = () => {
+export const SchedulerComponent = ({ id, comlabname = '' }: SchedulerComponentProps) => {
   const [events, setEvents] = useState<Event[]>([]);
-  const [teacherOptions, setTeacherOptions] = useState<Teacher[]>([]);
-  const [comlabOptions, setComlabOptions] = useState<ComLab[]>([]);
-  const [coursesOptions, setCoursesOptions] = useState<Courses[]>([]);
-  const [subjectsOptions, setSubjectsOptions] = useState<Subjects[]>([]);
-  const [sectionsOptions, setSectionsOptions] = useState<Subjects[]>([]);
+  const [teacherOptions, setTeacherOptions] = useState<Option[]>([]);
+  const [coursesOptions, setCoursesOptions] = useState<Option[]>([]);
+  const [subjectsOptions, setSubjectsOptions] = useState<Option[]>([]);
+  const [sectionsOptions, setSectionsOptions] = useState<Option[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchTeachers = async () => {
+  const fetchData = async (endpoint: string, transformFn: (item: any, index: number) => Option) => {
     try {
-      const response = await axios.get("https://comlab-backend.vercel.app/api/teacher/getTeachers");
-
-      const names = response.data.map((teacher: any, index: number) => ({
-        id: index + 1, // Increment id starting from 1
-        text: `${teacher.firstname} ${teacher.lastname}`,
-        value: `${teacher.firstname} ${teacher.lastname}`,
-      }));
-
-      setTeacherOptions(names);
-      return names; // Return the teacher names for synchronization
+      const response = await axios.get(`https://comlab-backend.vercel.app/api/${endpoint}`);
+      return response.data.map(transformFn);
     } catch (error) {
-      console.error("Error fetching teachers:", error);
+      console.error(`Error fetching ${endpoint}:`, error);
       return [];
     }
   };
 
-  const fetchComlabs = async () => {
-    try {
-      const response = await axios.get("https://comlab-backend.vercel.app/api/computer/getList");
-      // console.log(response.data.com)
-      const comlabs = response.data.com.map((comlab: any, index: number) => ({
-        id: index + 1, // Increment id starting from 1
-        text: `${comlab.name}`,
-        value: `${comlab.name}`,
-      }));
-
-      setComlabOptions(comlabs);
-      return comlabs; // Return the teacher names for synchronization
-    } catch (error) {
-      console.error("Error fetching comlabs:", error);
-      return [];
-    }
+  const fetchTeachers = async () => {
+    const teachers = await fetchData("teacher/getTeachers", (teacher, index) => ({
+      id: index + 1,
+      text: `${teacher.firstname} ${teacher.lastname}`,
+      value: `${teacher.firstname} ${teacher.lastname}`,
+    }));
+    setTeacherOptions(teachers);
   };
 
   const fetchSections = async () => {
-    try {
-      const response = await axios.get("https://comlab-backend.vercel.app/api/acads/getSections");
-      const sections = response.data.map((section: any, index: number) => ({
-        id: index + 1, // Increment id starting from 1
-        text: `${section.section}`,
-        value: `${section.section}`,
-      }));
-
-      setSectionsOptions(sections);
-      return sections;
-    } catch (error) {
-      console.error("Error fetching sections:", error);
-      return [];
-    }
+    const sections = await fetchData("acads/getSections", (section, index) => ({
+      id: index + 1,
+      text: section.section,
+      value: section.section,
+    }));
+    setSectionsOptions(sections);
   };
 
   const fetchCourses = async () => {
-    try {
-      const response = await axios.get("https://comlab-backend.vercel.app/api/acads/getCourses");
-      // console.log(response.data.com)
-      const courses = response.data.map((course: any, index: number) => ({
-        id: index + 1, // Increment id starting from 1
-        text: `${course.course}`,
-        value: `${course.course}`,
-      }));
-
-      setCoursesOptions(courses);
-      return courses; // Return the teacher names for synchronization
-    } catch (error) {
-      console.error("Error fetching courses:", error);
-      return [];
-    }
+    const courses = await fetchData("acads/getCourses", (course, index) => ({
+      id: index + 1,
+      text: course.course,
+      value: course.course,
+    }));
+    setCoursesOptions(courses);
   };
 
   const fetchSubjects = async () => {
-    try {
-      const response = await axios.get("https://comlab-backend.vercel.app/api/acads/getSubjects");
-      // console.log(response.data.com)
-      const subjects = response.data.map((subject: any, index: number) => ({
-        id: index + 1, // Increment id starting from 1
-        text: `${subject.subject}`,
-        value: `${subject.subject}`,
-      }));
-
-      setSubjectsOptions(subjects);
-      return subjects; // Return the teacher names for synchronization
-    } catch (error) {
-      console.error("Error fetching subjects:", error);
-      return [];
-    }
+    const subjects = await fetchData("acads/getSubjects", (subject, index) => ({
+      id: index + 1,
+      text: subject.subject,
+      value: subject.subject,
+    }));
+    setSubjectsOptions(subjects);
   };
 
   const fetchSchedules = async () => {
     try {
       const response = await axios.get<ApiResponse[]>("https://comlab-backend.vercel.app/api/schedule/getSched");
-
-      const parsedEvents: Event[] = response.data.map(event => ({
-        event_id: event.event_id,
-        title: event.title,
-        start: new Date(event.start), // Convert start date string to Date
-        end: new Date(event.end),     // Convert end date string to Date
-        teacher_name: event.teacher_name,
-        subject: event.subject,
-        course: event.course,
-        section: event.section,
-        subtitle: event.subtitle,
-        comlab: event.comlab,
-      }));
+      
+      const parsedEvents = response.data
+        .filter(event => event.comlab_id === id)
+        .map(event => ({
+          ...event,
+          start: new Date(event.start),
+          end: new Date(event.end),
+          comlab: comlabname || '',
+        }));
 
       setEvents(parsedEvents);
     } catch (error) {
@@ -175,95 +116,81 @@ export const SchedulerComponent = () => {
     }
   };
 
-  useEffect(() => {
-    const initializeData = async () => {
-      setIsLoading(true);
-      await fetchTeachers();
-      await fetchSchedules();
-      await fetchComlabs();
-      await fetchCourses();
-      await fetchSubjects();
-      await fetchSections()
-      setIsLoading(false);
-    };
-
-    initializeData();
-  }, []);
-
-  const handleConfirm = async (event: Event, action: "create" | "edit") => {
-    if (action === "create") {
-      const newEvent = {
-        event_id: Date.now().toString(), // Generate a unique ID using Date.now()
-        title: event.title,
-        start: event.start.toISOString(), // Convert to ISO string
-        end: event.end.toISOString(),     // Convert to ISO string
-        teacher_name: event.teacher_name,
-        subject: event.subject,
-        course: event.course,
-        section: event.section,
-        subtitle: event.subtitle,
-        comlab: event.comlab
-      };
-
-      try {
-        const response = await axios.post("https://comlab-backend.vercel.app/api/schedule/addSchedule", newEvent);
-          if (response.data && response.status === 200) {
-            console.log("Event added successfully:", response.data);
-            // Refresh the events after adding
-            fetchSchedules();
-          }
-      } catch (error: any) {
-        console.error("Error adding new event:", error);
-        toast.error("Conflict on schedule detected!");
-        if (axios.isAxiosError(error)) {
-          if (error.response && error.response.status === 400) {
-            return Promise.reject(error.response.data); 
-          
-          }
-        } else {
-          console.error("Unexpected error:", error);
-        }
-      }
-    } else if (action === "edit") {
-      try {
-        const updatedEvent = {
-          event_id: event.event_id,
-          title: event.title,
-          start: event.start.toISOString(),
-          end: event.end.toISOString(),
-          teacher_name: event.teacher_name,
-          subject: event.subject,
-          course: event.course,
-          section: event.section,
-          subtitle: event.subtitle,
-          comlab: event.comlab,
-        };
-
-        await axios.put(`https://comlab-backend.vercel.app/api/schedule/updateSched`, updatedEvent);
-
-        fetchSchedules();
-      } catch (error) {
-        console.error("Error updating event:", error);
+  const handleApiError = (error: unknown, defaultMessage: string) => {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 400) {
+        return Promise.reject(error.response.data);
       }
     }
-    return event;
+    console.error(defaultMessage, error);
+    toast.error(defaultMessage);
+    return Promise.reject(error);
+  };
+
+  const handleConfirm = async (event: Event, action: "create" | "edit") => {
+    try {
+      const eventPayload = {
+        ...event,
+        start: event.start.toISOString(),
+        end: event.end.toISOString(),
+        comlab: comlabname || '',
+        comlab_id: id,
+      };
+
+      if (action === "create") {
+        await axios.post("https://comlab-backend.vercel.app/api/schedule/addSchedule", {
+          ...eventPayload,
+          event_id: Date.now().toString(),
+        });
+        toast.success("Event created successfully");
+      } else {
+        await axios.put("https://comlab-backend.vercel.app/api/schedule/updateSched", eventPayload);
+        toast.success("Event updated successfully");
+      }
+
+      await fetchSchedules();
+      return event;
+    } catch (error:any) {
+      if (error.response && error.response.status === 400) {
+        toast.error("Conflict on schedule")
+      } else {
+        toast.error("An unexpected error occurred:", error);
+        // Handle other errors here
+      }
+    }
   };
 
   const handleDelete = async (event_id: string) => {
     try {
-      // Send a DELETE request to remove the event
       await axios.delete(`https://comlab-backend.vercel.app/api/schedule/deleteSched/${event_id}`);
-      console.log("Deleted event id:", event_id);
-      // Refresh the events after deletion
-      setEvents(events.filter(event => event.event_id !== event_id));
+      setEvents(prev => prev.filter(event => event.event_id !== event_id));
+      toast.success("Event deleted successfully");
+      return event_id;
     } catch (error) {
-      console.error("Error deleting event:", error);
+      return handleApiError(error, "Error deleting event");
     }
-    return Promise.resolve(event_id);
   };
 
+  useEffect(() => {
+    const initializeData = async () => {
+      setIsLoading(true);
+      try {
+        await Promise.all([
+          fetchTeachers(),
+          fetchSchedules(),
+          fetchCourses(),
+          fetchSubjects(),
+          fetchSections(),
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    initializeData();
+  }, [id, comlabname]);
+
   if (isLoading) {
-    return <Skeleton className="flex justify-center items-center h-full"></Skeleton>;
+    return <Skeleton className="flex justify-center items-center h-full" />;
   }
 
   return (
@@ -309,12 +236,6 @@ export const SchedulerComponent = () => {
               type: "select",
               options: sectionsOptions,
               config: { label: "Section", required: true, errMsg: "Please select a section" },
-            },
-            {
-              name: "comlab",
-              type: "select",
-              options: comlabOptions,
-              config: { label: "Com Lab", required: true, errMsg: "Please select a comlab" },
             },
           ]}
           onConfirm={handleConfirm}

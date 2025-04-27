@@ -54,6 +54,7 @@ export type Student = {
   status: "Present" | "Absent" | "Late" | "Excused",
   teacher_name: string,
   subject: string,
+  comlab: string,
 }
 
 const FormSchema = z.object({
@@ -192,6 +193,24 @@ export const columns = ( handleEdit: (student: Student) => void): ColumnDef<Stud
       )
     },
     cell: ({ row }) => <div>{row.getValue("time_out") === null ? "-----" : row.getValue("time_out")}</div>,
+  },
+  {
+    accessorKey: "comlab",
+    header: ({ column }) => {
+      return (
+        <div className="text-left">
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="text-xs pl-0 bg-transparent"
+          >
+            Comlab
+            <ArrowUpDown />
+          </Button>
+        </div>
+      )
+    },
+    cell: ({ row }) => <div>{row.getValue("time_out") === null ? "-----" : row.getValue("comlab")}</div>,
   },
   {
     accessorKey: "status",
