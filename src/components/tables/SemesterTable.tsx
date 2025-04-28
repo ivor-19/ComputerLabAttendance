@@ -245,46 +245,26 @@ export function SemesterTable() {
           </div>
         )
       },
-      cell: ({ row }) => {
-        const status = row.getValue("status");
-        const startDate = typeof row.original.start === 'string' 
-          ? parsePhilippineDate(row.original.start)
-          : new Date(row.original.start);
-        const endDate = typeof row.original.end === 'string' 
-          ? parsePhilippineDate(row.original.end)
-          : new Date(row.original.end);
-        const currentDate = getCurrentPhilippineDate();
-
-        let actualStatus = status;
-        if (currentDate >= startDate && currentDate <= endDate) {
-          actualStatus = "Ongoing";
-        } else if (currentDate > endDate) {
-          actualStatus = "Finished";
-        } else {
-          actualStatus = "Upcoming";
-        }
-
-        return (
-          <div className="capitalize">
-            {actualStatus === "Ongoing" ? (
-              <Badge className="bg-green-200 text-green-800 hover:bg-green-200 cursor-default gap-1">
-                <Loader className="h-3.5 w-3.5" />
-                {actualStatus}
-              </Badge>
-            ) : actualStatus === "Upcoming" ? (
-              <Badge className="bg-yellow-200 text-yellow-800 hover:bg-yellow-200 cursor-default gap-1">
-                <Clock className="h-3.5 w-3.5" />
-                {actualStatus}
-              </Badge>
-            ) : (
-              <Badge className="bg-blue-200 text-blue-800 hover:bg-blue-200 cursor-default gap-1">
-                <CheckCircle className="h-3.5 w-3.5" />
-                {/* {actualStatus} */}
-              </Badge>
-            )}
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <div className="capitalize">
+          {row.getValue("status") === "Ongoing" ? (
+            <Badge className="bg-green-200 text-green-800 hover:bg-green-200 cursor-default gap-1">
+              <Loader className="h-3.5 w-3.5" />
+              {row.getValue("status")}
+            </Badge>
+          ) : row.getValue("status") === "Upcoming" ? (
+            <Badge className="bg-yellow-200 text-yellow-800 hover:bg-yellow-200 cursor-default gap-1">
+              <Clock className="h-3.5 w-3.5" />
+              {row.getValue("status")}
+            </Badge>
+          ) : (
+            <Badge className="bg-blue-200 text-blue-800 hover:bg-blue-200 cursor-default gap-1">
+              <CheckCircle className="h-3.5 w-3.5" />
+              {row.getValue("status")}
+            </Badge>
+          )}
+        </div>
+      ),
     },
     {
       id: "actions",
