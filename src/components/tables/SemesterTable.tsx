@@ -261,11 +261,15 @@ export function SemesterTable() {
         </div>
       ),
       sortingFn: (rowA, rowB, columnId) => {
-        const statusA = rowA.getValue(columnId) as string;
-        const statusB = rowB.getValue(columnId) as string;
+        const statusA = rowA.getValue(columnId) as "Ongoing" | "Upcoming" | "Finished";
+        const statusB = rowB.getValue(columnId) as "Ongoing" | "Upcoming" | "Finished";
         
-        // Custom sorting order: Ongoing (0) > Upcoming (1) > Finished (2)
-        const order = { "Ongoing": 0, "Upcoming": 1, "Finished": 2 };
+        const order: Record<"Ongoing" | "Upcoming" | "Finished", number> = { 
+          "Ongoing": 0, 
+          "Upcoming": 1, 
+          "Finished": 2 
+        };
+        
         return order[statusA] - order[statusB];
       },
     },
