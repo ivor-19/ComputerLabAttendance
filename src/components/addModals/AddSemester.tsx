@@ -57,16 +57,11 @@ export const AddSemester = ({ open, setOpen, fetch }: AddSemesterProps) => {
   const [loading, setLoading] = useState(false)
   const [startDate, setStartDate] = useState<Date | null>(null)
   const [endDate, setEndDate] = useState<Date | null>(null)
-  const [startYear, setStartYear] = useState<number>(new Date().getFullYear())
-  const [endYear, setEndYear] = useState<number>(new Date().getFullYear() + 1)
+  const [dateExists, setDateExists] = useState(false)
+  const [semesterExists, setSemesterExists] = useState(false)
   
   const semester_type = watch("semester_type")
   const status = watch("status")
-
-  const [dateExists, setDateExists] = useState(false)
-
-  // Generate years from current year to 2099
-  const years = Array.from({ length: 2099 - new Date().getFullYear() + 1 }, (_, i) => new Date().getFullYear() + i)
 
   const formatDate = (date: Date) => {
     const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -75,10 +70,19 @@ export const AddSemester = ({ open, setOpen, fetch }: AddSemesterProps) => {
     return `${month}-${day}-${year}`
   }
 
-  // Update school year when start or end year changes
+  // Update school year when dates change
   useEffect(() => {
-    setValue("school_year", `${startYear}-${endYear}`, { shouldValidate: true })
-  }, [startYear, endYear, setValue])
+    if (startDate && endDate) {
+      const startYear = startDate.getFullYear()
+      const endYear = endDate.getFullYear()
+      
+      // School year is typically startYear-endYear if the semester spans academic year
+      // Or startYear-startYear if within same year
+      const schoolYear = endYear > startYear ? `${startYear}-${endYear}` : `${startYear}-${startYear + 1}`
+      
+      setValue("school_year", schoolYear, { shouldValidate: true })
+    }
+  }, [startDate, endDate, setValue])
 
   const handleStartDateChange = (date: Date | null) => {
     setStartDate(date)
@@ -103,20 +107,9 @@ export const AddSemester = ({ open, setOpen, fetch }: AddSemesterProps) => {
     }
   }
 
-  const handleStartYearChange = (value: string) => {
-    const year = parseInt(value)
-    setStartYear(year)
-    // Automatically set end year to next year if it's not already greater
-    if (year >= endYear) {
-      setEndYear(year + 1)
-    }
-  }
-
-  const handleEndYearChange = (value: string) => {
-    setEndYear(parseInt(value))
-  }
-
   const addNewSemester = async (data: FormData) => {
+    setDateExists(false);
+    setSemesterExists(false)
     setLoading(true)
     try {
       await axios.post('https://comlab-backend.vercel.app/api/acads/addSemester', data)
@@ -131,6 +124,11 @@ export const AddSemester = ({ open, setOpen, fetch }: AddSemesterProps) => {
       if (error.response && error.response.status === 400) {
         setDateExists(true);
         toast.error("Date is already occupied");
+        setLoading(false);
+      } 
+      else if (error.response && error.response.status === 405) {
+        setSemesterExists(true)
+        toast.error("Semester already exists on the same school year.");
         setLoading(false);
       } 
       else {
@@ -182,44 +180,18 @@ export const AddSemester = ({ open, setOpen, fetch }: AddSemesterProps) => {
             <Label htmlFor="school_year" className="text-right">
               School Year
             </Label>
-            <div className="col-span-3 flex items-center gap-2">
-              <Select value={startYear.toString()} onValueChange={handleStartYearChange} disabled>
-                <SelectTrigger className="w-[100px]">
-                  <SelectValue placeholder="Start year" />
-                </SelectTrigger>
-                <SelectContent>
-                  {years.map((year) => (
-                    <SelectItem key={`start-${year}`} value={year.toString()}>
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <span>-</span>
-              <Select 
-                value={endYear.toString()} 
-                onValueChange={handleEndYearChange}
-                disabled={startYear === 2099} // Disable if start year is already max
-              >
-                <SelectTrigger className="w-[100px]">
-                  <SelectValue placeholder="End year" />
-                </SelectTrigger>
-                <SelectContent>
-                  {years
-                    .filter(year => year > startYear) // Only show years after start year
-                    .map((year) => (
-                      <SelectItem key={`end-${year}`} value={year.toString()}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+            <div className="col-span-3">
+              <input
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={watch("school_year")}
+                disabled
+              />
+              {errors.school_year && (
+                <span className="text-sm text-red-500">
+                  {errors.school_year.message}
+                </span>
+              )}
             </div>
-            {errors.school_year && (
-              <span className="col-span-4 text-right text-sm text-red-500">
-                {errors.school_year.message}
-              </span>
-            )}
           </div>
 
           <div className="grid grid-cols-4 items-center gap-4">
@@ -292,6 +264,7 @@ export const AddSemester = ({ open, setOpen, fetch }: AddSemesterProps) => {
 
           <DialogFooter className="flex items-center">
             {dateExists && <span className="text-red-500 text-xs font-geist">Date is already occupied.</span>}
+            {semesterExists && <span className="text-red-500 text-xs font-geist">Semester already exists on the same school year.</span>}
             <Button type="submit" disabled={loading}> 
               {loading ? (
                 <>

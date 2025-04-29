@@ -120,13 +120,13 @@ export const AddTeacher = ({ open, setOpen, fetch }: AddTeacherProps) => {
       password: password.toString(),
       teacher_email: data.teacher_email
     };
-    const teacherEmail = { teacher_id: data.teacher_id, teacher_email: data.teacher_email, firstname: data.firstname, lastname: data.lastname, password: password.toString() }
+    // const teacherEmail = { teacher_id: data.teacher_id, teacher_email: data.teacher_email, firstname: data.firstname, lastname: data.lastname, password: password.toString() }
     try {
       const response = await axios.post('https://comlab-backend.vercel.app/api/teacher/addTeacher', newTeacher);
       console.log(response.data);
 
-      const sendQr = await axios.post("https://comlab-backend.vercel.app/api/teacher/teacherQR", teacherEmail)
-      console.log("Sent successfully", sendQr.data);
+      // const sendQr = await axios.post("https://comlab-backend.vercel.app/api/teacher/teacherQR", teacherEmail)
+      // console.log("Sent successfully", sendQr.data);
 
       setOpen(false);
       toast.success('Teacher has been created.');

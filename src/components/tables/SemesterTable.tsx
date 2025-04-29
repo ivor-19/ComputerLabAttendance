@@ -87,7 +87,12 @@ export function SemesterTable() {
     }
   })
 
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [sorting, setSorting] = React.useState<SortingState>([
+    {
+      id: "status",
+      desc: false, // Sort in ascending order to put Ongoing first
+    }
+  ])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
@@ -199,12 +204,7 @@ export function SemesterTable() {
           </div>
         )
       },
-      cell: ({ row }) => {
-        const date = typeof row.getValue("start") === 'string' 
-          ? parsePhilippineDate(row.getValue("start"))
-          : new Date(row.getValue("start"));
-        return <div>{format(date, 'MM/dd/yyyy')}</div>;
-      },
+      cell: ({ row }) => <div>{row.getValue("start")}</div>,
     },
     {
       accessorKey: "end",
@@ -222,12 +222,7 @@ export function SemesterTable() {
           </div>
         )
       },
-      cell: ({ row }) => {
-        const date = typeof row.getValue("end") === 'string' 
-          ? parsePhilippineDate(row.getValue("end"))
-          : new Date(row.getValue("end"));
-        return <div>{format(date, 'MM/dd/yyyy')}</div>;
-      },
+      cell: ({ row }) => <div>{row.getValue("end")}</div>,
     },
     {
       accessorKey: "status",
@@ -265,6 +260,14 @@ export function SemesterTable() {
           )}
         </div>
       ),
+      sortingFn: (rowA, rowB, columnId) => {
+        const statusA = rowA.getValue(columnId) as string;
+        const statusB = rowB.getValue(columnId) as string;
+        
+        // Custom sorting order: Ongoing (0) > Upcoming (1) > Finished (2)
+        const order = { "Ongoing": 0, "Upcoming": 1, "Finished": 2 };
+        return order[statusA] - order[statusB];
+      },
     },
     {
       id: "actions",
@@ -427,6 +430,14 @@ export function SemesterTable() {
       columnVisibility,
       rowSelection,
     },
+    initialState: {
+      sorting: [
+        {
+          id: "status",
+          desc: false,
+        }
+      ]
+    }
   })
 
   return (
