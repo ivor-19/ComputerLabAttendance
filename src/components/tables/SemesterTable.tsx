@@ -111,11 +111,11 @@ export function SemesterTable() {
   const years = Array.from({ length: 2099 - new Date().getFullYear() + 1 }, (_, i) => new Date().getFullYear() + i)
 
   // Function to get current date in Philippine time (UTC+8)
-  const getCurrentPhilippineDate = () => {
-    const now = new Date();
-    const phTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
-    return phTime;
-  };
+  // const getCurrentPhilippineDate = () => {
+  //   const now = new Date();
+  //   const phTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+  //   return phTime;
+  // };
 
   // Function to parse date string with Philippine timezone
   const parsePhilippineDate = (dateString: string) => {
