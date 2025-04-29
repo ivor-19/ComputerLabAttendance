@@ -26,6 +26,16 @@ interface AddSemesterProps {
   setOpen: (open: boolean) => void
 }
 
+interface Semester {
+  _id: string
+  semester_type: string
+  school_year: string
+  start: string
+  end: string
+  status: string
+  __v: number
+}
+
 const FormSchema = z.object({
   semester_type: z.enum(["1st", "2nd", "Summer Class"]),
   school_year: z.string().min(1, { message: "School year is required" }),
@@ -59,15 +69,57 @@ export const AddSemester = ({ open, setOpen, fetch }: AddSemesterProps) => {
   const [endDate, setEndDate] = useState<Date | null>(null)
   const [dateExists, setDateExists] = useState(false)
   const [semesterExists, setSemesterExists] = useState(false)
+  const [semesters, setSemesters] = useState<Semester[]>([])
   
   const semester_type = watch("semester_type")
   const status = watch("status")
+
+  // Fetch existing semesters when component mounts
+  useEffect(() => {
+    const fetchSemesters = async () => {
+      try {
+        const response = await axios.get('https://comlab-backend.vercel.app/api/acads/getSemester')
+        setSemesters(response.data)
+      } catch (error) {
+        console.error("Failed to fetch semesters:", error)
+      }
+    }
+    fetchSemesters()
+  }, [])
 
   const formatDate = (date: Date) => {
     const month = String(date.getMonth() + 1).padStart(2, '0')
     const day = String(date.getDate()).padStart(2, '0')
     const year = date.getFullYear()
     return `${month}-${day}-${year}`
+  }
+
+  // Function to parse date string to Date object
+  const parseDate = (dateStr: string): Date => {
+    const [month, day, year] = dateStr.split('-').map(Number)
+    return new Date(year, month - 1, day)
+  }
+
+  // Function to check if a date is within any semester's range
+  const isDateDisabled = (date: Date): boolean => {
+    return semesters.some(semester => {
+      const semesterStart = parseDate(semester.start)
+      const semesterEnd = parseDate(semester.end)
+      return date >= semesterStart && date <= semesterEnd
+    })
+  }
+
+  // Function to check if date range overlaps with any existing semester
+  const isRangeOverlapping = (start: Date, end: Date): boolean => {
+    return semesters.some(semester => {
+      const semesterStart = parseDate(semester.start)
+      const semesterEnd = parseDate(semester.end)
+      return (
+        (start >= semesterStart && start <= semesterEnd) || // start is within existing semester
+        (end >= semesterStart && end <= semesterEnd) ||     // end is within existing semester
+        (start <= semesterStart && end >= semesterEnd)      // new semester spans entire existing semester
+      )
+    })
   }
 
   // Update school year when dates change
@@ -108,7 +160,16 @@ export const AddSemester = ({ open, setOpen, fetch }: AddSemesterProps) => {
   }
 
   const addNewSemester = async (data: FormData) => {
-    setDateExists(false);
+    if (!startDate || !endDate) return
+    
+    // Check if the selected range overlaps with any existing semester
+    if (isRangeOverlapping(startDate, endDate)) {
+      setDateExists(true)
+      toast.error("Selected date range conflicts with existing semester(s)")
+      return
+    }
+    
+    setDateExists(false)
     setSemesterExists(false)
     setLoading(true)
     try {
@@ -122,19 +183,15 @@ export const AddSemester = ({ open, setOpen, fetch }: AddSemesterProps) => {
       window.location.reload()
     } catch (error: any) {
       if (error.response && error.response.status === 400) {
-        setDateExists(true);
-        toast.error("Date is already occupied");
-        setLoading(false);
+        setDateExists(true)
+        toast.error("Date conflict with existing semester(s)")
       } 
       else if (error.response && error.response.status === 405) {
         setSemesterExists(true)
-        toast.error("Semester already exists on the same school year.");
-        setLoading(false);
+        toast.error("Semester already exists on the same school year.")
       } 
       else {
-        toast.error("Failed to add data");
-        setOpen(false);
-        setLoading(false);
+        toast.error("Failed to add data")
       }
     } finally {
       setLoading(false)
@@ -209,6 +266,7 @@ export const AddSemester = ({ open, setOpen, fetch }: AddSemesterProps) => {
                 startDate={startDate}
                 endDate={endDate}
                 minDate={new Date()} // Disable past dates
+                filterDate={(date) => !isDateDisabled(date)} // Disable dates within existing semesters
               />
               {errors.start && (
                 <span className="text-sm text-red-500">
@@ -233,6 +291,7 @@ export const AddSemester = ({ open, setOpen, fetch }: AddSemesterProps) => {
                 startDate={startDate}
                 endDate={endDate}
                 minDate={startDate || new Date()} // Can't select date before start date or current date
+                filterDate={(date) => !isDateDisabled(date)} // Disable dates within existing semesters
               />
               {errors.end && (
                 <span className="text-sm text-red-500">
@@ -263,7 +322,7 @@ export const AddSemester = ({ open, setOpen, fetch }: AddSemesterProps) => {
           </div>
 
           <DialogFooter className="flex items-center">
-            {dateExists && <span className="text-red-500 text-xs font-geist">Date is already occupied.</span>}
+            {dateExists && <span className="text-red-500 text-xs font-geist">Date conflict with existing semester/s.</span>}
             {semesterExists && <span className="text-red-500 text-xs font-geist">Semester already exists on the same school year.</span>}
             <Button type="submit" disabled={loading}> 
               {loading ? (

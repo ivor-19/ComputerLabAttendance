@@ -65,7 +65,6 @@ export const QrAttendance = () => {
   const [loginDisabled, setLoginDisabled] = useState(false);
   const [randomCode, setRandomCode] = useState<string>('');
   const [labs, setLabs] = useState<{ _id: string, name: string; }[]>([])
-  const [timeError, setTimeError] = useState<string>('');
 
   // Time dropdown options
   const hours = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -105,17 +104,10 @@ export const QrAttendance = () => {
     return `${hourNum.toString().padStart(2, '0')}:${minute.padStart(2, '0')}`;
   };
 
-  // Handle end time change with validation
+  // Handle end time change
   const handleEndTimeChange = (hour: string, minute: string, period: string) => {
     const newEndTime = to24HourFormat(hour, minute, period);
     setEndTime(newEndTime);
-    
-    // Validate end time is after start time
-    if (startTime && newEndTime <= startTime) {
-      setTimeError('End time must be after start time');
-    } else {
-      setTimeError('');
-    }
   };
 
   // Generate random code for class session
@@ -124,41 +116,6 @@ export const QrAttendance = () => {
     return Array.from({length: 16}, () => 
       characters[Math.floor(Math.random() * characters.length)]
     ).join('');
-  };
-
-  // Check if a time option should be disabled
-  const isOptionDisabled = (type: 'hour' | 'minute' | 'period', value: string, current: any) => {
-    if (!startTime) return false;
-    
-    const start12 = to12HourFormat(startTime);
-    const current12 = current || to12HourFormat(startTime);
-    
-    if (type === 'hour') {
-      // If same period, disable hours before start hour
-      if (current12.period === start12.period) {
-        return parseInt(value) < parseInt(start12.hour);
-      }
-      // If switching to AM from PM start time, disable all AM hours
-      if (current12.period === 'AM' && start12.period === 'PM') {
-        return true;
-      }
-      return false;
-    }
-    
-    if (type === 'minute') {
-      // If same period and same hour, disable minutes before start minute
-      if (current12.period === start12.period && current12.hour === start12.hour) {
-        return parseInt(value) < parseInt(start12.minute);
-      }
-      return false;
-    }
-    
-    if (type === 'period') {
-      // Disable AM if start time is PM
-      return value === 'AM' && start12.period === 'PM';
-    }
-    
-    return false;
   };
 
   // Fetch teacher data
@@ -216,11 +173,6 @@ export const QrAttendance = () => {
 
   // Start class session
   const handleConfirm = async () => {
-    if (timeError) {
-      toast.error("Please fix time selection errors");
-      return;
-    }
-
     setStartClassLoading(true);
     const newData = {
       teacher_id: teacherId, 
@@ -585,11 +537,6 @@ export const QrAttendance = () => {
                                         <SelectItem 
                                           key={hour} 
                                           value={hour.toString()}
-                                          disabled={isOptionDisabled('hour', hour.toString(), {
-                                            hour: selectedHour,
-                                            minute: selectedMinute,
-                                            period: selectedPeriod
-                                          })}
                                         >
                                           {hour}
                                         </SelectItem>
@@ -611,11 +558,6 @@ export const QrAttendance = () => {
                                         <SelectItem 
                                           key={minute} 
                                           value={minute.toString().padStart(2, '0')}
-                                          disabled={isOptionDisabled('minute', minute.toString(), {
-                                            hour: selectedHour,
-                                            minute: selectedMinute,
-                                            period: selectedPeriod
-                                          })}
                                         >
                                           {minute.toString().padStart(2, '0')}
                                         </SelectItem>
@@ -637,11 +579,6 @@ export const QrAttendance = () => {
                                         <SelectItem 
                                           key={period} 
                                           value={period}
-                                          disabled={isOptionDisabled('period', period, {
-                                            hour: selectedHour,
-                                            minute: selectedMinute,
-                                            period: selectedPeriod
-                                          })}
                                         >
                                           {period}
                                         </SelectItem>
@@ -652,9 +589,6 @@ export const QrAttendance = () => {
                               </div>
                             </div>
                           </div>
-                          {timeError && (
-                            <p className="text-xs text-red-500">{timeError}</p>
-                          )}
                         </div>
                       </div>
 
@@ -667,7 +601,7 @@ export const QrAttendance = () => {
                         </Button>
                         <Button 
                           onClick={handleConfirm} 
-                          disabled={!subject || !course || !section || !comlab || !endTime || !!timeError}
+                          disabled={!subject || !course || !section || !comlab || !endTime}
                         >
                           {startClassLoading ? (
                             <>
