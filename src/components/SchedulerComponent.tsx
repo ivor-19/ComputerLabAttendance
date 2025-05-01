@@ -153,11 +153,20 @@ export const SchedulerComponent = ({ id, comlabname = '' }: SchedulerComponentPr
       await fetchSchedules();
       return event;
     } catch (error: any) {
-      if (error.response && error.response.status === 400) {
-        toast.error("Conflict on schedule")
-      } else {
-        toast.error("An unexpected error occurred:", error);
-      }
+      if (error.response) {
+        if (error.response.status === 400) {
+            toast.error("Conflict on schedule");
+        } else {
+            console.error("Server responded with:", error.response.data);
+            toast.error(`Server error: ${error.response.status}`);
+        }
+    } else if (error.request) {
+        console.error("No response received:", error.request);
+        toast.error("Network error - no response from server");
+    } else {
+        console.error("Request setup error:", error.message);
+        toast.error("Request error");
+    }
       return handleApiError(error, "Error saving event");
     } finally {
       setIsActionLoading(false); // End loading
